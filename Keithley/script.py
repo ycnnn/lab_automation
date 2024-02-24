@@ -147,6 +147,7 @@ def write_script(gate,
 def run_script(gate, script_name):
     gate.write(script_name + '.run()')
     gate.write('script.delete(\"' + script_name +'\")')
+    # gate.write('waitcomplete()')
 
 def transfer_paramater_generator(
                                  gate_start,
