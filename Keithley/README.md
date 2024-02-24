@@ -4,6 +4,7 @@ Prerequisites:
 - Two Kiethley 2450 series source-measure-units (SMUs). 
 - A RJ45 LAN crossover cable.
 - A USB-B to USB-A cable.
+- A python-ready computer.
 
 How to setup Keithely SMUs and the computer:
 
