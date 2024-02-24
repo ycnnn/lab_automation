@@ -19,18 +19,18 @@ How to setup Keithely SMUs and the computer:
 How to use this script:
 - As a quick start, see `scriptGenerator.ipynb` as an example.
 - For transfer measurement, call `transfer()` function. The arguments are:
-  - `gate_start`: gate sweeping start value.
-  - `gate_end`: gate sweep eend value.
-  - `drain_voltage`: constant drain-source bias.
-  - `sweep_steps`: the number of sweep steps for a single scan. Note you will get `2*sweep_steps` readings if you choose to test hysteresis.
-  - `test_hysteresis`: whether to test hysteresis.
-  - `test_leakage`: whether to measure gate leakage current during sweping. If `True`, the whole sweep speed will be 3x slower.
+  - `gate_start`: a float number which is gate sweeping start value.
+  - `gate_end`: a float number which is gate sweep eend value.
+  - `drain_voltage`: a float number which is constant drain-source bias.
+  - `sweep_steps`: an int number which is the number of sweep steps for a single scan. Note you will get `2*sweep_steps` readings if you choose to test hysteresis.
+  - `test_hysteresis`: Boolean value representing whether to test hysteresis.
+  - `test_leakage`: Boolean value representing whether to measure gate leakage current during sweping. If `True`, the whole sweep speed will be 3x slower.
     
 - For output measurement, call `output()` function. The arguments are:
-  - `drain_start`: drain sweeping start value.
-  - `drain_end`: drain sweep eend value.
-  - `gate_voltage`: constant gate bias.
-  - `sweep_steps`: the number of sweep steps for a single scan. Note you will get `2*sweep_steps` readings if you choose to test hysteresis.
-  - `test_hysteresis`: whether to test hysteresis.
+  - `drain_start`: a float number which is drain sweeping start value.
+  - `drain_end`: a float number which is drain sweep eend value.
+  - `gate_voltage`: a float number which is constant gate bias.
+  - `sweep_steps`: an int number which is the number of sweep steps for a single scan. Note you will get `2*sweep_steps` readings if you choose to test hysteresis.
+  - `test_hysteresis`: Boolean value representing whether to test hysteresis.
 - Both the `transfer()` and `output()` fucntion call return two arrays, `gate_readings` and `drain_readings`. Each of them are numpy array of shape `(2, # of readings)`. For each array, the first column is the output voltage, and the second column is the measuremnt result.
 - Simple repeateadly call the `transfer()` and `output()` fucntion if multiple scans are needed by using a `for` loop.
