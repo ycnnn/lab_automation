@@ -18,3 +18,9 @@ How to setup Keithely SMUs and the computer:
 
 How to use this script:
 - For transfer measurement, call `transfer()` function. The arguments are:
+-- `gate_start`: gate sweeping start value.
+-- `gate_end`: gate sweep eend value.
+-- `drain_voltage`: constant drain-source bias.
+-- `sweep_steps`: the number of sweep steps for a single scan. Note you will get `2*sweep_steps` readings if you choose to test hysteresis.
+-- `test_hysteresis`: whether to test hysteresis.,
+-- `test_leakage`: whether to measure gate leakage current during sweping. If `True`, the whole sweep speed will be 3x slower.
