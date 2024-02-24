@@ -24,3 +24,4 @@ How to use this script:
   - `sweep_steps`: the number of sweep steps for a single scan. Note you will get `2*sweep_steps` readings if you choose to test hysteresis.
   - `test_hysteresis`: whether to test hysteresis.,
   - `test_leakage`: whether to measure gate leakage current during sweping. If `True`, the whole sweep speed will be 3x slower.
+- The `transfer()` fucntion call returns two arrays, `gate_readings` and `drain_readings`. Each of them are numpy array of shape `(2, # of readings)`. For each array, the first column is the output voltage, and the second column is the measuremnt result.
