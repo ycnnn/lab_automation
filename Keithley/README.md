@@ -33,4 +33,4 @@ How to use this script:
   - `sweep_steps`: an int number which is the number of sweep steps for a single scan. Note you will get `2*sweep_steps` readings if you choose to test hysteresis.
   - `test_hysteresis`: Boolean value representing whether to test hysteresis.
 - Both the `transfer()` and `output()` fucntion call return two arrays, `gate_readings` and `drain_readings`. Each of them are numpy array of shape `(2, # of readings)`. For each array, the first column is the output voltage, and the second column is the measuremnt result.
-- Simple repeateadly call the `transfer()` and `output()` fucntion if multiple scans are needed by using a `for` loop.
+- Simply repeateadly call the `transfer()` and `output()` fucntion if multiple scans are needed by using a `for` loop.
