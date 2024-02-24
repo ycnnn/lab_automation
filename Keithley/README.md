@@ -3,18 +3,20 @@
 Prerequisites:
 - Two Kiethley 2450 series source-measure-units (SMUs). 
 - A RJ45 LAN crossover cable.
-- Two USB-B to USB-A cables.
+- A USB-B to USB-A cable.
 
 How to setup Keithely SMUs and the computer:
 
-- Connect each of the Keithley SMU to the computer with USB cable.
+- Connect two Keithley SMUs to the computer with USB cable.
 - Connet two Keithley SMUs to each other by plugging the RJ45 cable to the TSP-Link portal on the back of Keithley 2450 SMU.
 - Make sure all two Keithleys are using TSP command set, not SCPI. To change, press MENU, go to Settings, check Command set tab.
-- Install NI-VISA to the computer.
+- Install NI-VISA, NI-MAX to the computer.
 - Install Python and the dependencies (NumPy, Pandas, Matplotlib, PyVISA).
+- Record the USB addresses of two Keithley SMUs, as `gate_address` and `drain_address`. They should look similar to `USB0::0x0XXX::0x2450::XXXXXXXX::INSTR`.
+- Update the USB addresses in `script.py`.
 - Initialize TSP-Link. For each Keithley,press MENU, click Communication, go to the TSP-Link tab, select node number as follows, and click Initialize.
-  - For the SMU used as the gate, set the node number as 1.
-  - For the SMU used as the drain, set the node number as 2.
+  - For the SMU to be used as the gate, set the node number as 1.
+  - For the SMU to be used as the drain, set the node number as 2.
 
 How to use this script:
 - As a quick start, see `scriptGenerator.ipynb` as an example.
