@@ -194,13 +194,9 @@ def transfer_paramater_generator(
         np.ones(int(len(drain_sweep_volt_list) - 2 * ramp_steps)),
         np.zeros(ramp_steps)
     ))
-    # steps = 100
+
     script_name = 'sweepScript'
-    # gate_sweep_volt_list = np.linspace(0,1,num=steps)
-    # drain_sweep_volt_list = np.linspace(0,1.5,num=steps)
-    # gate_sweep_mode_list = np.array([0 if abs(index-50) >=15 else 1 for index in range(steps)])
-    # # gate_sweep_mode_list = np.zeros(steps)
-    # drain_sweep_mode_list = np.array([0 if abs(index-50) >=15 else 1 for index in range(steps)])
+
     parameters = {
                   'script_name':script_name,
                   'gate_sweep_volt_list':gate_sweep_volt_list,
