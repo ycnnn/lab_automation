@@ -14,7 +14,7 @@ How to setup Keithely SMUs and the computer:
 - Install Python and the dependencies (NumPy, Pandas, Matplotlib, PyVISA).
 - Record the USB addresses of two Keithley SMUs, as `gate_address` and `drain_address`. They should look similar to `USB0::0x0XXX::0x2450::XXXXXXXX::INSTR`.
 - Update the USB addresses in `script.py`.
-- Initialize TSP-Link. For each Keithley,press MENU, click Communication, go to the TSP-Link tab, select node number as follows, and click Initialize.
+- Initialize TSP-Link. For each Keithley, press the MENU button, click Communication, go to the TSP-Link tab, select node number as follows, and click Initialize. This needs to be done before running the script. 
   - For the SMU to be used as the gate, set the node number as 1.
   - For the SMU to be used as the drain, set the node number as 2.
 
