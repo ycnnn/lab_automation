@@ -1,41 +1,101 @@
+from functools import partial
+import multiprocessing
 import numpy as np
+import pandas as pd
 from lmfit.models import LinearModel, LorentzianModel
 
+def load_helper(data_path, _width=400):
+    data_raw = pd.read_csv(data_path,sep='\t', header=None, index_col=0, comment='#').T.iloc[:-1]
+    _total_count, _spectra_len = data_raw.shape
+    x = data_raw.columns.to_numpy()
+    data = data_raw.to_numpy()
+    spec_len = len(x)
+    data = data.reshape(-1, _width, spec_len)
+    return x, data
 
-def fit(y,x, 
-        amp=1000, 
-        width=10, 
-        Si_amp=1000, 
-        Si_width=10, 
-        bkg=150,
+def single_peak_fit(y,x, 
         _max_iters=5000,
-        summary=False):
+        peak_0_center=520,
+        peak_0_amplitude=1000, 
+        peak_0_sigma=10, 
+        _slope=0,
+        _intercept=150):
     
     iters = _max_iters    
-    rmodel = (LorentzianModel(prefix='E_') 
-            + LorentzianModel(prefix='A_') 
-            + LorentzianModel(prefix='Si_')  
-            + LinearModel(prefix='bkg_'))
+    rmodel = (LorentzianModel(prefix='peak_0_') + LinearModel(prefix='_'))
 
-    params = rmodel.make_params(E_center=dict(value=383.0, min=373.0, max=395.0),
-                                E_amplitude=dict(value=amp, min=0),
-                                E_width=width,
-                                # A_center=dict(value=400.0, min=393.0, max=400.5),
-                                # A_center=dict(value=401.0, min=393.0, max=400.2),
-                                A_center=dict(value=401.0, min=393.0, max=405.0),
-                                A_amplitude=dict(value=amp, min=0),
-                                A_width=width,
-                                Si_center=dict(value=520.0, min=505.0, max=535.0),
-                                Si_amplitude=dict(value=amp, min=0),
-                                Si_width=Si_width,
-                                bkg_slope=0,
-                                bkg_intercept=bkg)
+    params = rmodel.make_params(
+                                peak_0_center=dict(value=peak_0_center, 
+                                                   min=peak_0_center-10.0, 
+                                                   max=peak_0_center+10.0),
+                                peak_0_amplitude=dict(value=peak_0_amplitude, min=0),
+                                peak_0_sigma=peak_0_sigma,
+                                _slope=_slope,
+                                _intercept=_intercept)
     result = rmodel.fit(y, params, x=x, max_nfev=iters)
-    
-    if not summary:
-        return result.best_fit, result.params
-    else:
-        return result.best_fit, result.params, result.nfev
+    params_val = {}
+    params_std ={}
+    for param in result.params:
+        if 'fwhm' not in param and 'height' not in param:
+            params_val[param] = result.params[param].value
+            params_std[param] = result.params[param].stderr
 
+    return params_val, (params_std, result.nfev, result.best_fit)
 
+def double_peak_fit(y,x, 
+        _max_iters=5000,
+        peak_0_center=380,
+        peak_0_amplitude=1000, 
+        peak_0_sigma=10, 
+        peak_1_center=404,
+        peak_1_amplitude=1000, 
+        peak_1_sigma=10, 
+        _slope=0,
+        _intercept=150):
     
+    iters = _max_iters    
+    rmodel = (LorentzianModel(prefix='peak_0_') 
+              + LorentzianModel(prefix='peak_1_')
+              + LinearModel(prefix='_'))
+
+    params = rmodel.make_params(
+                                peak_0_center=dict(value=peak_0_center, 
+                                                   min=peak_0_center-5.0, 
+                                                   max=peak_0_center+5.0),
+                                peak_0_amplitude=dict(value=peak_0_amplitude, min=0),
+                                peak_0_sigma=peak_0_sigma,
+                                peak_1_center=dict(value=peak_1_center, 
+                                                   min=peak_1_center-5.0, 
+                                                   max=peak_1_center+5.0),
+                                peak_1_amplitude=dict(value=peak_1_amplitude, min=0),
+                                peak_1_sigma=peak_1_sigma,
+                                _slope=_slope,
+                                _intercept=_intercept)
+    
+    result = rmodel.fit(y, params, x=x, max_nfev=iters)
+    params_val = {}
+    params_std ={}
+    for param in result.params:
+        if 'fwhm' not in param and 'height' not in param:
+            params_val[param] = result.params[param].value
+            params_std[param] = result.params[param].stderr
+ 
+    return params_val, (params_std, result.nfev, result.best_fit)
+
+def map_fit(x, data, 
+            fit_function,
+            _max_iters=5000,
+            _workers=16,
+            **kwargs):
+    if len(data.shape) != 2:
+        raise AssertionError("Input data shape incorrect.")
+    fit_partial = partial(fit_function, 
+                          x=x, 
+                          _max_iters=_max_iters, 
+                          **kwargs)
+    
+    pool = multiprocessing.Pool(_workers)
+    fit_result = pool.map(fit_partial, data)
+    pool.close()
+    pool.join()
+    return fit_result
