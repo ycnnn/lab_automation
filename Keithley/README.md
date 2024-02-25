@@ -20,6 +20,13 @@ How to setup Keithely SMUs and the computer:
   - For the SMU to be used as the drain, set the node number as 2.
 
 How to use this script:
+- Make electrical connections:
+  
+  - Prepare the device under test (DUT). Ground the source.
+  - Connect the drain to the front terminal of SMU node 2 with a BNC cable.
+  - Connect the gate to the front terminal of SMU nide 1 with a BNC cable.
+  - It is strongly suggested to use common ground for all connections.
+    
 - As a quick start, see `scriptGenerator.ipynb` as an example.
 - For transfer measurement, call `transfer()` function. The arguments are:
   - `gate_start`: a float number which is gate sweeping start value.
