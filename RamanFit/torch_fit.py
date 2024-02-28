@@ -160,10 +160,10 @@ def one_peak_map_fit(
         device = torch.device("cpu")
     else:
         if torch.cuda.is_available(): 
-            print('CUDA GPU accelaration enabled.')
+            print('CUDA GPU acceleration enabled.')
             device = torch.device("cuda:0" )
         elif torch.backends.mps.is_available():
-            print('Apple M series GPU accelaration enabled.')
+            print('Apple M series GPU acceleration enabled.')
             device = torch.device("mps")
         else: 
             device = torch.device("cpu")
@@ -236,10 +236,10 @@ def two_peak_map_fit(
         device = torch.device("cpu")
     else:
         if torch.cuda.is_available(): 
-            print('CUDA GPU accelaration enabled.')
+            print('CUDA GPU acceleration enabled.')
             device = torch.device("cuda:0" )
         elif torch.backends.mps.is_available():
-            print('Apple M series GPU accelaration enabled.')
+            print('Apple M series GPU acceleration enabled.')
             device = torch.device("mps")
         else: 
             device = torch.device("cpu")
