@@ -3,7 +3,7 @@
 This is a Python implementation for peak fitting the Raman mapping data collected from hyperspectral Raman microscopy. Compared with standard peak fitting functionality provided by NanoPhoton, this tool offers > 10x acceleration in achieveing same accuracy. As a comparasion, for a 400 x 160 pixels Raman mapping data, where each pixel represents a single Raman spectrum, performing a 3-peak fitting will take ~ 500s in the NanoPhoton software, but only ~ 50s using this code.
 
 If you use this code in your research, please cite as follows:
-"""
+```
 @software{Zhang_2D_Reserach_Automation_2024,
 author = {Zhang, Yue},
 doi = {10.5281/zenodo.10724769},
@@ -13,7 +13,7 @@ url = {https://github.com/ycnnn/lab_automation},
 version = {2.0},
 year = {2024}
 }
-"""
+```
 
 *Why is the peak fitting in this tool so fast?*
 
