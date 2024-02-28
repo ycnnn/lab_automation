@@ -17,8 +17,7 @@ class Lorentizian(torch.autograd.Function):
 
 class RamanOnePeak(torch.nn.Module):
     def __init__(self, 
-                 height, 
-                 width,
+                 pixels, 
                  x_coordinates_len,
                  peak_0_amplitude_guess,
                  peak_0_center_guess,
@@ -32,23 +31,22 @@ class RamanOnePeak(torch.nn.Module):
         
         super().__init__()
         
-        self.height, self.width = (height, width)
-        self.x_coordinates_len = x_coordinates_len
+        self.pixels, self.x_coordinates_len = (pixels, x_coordinates_len)
 
         self.peak_0_amplitudes = torch.tensor(
-            peak_0_amplitude_guess * np.ones((self.height, self.width, 1)),
+            peak_0_amplitude_guess * np.ones(self.pixels).reshape(-1,1),
                     device=device, dtype=dtype, requires_grad=True)
         self.peak_0_centers = torch.tensor(
-            peak_0_center_guess * np.ones((self.height, self.width, 1)),
+            peak_0_center_guess * np.ones(self.pixels).reshape(-1,1),
                     device=device, dtype=dtype, requires_grad=True)
         self.peak_0_sigmas = torch.tensor(
-            peak_0_sigma_guess * np.ones((self.height, self.width, 1)),
+            peak_0_sigma_guess * np.ones(self.pixels).reshape(-1,1),
                     device=device, dtype=dtype, requires_grad=True)
         self.slopes = torch.tensor(
-            slope_guess * np.ones((self.height, self.width, 1)),
+            slope_guess * np.ones(self.pixels).reshape(-1,1),
                     device=device, dtype=dtype, requires_grad=True)
         self.constants = torch.tensor(
-            constant_guess * np.ones((self.height, self.width, 1)),
+            constant_guess * np.ones(self.pixels).reshape(-1,1),
                     device=device, dtype=dtype, requires_grad=True)
         self.train_parameters = [
                                                        self.peak_0_amplitudes, 
@@ -62,18 +60,16 @@ class RamanOnePeak(torch.nn.Module):
 
     def forward(self, x):
 
-        result = (
-            self.constants
-              + torch.mul(self.slopes, x)
-              + torch.mul(self.peak_0_amplitudes,
-                self.LP((x - self.peak_0_centers)/self.peak_0_sigmas))
+        result = (self.constants.repeat(1, self.x_coordinates_len) 
+              + torch.matmul(torch.diag(self.slopes.reshape(-1)), x)
+              + torch.matmul(torch.diag(self.peak_0_amplitudes.reshape(-1)),
+                self.LP((x - self.peak_0_centers.repeat(1,self.x_coordinates_len))/self.peak_0_sigmas.repeat(1,self.x_coordinates_len)))
                 )
         return result
 
 class RamanTwoPeaks(torch.nn.Module):
     def __init__(self, 
-                 height,
-                 width,
+                 pixels, 
                  x_coordinates_len,
                  peak_0_amplitude_guess,
                  peak_0_center_guess,
@@ -89,33 +85,32 @@ class RamanTwoPeaks(torch.nn.Module):
                  ):
         
         super().__init__()
-
-        self.height, self.width = (height, width)
-        self.x_coordinates_len = x_coordinates_len
+        
+        self.pixels, self.x_coordinates_len = (pixels, x_coordinates_len)
 
         self.peak_0_amplitudes = torch.tensor(
-            peak_0_amplitude_guess * np.ones((self.height, self.width, 1)),
+            peak_0_amplitude_guess * np.ones(self.pixels).reshape(-1,1),
                     device=device, dtype=dtype, requires_grad=True)
         self.peak_0_centers = torch.tensor(
-            peak_0_center_guess * np.ones((self.height, self.width, 1)),
+            peak_0_center_guess * np.ones(self.pixels).reshape(-1,1),
                     device=device, dtype=dtype, requires_grad=True)
         self.peak_0_sigmas = torch.tensor(
-            peak_0_sigma_guess * np.ones((self.height, self.width, 1)),
+            peak_0_sigma_guess * np.ones(self.pixels).reshape(-1,1),
                     device=device, dtype=dtype, requires_grad=True)
         self.peak_1_amplitudes = torch.tensor(
-            peak_1_amplitude_guess * np.ones((self.height, self.width, 1)),
+            peak_1_amplitude_guess * np.ones(self.pixels).reshape(-1,1),
                     device=device, dtype=dtype, requires_grad=True)
         self.peak_1_centers = torch.tensor(
-            peak_1_center_guess * np.ones((self.height, self.width, 1)),
+            peak_1_center_guess * np.ones(self.pixels).reshape(-1,1),
                     device=device, dtype=dtype, requires_grad=True)
         self.peak_1_sigmas = torch.tensor(
-            peak_1_sigma_guess * np.ones((self.height, self.width, 1)),
+            peak_1_sigma_guess * np.ones(self.pixels).reshape(-1,1),
                     device=device, dtype=dtype, requires_grad=True)
         self.slopes = torch.tensor(
-            slope_guess * np.ones((self.height, self.width, 1)),
+            slope_guess * np.ones(self.pixels).reshape(-1,1),
                     device=device, dtype=dtype, requires_grad=True)
         self.constants = torch.tensor(
-            constant_guess * np.ones((self.height, self.width, 1)),
+            constant_guess * np.ones(self.pixels).reshape(-1,1),
                     device=device, dtype=dtype, requires_grad=True)
         self.train_parameters = [
                                                        self.peak_0_amplitudes, 
@@ -132,27 +127,20 @@ class RamanTwoPeaks(torch.nn.Module):
 
     def forward(self, x):
 
-        result = (
-            self.constants
-              + torch.mul(self.slopes, x)
-              + torch.mul(self.peak_0_amplitudes,
-                self.LP((x - self.peak_0_centers)/self.peak_0_sigmas))
-              + torch.mul(self.peak_1_amplitudes,
-                self.LP((x - self.peak_1_centers)/self.peak_1_sigmas))
+        result = (self.constants.repeat(1, self.x_coordinates_len) 
+              + torch.matmul(torch.diag(self.slopes.reshape(-1)), x)
+              + torch.matmul(torch.diag(self.peak_0_amplitudes.reshape(-1)),
+                self.LP((x - self.peak_0_centers.repeat(1,self.x_coordinates_len))/self.peak_0_sigmas.repeat(1,self.x_coordinates_len)))
+              + torch.matmul(torch.diag(self.peak_1_amplitudes.reshape(-1)),
+                self.LP((x - self.peak_1_centers.repeat(1,self.x_coordinates_len))/self.peak_1_sigmas.repeat(1,self.x_coordinates_len)))
                 )
-        # result = (
-        #     self.constants
-        #       + torch.mul(self.slopes, x)
-        #       + torch.mul(self.peak_0_amplitudes,
-        #         self.LP((x - self.peak_0_centers)/self.peak_0_sigmas))
-        #         )
         return result
 
 def one_peak_map_fit(
                     x_input, 
                     y_input,
                     learning_rate=0.1,
-                    iterations=250,
+                    iterations=40,
                     use_GPU=True,
                     spec_cutoff_range=(500.0,550.0)
                     ):
@@ -175,11 +163,11 @@ def one_peak_map_fit(
     spec_range = (x_input < spec_cutoff_range[1]) & (x_input > spec_cutoff_range[0])
     pixels = height * width
     x_raw = x_input[spec_range]
-    y = y_input[:,:, spec_range]
+    y = y_input.reshape(-1,x_input.shape[0])[:pixels, spec_range]
 
     x = torch.tensor(x_raw.reshape(1,-1), 
                     device=device, 
-                    dtype=dtype).repeat(pixels,1).reshape(height, width, -1)
+                    dtype=dtype).repeat(pixels,1)
     y = torch.tensor(y,  
                     device=device, 
                     dtype=dtype)
@@ -194,8 +182,7 @@ def one_peak_map_fit(
         'constant_guess':initial_fit_params['_intercept'],}
 
 
-    model = RamanOnePeak(height=height,
-                         width=width,
+    model = RamanOnePeak(pixels=pixels,
                         x_coordinates_len=np.sum(spec_range),
                         **init_params,
                         device=device,
@@ -228,7 +215,7 @@ def two_peak_map_fit(
                     x_input, 
                     y_input,
                     learning_rate=0.1,
-                    iterations=250,
+                    iterations=40,
                     use_GPU=True,
                     spec_cutoff_range=(350.0,450.0)
                     ):
@@ -251,11 +238,11 @@ def two_peak_map_fit(
     spec_range = (x_input < spec_cutoff_range[1]) & (x_input > spec_cutoff_range[0])
     pixels = height * width
     x_raw = x_input[spec_range]
-    y = y_input[:,:, spec_range]
+    y = y_input.reshape(-1,x_input.shape[0])[:pixels, spec_range]
 
     x = torch.tensor(x_raw.reshape(1,-1), 
                     device=device, 
-                    dtype=dtype).repeat(pixels,1).reshape(height, width, -1)
+                    dtype=dtype).repeat(pixels,1)
     y = torch.tensor(y,  
                     device=device, 
                     dtype=dtype)
@@ -274,8 +261,7 @@ def two_peak_map_fit(
         'constant_guess':initial_fit_params['_intercept'],}
 
 
-    model = RamanTwoPeaks(height=height,
-                          width=width,
+    model = RamanTwoPeaks(pixels=pixels,
                         x_coordinates_len=np.sum(spec_range),
                         **init_params,
                         device=device,
