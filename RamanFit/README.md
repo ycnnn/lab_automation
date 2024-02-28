@@ -27,7 +27,7 @@ Required libraries:`NumPy`, `Pandas`, `Modin`, `PyTorch`, `lmfit`, `tqdm`.
 
 **Supported materials:**
 
-Currently the code supports the Raman peak fitting of MoS<sub>2</sub>.
+Currently the code supports the Raman peak fitting of MoS<sub>2</sub>. WSe<sub>2</sub>, graphene support should be ready before mid March 2024. 
 
 
 **GPU support:**
