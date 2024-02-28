@@ -230,7 +230,9 @@ def two_peak_map_fit(
                     learning_rate=0.1,
                     iterations=250,
                     use_GPU=True,
-                    spec_cutoff_range=(350.0,450.0)
+                    spec_cutoff_range=(350.0,450.0),
+                    peak_0_center_initial_guess=384.0,
+                    peak_1_center_initial_guess=404.0,
                     ):
     if not use_GPU:
         device = torch.device("cpu")
@@ -260,7 +262,10 @@ def two_peak_map_fit(
                     device=device, 
                     dtype=dtype)
 
-    initial_fit_params, _ = double_peak_fit(np.mean(y_input, axis=(0,1))[spec_range], x_input[spec_range])
+    initial_fit_params, _ = double_peak_fit(
+        np.mean(y_input, axis=(0,1))[spec_range], x_input[spec_range],
+        peak_0_center=peak_0_center_initial_guess,
+        peak_1_center=peak_1_center_initial_guess)
     init_params = {
         'peak_0_amplitude_guess':
         initial_fit_params['peak_0_amplitude']/(np.pi * initial_fit_params['peak_0_sigma']),

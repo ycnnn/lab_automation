@@ -53,7 +53,7 @@ def double_peak_fit(y,x,
         peak_1_sigma=10, 
         _slope=0,
         _intercept=150):
-    
+    print(f'Running initial fit, guess {peak_0_center} and {peak_1_center}...')
     iters = _max_iters    
     rmodel = (LorentzianModel(prefix='peak_0_') 
               + LorentzianModel(prefix='peak_1_')
