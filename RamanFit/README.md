@@ -28,3 +28,8 @@ Running initial fit, guess 384.01 and 404.01...
 Loss 5.472247808 : 100%|██████████████████████████████████████████████████████████████████████████████████████| 250/250 [00:15<00:00, 16.11it/s]
 `.
 - Wait thill finish. Once finish, you will see 3 `csv` files appearing in the `RamanFit` folder, anmely `Si_peak_position.csv`, `E_peak_position.csv` and `A_peak_position.csv`. These are peaking distribution maps.
+- (Optional) if you want customization of code, do not run  `python start_fitting.py spectrums.txt`, instead run  `python start_fitting.py spectrums.txt 0`.
+  - The system will then ask for each paramter:
+  - For `Initial E peak position guess (in cm-1) ? `, enter your initial guess of the E peak position.
+  - For `Initial A peak position guess (in cm-1) ? `, enter your initial guess of the A peak position.
+  - For `How to save the result? Enter 0 for .csv file, enter 1 for .npy file. `, enter 0 to save all results in `csv` format, otherwise in `npy` format. 
