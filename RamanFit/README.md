@@ -17,7 +17,7 @@ year = {2024}
 
 *Why is the peak fitting in this tool so fast?*
 
-We has applied multiple optimizing strategies, including:
+We have applied multiple optimizing strategies, including:
 
 - Better initial values: before running the whole-scale fit, we runa fast, initial fit on the average spectra from every pixel to provide a good initial parameter set.
 - Multiprocessing acceleration: we use the multi-processing fuctionality to speed up the process of loading of data into memory up to 3x faster.
