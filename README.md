@@ -4,7 +4,7 @@ Yue Zhang
 
 -- Project ongoing --
 
-If you use this code in your research, please cite as follows:
+If you use the code from any part of this repository in your research, please cite as follows:
 ```
 @software{Zhang_2D_Reserach_Automation_2024,
 author = {Zhang, Yue},
