@@ -1,7 +1,8 @@
 from functools import partial
 import multiprocessing
 import numpy as np
-import pandas as pd
+# import pandas as pd
+import modin.pandas as pd
 from lmfit.models import LinearModel, LorentzianModel
 
 def load_helper(data_path, _width=400):
