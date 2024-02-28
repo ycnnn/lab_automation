@@ -1,12 +1,11 @@
 cff-version: 1.2.0
-message: "If you use any part of this code repository, please cite it as below."
-authors:
-  - family-names: Zhang
-    given-names: Yue
-    orcid: https://orcid.org/0000-0002-3087-6965
+message: "If you use this software, please cite it as below."
+author:
+- family-names: "Zhang"
+  given-names: "Yue"
+  orcid: "https://orcid.org/0000-0002-3087-6965"
 title: "2D Reserach Automation Tools"
 version: 2.0
-identifiers:
-  - type: doi
-    value: 10.5281/zenodo.1234
-date-released: 2024-02-20
+doi: 10.5281/zenodo.10724769
+date-released: 2024-02-28
+url: "https://github.com/ycnnn/lab_automation"
