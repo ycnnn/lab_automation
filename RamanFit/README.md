@@ -47,10 +47,13 @@ To run it on command line:
 - Enter this command: `ulimit -n 512`. This line sets the maximum files the script can open. This is ncessary because the script is highly parallelized.
 - Assume the filename of the `txt` file is `spectrums.txt`. Run this command: `python start_fitting.py spectrums.txt`.
 - Wait about 20s.
-- You should see a progress bar appearing, looking like: `Apple M series GPU acceleration enabled.
+- You should see a progress bar appearing, looking like:
+```
+Apple M series GPU acceleration enabled.
 Running initial fit, guess 384.01 and 404.01...
 Loss 5.472247808 : 100%|██████████████████████████████████████████████████████████████████████████████████████| 250/250 [00:15<00:00, 16.11it/s]
-`.
+```
+
 - Wait thill finish. Once finish, you will see 3 `csv` files appearing in the `RamanFit` folder, anmely `Si_peak_position.csv`, `E_peak_position.csv` and `A_peak_position.csv`. These are peaking distribution maps.
 - (Optional) if you want customization of code, do not run  `python start_fitting.py spectrums.txt`, instead run  `python start_fitting.py spectrums.txt 0`.
   - The system will then ask for each paramter:
