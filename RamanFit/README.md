@@ -27,7 +27,7 @@ Required libraries:`NumPy`, `Pandas`, `Modin`, `PyTorch`, `lmfit`, `tqdm`.
 
 **Supported materials:**
 
-Currently the code supports the Raman peak fitting of MoS_2.
+Currently the code supports the Raman peak fitting of MoS~2.
 
 
 **GPU support:**
