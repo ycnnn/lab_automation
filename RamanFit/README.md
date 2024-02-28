@@ -16,6 +16,8 @@ Required libraries:`NumPy`, `Pandas`, `Modin`, `PyTorch`, `lmfit`, `tqdm`.
 
 There are two ways to use this script, you can either run it on command line or inside a Jupyter notebook.
 
+(Recommended) To run it on Jupyter notebook, follow `demo.ipynb`.
+
 To run it on command line:
 - Download the `RamanFit` folder.
 - Put the `txt` raw Raman mapping file into the `RamanFit` folder. It should be the same folder where you see other files such as `torch_fit.py`.
