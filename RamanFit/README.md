@@ -25,6 +25,15 @@ We have applied multiple optimizing strategies, including:
 
 Required libraries:`NumPy`, `Pandas`, `Modin`, `PyTorch`, `lmfit`, `tqdm`.
 
+**Supported materials:**
+
+Currently the code supports the Raman peak fitting of MoS_2.
+
+
+**GPU support:**
+
+Currently the code supports Nvidia and Apple M series GPU. If there is no GPU installed, the code will automatically run on CPU (potentially 10-100x slower).
+
 **How to use this script:**
 
 There are two ways to use this script, you can either run it on command line or inside a Jupyter notebook.
