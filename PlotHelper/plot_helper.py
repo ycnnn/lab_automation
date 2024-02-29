@@ -87,6 +87,18 @@ def format(figsize,
     ax.xaxis.set_tick_params(width=linewidth)
     ax.yaxis.set_tick_params(width=linewidth)
     set_size(figsize, unit_pt=unit_pt)
+    
+def format_no_resize(ax=None,
+           linewidth=0.5):
+    
+    ax = ax or plt.gca()
+ 
+    ax.tick_params(axis="y",direction="in")
+    ax.tick_params(axis="x",direction="in")
+    for axis in ['top','bottom','left','right']:
+        ax.spines[axis].set_linewidth(linewidth)
+    ax.xaxis.set_tick_params(width=linewidth)
+    ax.yaxis.set_tick_params(width=linewidth)
 
         
 def label_format(ax=None,
@@ -188,7 +200,7 @@ def line_format(lines,
         line.set_linestyle(linestyle)
 
 
-def abline(slope,x,y,ax=None,_linewidth=0.5):
+def abline(slope,x,y,ax=None):
     ax = ax or plt.gca()
     """Plot a line from slope and intercept"""
     x0 = np.mean(x)
