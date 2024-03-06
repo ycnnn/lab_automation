@@ -44,7 +44,7 @@ To run it on command line:
 - Download the `RamanFit` folder.
 - Put the `txt` raw Raman mapping file into the `RamanFit` folder. It should be the same folder where you see other files such as `torch_fit.py`.
 - Open your command line window (`cmd` on Windows or `Terminal` on Linux/MacOS). Go to the `RamanFit` folder by using `cd` command. You should see `__your__computer__name RamanFit %` in the command tool window.
-- Enter this command: `ulimit -n 512`. This line sets the maximum files the script can open. This is ncessary because the script is highly parallelized.
+- Enter this command: `ulimit -n 512`. This line sets the maximum files the script can open.
 - Assume the filename of the `txt` file is `spectrums.txt`. Run this command: `python start_fitting.py spectrums.txt`.
 - Wait about 20s.
 - You should see a progress bar appearing, looking like:
