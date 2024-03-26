@@ -22,17 +22,15 @@ def find_braket(sample):
             res = sample
 
     l_indices = []
-    r_indices = []
+
 
     for i in range(length):
         if sample[i] == '{':
             l_indices.append(i)
         if sample[i] == '}':
-            r_indices.append(i)
             try:
                 l_indices.pop(-1)
             except:
-                # return i
                 return sample[:i] + sample[i+1:]
              
     return sample
