@@ -339,3 +339,37 @@ def output(
     _ = set_smu_ready(drain_address)
 
     return gate_readings[20:-20,:], drain_readings[20:-20,:]
+
+
+
+###########################################################################################################################
+# The following script is for ramping up single Keithley
+
+
+def set_smu_ready_for_ramp(address="USB0::0x05E6::0x2450::04096331::INSTR"):
+    rm = pv.ResourceManager()
+    smu = rm.open_resource(address)
+    smu.timeout = 500
+    smu.write('reset()')
+    smu.write("smu.source.autorange = smu.ON")
+    smu.write("smu.measure.func = smu.FUNC_DC_VOLTAGE")
+    smu.write("smu.measure.autorange = smu.ON")
+    smu.write("smu.measure.terminals = smu.TERMINALS_FRONT")
+    smu.write("smu.measure.func = smu.FUNC_DC_VOLTAGE")
+    smu.write("smu.source.level = 0")
+    return smu
+
+def ramp(smu, start_volt=0, end_volt=0):
+
+    voltages = np.linspace(start_volt, end_volt, 20)
+    volt_readings = []
+    # return start_volt
+    for volt in voltages:
+        smu.write(f"smu.source.level = {volt}")
+        smu.write('reading = smu.measure.read()')
+        volt_reading = smu.query_ascii_values('print(reading)')
+        smu.write('waitcomplete()')
+        volt_readings.append(volt_reading)
+        # break
+
+    return np.array(volt_readings).reshape(-1)
