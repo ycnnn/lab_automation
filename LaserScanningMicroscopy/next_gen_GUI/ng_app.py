@@ -7,24 +7,21 @@ import time
 import warnings
 
 
-# class CustomAxisItem(pg.AxisItem):
-
-#     def tickStrings(self, values, scale, spacing):
-
-#         places = max(0, np.ceil(-np.log10(spacing*scale)))
-#         strings = []
-#         for v in values:
-#             vs = v * scale
-#             vstr = ("%%0.%df" % places) % vs
-#             strings.append(vstr)
-#         return strings
-def widget_format(widget):
+def widget_format(widget, hide_axis=False):
     widget.hideButtons()
     widget.setStyleSheet("background-color: black;")
-    widget.showAxis('top')
-    widget.showAxis('bottom')
-    widget.showAxis('left')
-    widget.showAxis('right')
+    # widget.setXRange(0, x_range, padding=0)
+    widget.setDefaultPadding(0)
+    if not hide_axis:
+        widget.showAxis('top')
+        widget.showAxis('bottom')
+        widget.showAxis('left')
+        widget.showAxis('right')
+    else:
+        widget.hideAxis('top')
+        widget.hideAxis('bottom')
+        widget.hideAxis('left')
+        widget.hideAxis('right')
     
 
 class QPlot(QMainWindow):
@@ -32,6 +29,7 @@ class QPlot(QMainWindow):
                  line_width, 
                  scan_num,
                  channel_num=3,
+                 widget_width=300
                  ):
         
         super().__init__()
@@ -41,12 +39,14 @@ class QPlot(QMainWindow):
         self.counter = 0
         self.time = time.time()
         self.setWindowTitle(f'{self.channel_num} Channel Scan: Frame {self.counter}')
-        self.resize(300*self.channel_num,300)
+        # self.resize(300*self.channel_num,300)
+        # self.setGeometry(0,0,1000,1000)
 
         # width,height = self.primaryScreen().size().toTuple()
         # self.setMaximumWidth(width)
 
         self.mainWidget = QWidget()
+        self.widget_width = widget_width
         self.setCentralWidget(self.mainWidget)
         self.mainWidget.setStyleSheet("background-color: black;")
         self.layout = QGridLayout(self.mainWidget)
@@ -59,9 +59,22 @@ class QPlot(QMainWindow):
             self.widgets[row_id,0] = pg.PlotWidget()
             self.widgets[row_id,0].setMouseEnabled(x=False, y=False)
             self.widgets[row_id,1] = pg.PlotWidget()
+
+            self.widgets[row_id,0].setFixedSize(self.widget_width,self.widget_width/3)
+            self.widgets[row_id,1].setFixedSize(self.widget_width,self.widget_width * self.scan_num/self.line_width)
         
-            widget_format(self.widgets[row_id,0])
-            widget_format(self.widgets[row_id,1])
+            widget_format(self.widgets[row_id,0], 
+                          hide_axis=False)
+            widget_format(self.widgets[row_id,1], 
+                          hide_axis=True)
+            
+            self.widgets[row_id,0].getAxis("left").setStyle(tickLength=2,showValues=True)
+            self.widgets[row_id,0].getAxis("right").setStyle(tickLength=2,showValues=False)
+            self.widgets[row_id,0].getAxis("top").setStyle(tickLength=2,showValues=False)
+            self.widgets[row_id,0].getAxis("bottom").setStyle(tickLength=2,showValues=False)
+
+            self.widgets[row_id,0].getAxis("top").setLabel(f'Channel {row_id}')
+
 
     
             self.layout.addWidget(self.widgets[row_id,0], 0, row_id)
