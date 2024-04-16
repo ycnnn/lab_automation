@@ -103,10 +103,7 @@ class QPlot(QMainWindow):
 
         
         self.show()
-        # sample_fetch_data = np.random.normal(size=(self.channel_num, self.line_width))
 
-        # for _ in range(self.scan_num):
-        #     self.update(sample_fetch_data)
 
     def update(self, fetched_data):
 

@@ -8,8 +8,8 @@ from ng_app import QPlot
 ######################################################################
 
 if __name__ == '__main__':
-    line_width = 1024
-    scan_num = 1024
+    line_width = 256
+    scan_num = 128
     channel_num = 4
     app = QApplication(sys.argv)
     window = QPlot(line_width=line_width, scan_num=scan_num, channel_num=channel_num)
