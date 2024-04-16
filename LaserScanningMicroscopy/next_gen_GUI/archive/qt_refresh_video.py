@@ -6,6 +6,8 @@ import numpy as np
 import pyqtgraph as pg
 from matplotlib import cm
 
+
+
 def fetch_cmap(cmap_name='bwr'):
     colormap = cm.get_cmap(cmap_name)  
     colormap._init()
@@ -15,18 +17,18 @@ def fetch_cmap(cmap_name='bwr'):
 class MainWindow(QMainWindow):
     def __init__(self):
 
-        self.pixels = 256
+        self.pixels = 512
         super().__init__()
         self.setWindowTitle('0')
         self.resize(900,450)
 
         self.main_widget = QWidget()
+        self.main_widget.setStyleSheet("background-color: black;")
         self.setCentralWidget(self.main_widget)
         self.layout = QGridLayout(self.main_widget)
         self.layout.setContentsMargins(10,10,10,10) 
 
-        # self.X = np.arange(self.pixels)
-        # self.Y = np.zeros(shape=(3,2,self.pixels))
+
         self.Y = np.random.normal(size=(3,2,self.pixels))
 
         self.widgets = []
@@ -41,11 +43,19 @@ class MainWindow(QMainWindow):
                     plot = widget.plot(self.Y[row,col])
                     widget.setXRange(0, self.pixels, padding=0)
                     widget.setMouseEnabled(x=False, y=False)
-                    widget.setStyleSheet("background-color: white;")
+                    widget.setStyleSheet("background-color: black;")
                     widget.setFixedSize(280,140)
                     widget.hideButtons()
                     widget.showAxis('top')
+                    # widget.getAxis('top').setStyle(showValues=False)
+                    widget.showAxis('bottom')
+                    # widget.getAxis('bottom').setStyle(showValues=False)
+                    widget.showAxis('left')
+                    # widget.getAxis('left').setStyle(showValues=False)
                     widget.showAxis('right')
+                    # widget.getAxis('right').setStyle(showValues=False)
+                
+                    
                     self.layout.addWidget(widget, col, row)
                     row_widgets.append(widget)
                     plots.append(plot)
@@ -53,11 +63,11 @@ class MainWindow(QMainWindow):
                     widget = pg.PlotWidget()
                     img = pg.ImageItem(np.random.normal(size=(self.pixels,self.pixels)))
                     img.setLookupTable(fetch_cmap())
-                    # widget.setYRange(0, self.pixels, padding=0)
-                    widget.hideAxis('top')
-                    widget.hideAxis('bottom')
-                    widget.hideAxis('left')
-                    widget.hideAxis('right')
+                    widget.setXRange(0, self.pixels, padding=0)
+                    widget.showAxis('top')
+                    widget.showAxis('bottom')
+                    widget.showAxis('left')
+                    widget.showAxis('right')
                     widget.hideButtons()
                     widget.addItem(img)
                     # widget = pg.image(np.random.normal(size=(self.pixels,self.pixels)))
