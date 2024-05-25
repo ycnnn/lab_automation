@@ -1,5 +1,6 @@
 import numpy as np
 import multiprocessing as mp
+import sys
 ######################################################################
 # Custom dependencies
 from ng_mp import Data_fetcher, Data_receiver
@@ -9,9 +10,10 @@ from ng_mp import Data_fetcher, Data_receiver
 
 if __name__ == '__main__':
 
-
-    line_width=512
-    scan_num=512
+    line_width = int(sys.argv[1])
+    scan_num = int(sys.argv[2])
+    # line_width=512
+    # scan_num=512
 
 
     mp.freeze_support()

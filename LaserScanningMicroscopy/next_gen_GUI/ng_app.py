@@ -1,6 +1,7 @@
 import numpy as np
 from PySide6.QtWidgets import QMainWindow, QApplication, QWidget, QVBoxLayout, QGridLayout, QLabel
 from PySide6 import QtCore
+from PySide6.QtCore import Qt
 from PySide6.QtGui import QGuiApplication
 import pyqtgraph as pg
 import time 
@@ -9,6 +10,7 @@ import warnings
 
 def widget_format(widget, hide_axis=False):
     widget.hideButtons()
+    widget.setMouseEnabled(x=False, y=False)
     widget.setStyleSheet("background-color: black;")
     # widget.setXRange(0, x_range, padding=0)
     widget.setDefaultPadding(0)
@@ -45,6 +47,9 @@ class QPlot(QMainWindow):
         # width,height = self.primaryScreen().size().toTuple()
         # self.setMaximumWidth(width)
 
+
+        self.setWindowFlags((self.windowFlags() & ~Qt.WindowFullscreenButtonHint) | Qt.CustomizeWindowHint)
+
         self.mainWidget = QWidget()
         self.widget_width = widget_width
         self.setCentralWidget(self.mainWidget)
@@ -57,7 +62,7 @@ class QPlot(QMainWindow):
 
         for row_id in range(self.channel_num):
             self.widgets[row_id,0] = pg.PlotWidget()
-            self.widgets[row_id,0].setMouseEnabled(x=False, y=False)
+            
             self.widgets[row_id,1] = pg.PlotWidget()
 
             self.widgets[row_id,0].setFixedSize(self.widget_width,self.widget_width/3)
