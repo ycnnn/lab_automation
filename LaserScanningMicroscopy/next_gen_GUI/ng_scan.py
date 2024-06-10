@@ -4,22 +4,34 @@ import sys
 ######################################################################
 # Custom dependencies
 from ng_mp import Data_fetcher, Data_receiver
+from ng_position_params import Position_parameters
+from ng_scan_params import Scan_parameters
 ######################################################################
 
 
 
 if __name__ == '__main__':
 
-    line_width = int(sys.argv[1])
-    scan_num = int(sys.argv[2])
-    # line_width=512
-    # scan_num=512
-
+    position_parameters = Position_parameters(
+                                            x_size=30,
+                                            y_size=30,
+                                            x_pixels=300,
+                                            y_pixels=128,
+                                            x_origin=0,
+                                            y_origin=0)
+    
+    scan_parameters = Scan_parameters(frequency=20, 
+                                      channel_num=3, 
+                                      input_mapping=['ai0', 'ai1', 'ai2'])
 
     mp.freeze_support()
     out_pipe, in_pipe = mp.Pipe(duplex=True)
-    data_fetcher = Data_fetcher(line_width=line_width, scan_num=scan_num, pipe=out_pipe)
-    data_receiver = Data_receiver(line_width=line_width, scan_num=scan_num, pipe=in_pipe)
+    data_fetcher = Data_fetcher(position_parameters=position_parameters,
+                                scan_parameters=scan_parameters, 
+                                pipe=out_pipe)
+    data_receiver = Data_receiver(position_parameters=position_parameters,
+                                  scan_parameters=scan_parameters, 
+                                  pipe=in_pipe)
     data_fetcher.start()
     data_receiver.start()
     data_fetcher.join()
