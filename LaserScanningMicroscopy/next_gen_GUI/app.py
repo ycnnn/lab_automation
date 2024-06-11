@@ -30,7 +30,7 @@ class QPlot(QMainWindow):
     def __init__(self, 
                  line_width, 
                  scan_num,
-                 channel_num=3,
+                 channel_num,
                  widget_width=300
                  ):
         
@@ -111,6 +111,8 @@ class QPlot(QMainWindow):
 
 
     def update(self, fetched_data):
+        # print('Self data shape is')
+        # print(self.data.shape)
 
         self.data[:,:,self.scan_num - self.counter - 1] = fetched_data
         for row_id in range(self.channel_num):

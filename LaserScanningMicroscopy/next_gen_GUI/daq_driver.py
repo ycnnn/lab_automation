@@ -39,6 +39,7 @@ def playrec(data, samplerate, input_mapping, output_mapping):
     # print(data.shape)
     data = data.T
     nsamples = data.shape[1]
+    # print(data.shape)
 
 
     # with ni.Task() as read_task, ni.Task() as write_task:
@@ -84,7 +85,7 @@ def playrec(data, samplerate, input_mapping, output_mapping):
 
 def daq_interface(ao0_1_write_data,
                   frequency,
-                  input_mapping=["ai1", "ai4", "ai20"],
+                  input_mapping,
                   device_name='Dev2'):
     pixels = len(ao0_1_write_data)
     # Be careful. The input argument frequency is line scan frequency
@@ -100,4 +101,9 @@ def daq_interface(ao0_1_write_data,
         output_mapping=output_mapping_full_path,
     )
     sampled_data = indata.T
-    return np.flip(sampled_data[0]), np.flip(sampled_data[1]), np.flip(sampled_data[2])
+    # print(sampled_data.shape, flush=True)
+
+    # Something needs to be done here!
+    # 
+    # return np.flip(sampled_data[0]), np.flip(sampled_data[1]), np.flip(sampled_data[2])
+    return np.flip(sampled_data, axis=1)

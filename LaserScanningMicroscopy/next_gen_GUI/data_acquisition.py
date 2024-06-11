@@ -1,11 +1,12 @@
 import numpy as np
-from ng_daq_driver import daq_interface
+from daq_driver import daq_interface
 
 
 class Data_acquisitor():
 
     def __init__(self, position_parameters, scan_parameters):
         self.position_parameters = position_parameters
+        self.scan_parameters = scan_parameters
         self.DAQ_output_data = np.array([position_parameters.x_coordinates, 
                                          position_parameters.y_coordinates])
         self.frequency = scan_parameters.frequency
@@ -15,7 +16,7 @@ class Data_acquisitor():
         DAQ_output_data = self.DAQ_output_data[:,scan_index,:].T
         DAQ_input_data = daq_interface(ao0_1_write_data=DAQ_output_data, 
                       frequency=self.frequency,
-                      input_mapping=["ai1", "ai4", "ai20"],
+                      input_mapping=self.scan_parameters.input_mapping,
                     )
         # Optionally, some other sensing happens here.
         return DAQ_input_data

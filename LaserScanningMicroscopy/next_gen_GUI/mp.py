@@ -5,8 +5,8 @@ from PySide6.QtWidgets import QApplication
 import sys
 ######################################################################
 # Custom dependencies
-from ng_app import QPlot
-from ng_data_acquisition import Data_acquisitor
+from app import QPlot
+from data_acquisition import Data_acquisitor
 ######################################################################
 
 class Data_fetcher(mp.Process):
@@ -64,7 +64,7 @@ class Data_receiver(mp.Process):
         #####################################################################
         # Initilize plots
         self.app = QApplication(sys.argv)
-        self.window = QPlot(line_width=self.line_width, scan_num=self.scan_num, channel_num=3)
+        self.window = QPlot(line_width=self.line_width, scan_num=self.scan_num, channel_num=self.scan_parameters.channel_num)
         self.window.show()
         #####################################################################
 

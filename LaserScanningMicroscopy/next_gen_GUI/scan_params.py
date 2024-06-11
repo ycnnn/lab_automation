@@ -2,9 +2,9 @@ import numpy as np
 
 class Scan_parameters:
     def __init__(self,
-                 frequency=2.5,
-                 channel_num=3,
-                 input_mapping=['ai0', 'ai1', 'ai2'],
+                 input_mapping,
+                 frequency,
+                 channel_num,
                  DAQ_name='Dev2'):
        
         self.frequency = frequency
