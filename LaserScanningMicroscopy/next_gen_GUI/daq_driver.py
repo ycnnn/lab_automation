@@ -1,6 +1,7 @@
 """Simultaneous read and write with NI USB-4431 or similar device."""
 
 import numpy as np
+import time
 
 # import nidaqmx as ni
 # from nidaqmx.constants import WAIT_INFINITELY
@@ -74,6 +75,7 @@ def playrec(data, samplerate, input_mapping, output_mapping):
     #     indata = read_task.read(nsamples, timeout=WAIT_INFINITELY)
 
     # return np.asarray(indata).T
+    
     return np.random.normal(size=(nsamples, len(input_mapping)))
 
 
@@ -106,4 +108,5 @@ def daq_interface(ao0_1_write_data,
     # Something needs to be done here!
     # 
     # return np.flip(sampled_data[0]), np.flip(sampled_data[1]), np.flip(sampled_data[2])
+    time.sleep(1/frequency)
     return np.flip(sampled_data, axis=1)

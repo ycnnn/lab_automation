@@ -17,7 +17,6 @@ class Display_parameters:
         self.scan_id = '' if not scan_id else scan_id
         
         full_path = os.path.realpath(__file__)
-        # path = os.path.dirname(full_path) + '/'
         path = str(Path(os.path.dirname(full_path)).parent.absolute()) + '/'
         self.save_destination = path if not save_destination else save_destination
 
