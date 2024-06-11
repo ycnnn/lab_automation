@@ -125,11 +125,10 @@ class QPlot(QMainWindow):
         self.setWindowTitle(f'{self.channel_num} Channel Scan: Frame {self.counter}, Est time {int(elapse_time*(self.scan_num - self.counter))} s')
         QApplication.processEvents()
 
-    def screenCaptureWidget(self, filename=None, fileformat='png'):
+    def save_results(self, filepath=None, scan_id='', fileformat='png'):
         img = self.mainWidget.grab(self.mainWidget.rect())
-        full_path = os.path.realpath(__file__)
-        path = os.path.dirname(full_path)
-        img.save(path + '/_screenshot.png', fileformat)
-        print(path)
+        img.save(filepath + '/_' + str(scan_id) + '_screenshot.png', fileformat)
+        np.save(filepath + '/_' + str(scan_id) + '_data', self.data)
+
 
 

@@ -48,10 +48,12 @@ class Data_receiver(mp.Process):
     def __init__(self,
                  position_parameters,
                  scan_parameters,
+                 display_parameters,
                  pipe) -> None:
         mp.Process.__init__(self)
         self.position_parameters = position_parameters
         self.scan_parameters = scan_parameters
+        self.display_parameters = display_parameters
         self.line_width = self.position_parameters.x_pixels
         self.scan_num = self.position_parameters.y_pixels
         self.pipe = pipe
@@ -79,6 +81,9 @@ class Data_receiver(mp.Process):
             counter += 1
             if counter >= self.scan_num:
                 break
-        # print('hello')
-        self.window.screenCaptureWidget()
+
+        if self.display_parameters.save_data:
+            self.window.save_results(
+                filepath=self.display_parameters.save_destination,
+                scan_id=self.display_parameters.scan_id)
 
