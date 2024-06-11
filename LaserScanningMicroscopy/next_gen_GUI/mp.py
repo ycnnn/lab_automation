@@ -79,4 +79,6 @@ class Data_receiver(mp.Process):
             counter += 1
             if counter >= self.scan_num:
                 break
+        # print('hello')
+        self.window.screenCaptureWidget()
 

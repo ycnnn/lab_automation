@@ -36,5 +36,6 @@ if __name__ == '__main__':
     data_receiver.start()
     data_fetcher.join()
     data_receiver.join()
+    
 
    

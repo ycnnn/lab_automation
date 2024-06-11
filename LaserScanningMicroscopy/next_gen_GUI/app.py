@@ -2,10 +2,11 @@ import numpy as np
 from PySide6.QtWidgets import QMainWindow, QApplication, QWidget, QVBoxLayout, QGridLayout, QLabel
 from PySide6 import QtCore
 from PySide6.QtCore import Qt
-from PySide6.QtGui import QGuiApplication
+from PySide6.QtGui import QGuiApplication, QScreen
 import pyqtgraph as pg
 import time 
 import warnings
+import os
 
 
 def widget_format(widget, hide_axis=False):
@@ -123,4 +124,12 @@ class QPlot(QMainWindow):
         self.time = time.time()
         self.setWindowTitle(f'{self.channel_num} Channel Scan: Frame {self.counter}, Est time {int(elapse_time*(self.scan_num - self.counter))} s')
         QApplication.processEvents()
+
+    def screenCaptureWidget(self, filename=None, fileformat='png'):
+        img = self.mainWidget.grab(self.mainWidget.rect())
+        full_path = os.path.realpath(__file__)
+        path = os.path.dirname(full_path)
+        img.save(path + '/_screenshot.png', fileformat)
+        print(path)
+
 
