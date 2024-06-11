@@ -63,7 +63,7 @@ class Position_parameters:
         # First dim: which data: 0 = TTL signal, 1 = X_coordinates, 2 = Y_coordinates
         self.x_coordinates = np.repeat(self.x_coordinates[:,:,np.newaxis],axis=2,repeats=2).reshape(self.y_pixels,-1)
         self.y_coordinates = np.repeat(self.y_coordinates[:,:,np.newaxis],axis=2,repeats=2).reshape(self.y_pixels,-1)
-        self.ttl = np.repeat(
+        self.ttl = 3.5 * np.repeat(
             np.ravel(np.column_stack((
                                 np.ones(self.x_pixels),
                                 np.zeros(self.x_pixels)
