@@ -57,25 +57,6 @@ class Position_parameters:
         # This line flips the x coordinates on even rows, such that the lens travels like a snake
         self.x_coordinates[1::2, :] = self.x_coordinates[1::2, ::-1]
 
-        ###########################
-        # Prepare for lock-in interface scan
-        # What happens there: we repeat every pixel two times, so the overall data supplied to DAQ has shape of (3, self.y_pixels, 2*self.x_pixles)
-        # First dim: which data: 0 = TTL signal, 1 = X_coordinates, 2 = Y_coordinates
-        self.x_coordinates = np.repeat(self.x_coordinates[:,:,np.newaxis],axis=2,repeats=2).reshape(self.y_pixels,-1)
-        self.y_coordinates = np.repeat(self.y_coordinates[:,:,np.newaxis],axis=2,repeats=2).reshape(self.y_pixels,-1)
-        self.ttl = 3.5 * np.repeat(
-            np.ravel(np.column_stack((
-                                np.ones(self.x_pixels),
-                                np.zeros(self.x_pixels)
-                                )))[np.newaxis,:],
-                                axis=0,repeats=self.y_pixels
-                                )
-        self.DAQ_output_data = np.array([self.x_coordinates,
-                                         self.y_coordinates,
-                                         self.ttl])
-        # print(self.ttl.shape)
-        # print(self.x_coordinates.shape)
-
     def generate_initial_moves(self):
         # Initial: (0,0) to (x_origin, y_origin)
         # Final: self.x_coordinates[self.y_pixels-1, self.x_pixels-1], self.x_coordinates[self.y_pixels-1, self.x_pixels-1] to 0,0
@@ -88,8 +69,6 @@ class Position_parameters:
         self.final_move = np.array([
             np.linspace(final_x_location, 0, num=self.x_pixels), 
             np.linspace(final_y_location, 0, num=self.x_pixels)]).T
-        
-        
        
 
     def save_params(self, save_name):

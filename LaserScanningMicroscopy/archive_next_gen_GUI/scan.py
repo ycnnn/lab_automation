@@ -16,14 +16,14 @@ if __name__ == '__main__':
     position_parameters = Position_parameters(
                                             x_size=30,
                                             y_size=30,
-                                            x_pixels=256,
-                                            y_pixels=100,
+                                            x_pixels=128,
+                                            y_pixels=128,
                                             x_origin=0,
                                             y_origin=0)
     
-    scan_parameters = Scan_parameters(frequency=1, 
+    scan_parameters = Scan_parameters(frequency=0.2, 
                                       channel_num=3, 
-                                      input_mapping=["ai0","ai1","ai3"])
+                                      input_mapping=['ai0', 'ai1','ai4'])
     
     display_parameters = Display_parameters(
                  scan_id='01',
