@@ -14,7 +14,8 @@ class Position_parameters:
                  axis_motion_high_limit=9.50, 
                  conversion_factor=0.1,
                  z_conversion_factor=0.2):
-
+        self.conversion_factor = conversion_factor
+        self.z_conversion_factor = z_conversion_factor
         self.x_origin, self.y_origin = (x_origin, y_origin)
         self.x_size, self.y_size = (abs(x_size), abs(y_size))
         self.x_pixels, self.y_pixels = (int(abs(x_pixels)), int(abs(y_pixels)))
@@ -22,9 +23,8 @@ class Position_parameters:
         self.y_pixels = max(1, self.y_pixels)
         self.axis_limits = (axis_motion_low_limit, axis_motion_high_limit)
         self.z_height = z_height
-        self.z_output = self.z_height * conversion_factor
-        self.conversion_factor = conversion_factor
-        self.z_conversion_factor = z_conversion_factor
+        self.z_output = self.z_height * self.z_conversion_factor
+        
 
 
         self.generate_sweep_coordiantes()
@@ -67,7 +67,7 @@ class Position_parameters:
           ).reshape(1,-1),
         repeats=self.x_pixels, axis=0).T
 
-        self.z_coordinates = self.z_conversion_factor * np.ones(self.x_coordinates.shape)
+        self.z_coordinates = self.z_output * np.ones(self.x_coordinates.shape)
         self.ttl = 3.50 * np.ones(self.x_coordinates.shape)
 
         self.x_coordinates = self.create_reverse_scan(self.x_coordinates)
