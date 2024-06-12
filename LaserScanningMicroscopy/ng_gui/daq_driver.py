@@ -114,7 +114,7 @@ def set_z_height(scan_parameters, z_height, conversion_factor=0.20):
         print('Error: input z height is beyond the piezo stage travel range.')
         return
     with ni.Task() as write_task:
-        write_task.ao_channels.add_ai_voltage_chan(scan_parameters.DAQ_name + "/ao2",
+        write_task.ao_channels.add_ao_voltage_chan(scan_parameters.DAQ_name + "/ao2",
                                     min_val=-10, max_val=10)
         write_task.write(z_height*conversion_factor)
     return
