@@ -109,14 +109,25 @@ def daq_interface(ao0_1_write_data,
     # time.sleep(1/frequency)
     return np.flip(sampled_data, axis=1)
 
-def reset_daq(scan_parameters, ramp_steps=50):
+def set_z_height(scan_parameters, z_height, conversion_factor=0.20):
+    if z_height < -0.25 or z_height > 49.0:
+        print('Error: input z height is beyond the piezo stage travel range.')
+        return
+    with ni.Task() as write_task:
+        write_task.ao_channels.add_ai_voltage_chan(scan_parameters.DAQ_name + "/ao2",
+                                    min_val=-10, max_val=10)
+        write_task.write(z_height*conversion_factor)
+    return
+
+
+def reset_daq(scan_parameters, z_height=0, ramp_steps=50):
 
     with ni.Task() as read_task:
         for channel_id in [0,1,2,3]:
             read_task.ai_channels.add_ai_voltage_chan(scan_parameters.DAQ_name + f"/_ao{channel_id}_vs_aognd",
                                     min_val=-10, max_val=10)
         result = np.array(read_task.read())
-        ramp_output_data = np.linspace(result, np.zeros(len(result)), num=ramp_steps)
+        ramp_output_data = np.linspace(result, np.array([0,0,z_height,0]), num=ramp_steps)
 
         _ = daq_interface(ao0_1_write_data=ramp_output_data,
                     frequency=2,
