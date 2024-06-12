@@ -14,11 +14,11 @@ class Data_acquisitor():
         self.DAQ_output_data = position_parameters.DAQ_output_data
         self.frequency = scan_parameters.frequency
         
-    def run(self, scan_index, lockin, retrace=False):
+    def run(self, scan_index, retrace=False):
 
         
 
-        scan_frequency = self.frequency if not retrace else self.retrace_frequency
+        scan_frequency = self.frequency if not retrace else self.scan_parameters.retrace_frequency
     
         DAQ_output_data = self.DAQ_output_data[:,scan_index,:].T
 
@@ -34,10 +34,10 @@ class Data_acquisitor():
 
         return shrinked_DAQ_input_data
     
-    def run_with_lockin(self, scan_index, retrace=False):
+    def run_with_lockin(self, scan_index, lockin=None, retrace=False):
         # Lockin starts to listen signals from DAQ
 
-        scan_frequency = self.frequency if not retrace else self.retrace_frequency
+        scan_frequency = self.frequency if not retrace else self.scan_parameters.retrace_frequencys
     
         DAQ_output_data = self.DAQ_output_data[:,scan_index,:].T
         DAQ_input_data = daq_interface(ao0_1_write_data=DAQ_output_data, 

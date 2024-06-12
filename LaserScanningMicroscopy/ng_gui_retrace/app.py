@@ -37,7 +37,7 @@ class QPlot(QMainWindow):
         
         super().__init__()
         self.line_width = line_width
-        self.scan_num = scan_num
+        self.scan_num = int(scan_num/2)
         self.channel_num = channel_num
         self.counter = 0
         self.time = time.time()
@@ -135,7 +135,7 @@ class QPlot(QMainWindow):
         # for row_id in range(self.channel_num):
         #     self.plots[row_id, 0].setData(fetched_data[row_id])
         #     self.plots[row_id, 1].setImage(self.data[row_id])
-        self.counter += 1
+        # self.counter += 1
         # elapse_time = time.time() - self.time
         # self.time = time.time()
         self.setWindowTitle(f'{self.channel_num} Channel Scan: Frame {self.counter}, Est time {self.remaining_time} s')
@@ -144,7 +144,7 @@ class QPlot(QMainWindow):
     def save_results(self, filepath=None, scan_id='', fileformat='png'):
         img = self.mainWidget.grab(self.mainWidget.rect())
         img.save(filepath + '/_' + str(scan_id) + '_screenshot.png', fileformat)
-        final_data = np.array(self.data, self.retrace_data)
+        final_data = np.array([self.data, self.retrace_data])
         np.save(filepath + '/_' + str(scan_id) + '_data', final_data)
         # np.save(filepath + '/_' + str(scan_id) + '_retrace_data', self.retrace_data)
 
