@@ -34,7 +34,6 @@ class Data_acquisitor():
         _ = daq_interface(ao0_1_write_data=DAQ_output_data, 
                         frequency=self.frequency,
                         input_mapping=["ai1", "ai4", "ai20"],
-                        output_mapping=['ao0','ao1'],
                         DAQ_name=self.scan_parameters.DAQ_name
                         )
         print('Initialization finished!')

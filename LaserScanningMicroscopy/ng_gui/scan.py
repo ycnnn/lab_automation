@@ -14,14 +14,15 @@ from params.display_params import Display_parameters
 if __name__ == '__main__':
 
     position_parameters = Position_parameters(
-                                            x_size=30,
-                                            y_size=30,
+                                            x_size=15,
+                                            y_size=15,
                                             x_pixels=256,
-                                            y_pixels=100,
-                                            x_origin=0,
-                                            y_origin=0)
+                                            y_pixels=5,
+                                            x_origin=10,
+                                            y_origin=10,
+                                            z_height=19)
     
-    scan_parameters = Scan_parameters(frequency=1, 
+    scan_parameters = Scan_parameters(frequency=0.1, 
                                       channel_num=3, 
                                       input_mapping=["ai0","ai1","ai3"])
     
