@@ -87,19 +87,35 @@ class Position_parameters:
         # Initial: (0,0) to (x_origin, y_origin)
         # Final: self.x_coordinates[self.y_pixels-1, self.x_pixels-1], self.x_coordinates[self.y_pixels-1, self.x_pixels-1] to 0,0
         
-        self.initial_move = np.array([
-            np.linspace(0, self.x_origin * self.conversion_factor, num=self.x_pixels), 
-            np.linspace(0, self.y_origin * self.conversion_factor, num=self.x_pixels),
-            np.linspace(0, self.z_height * self.z_conversion_factor, num=self.x_pixels),
-            np.zeros(self.x_pixels)]).T
+        # self.initial_move = np.array([
+        #     np.linspace(0, self.x_origin * self.conversion_factor, num=self.x_pixels), 
+        #     np.linspace(0, self.y_origin * self.conversion_factor, num=self.x_pixels),
+        #     np.linspace(0, self.z_height * self.z_conversion_factor, num=self.x_pixels),
+        #     np.zeros(self.x_pixels)]).T
+        
+        self.initial_move = np.linspace(
+            np.zeros(4),
+            np.array([self.x_origin * self.conversion_factor, 
+                      self.y_origin * self.conversion_factor,
+                      self.z_height * self.z_conversion_factor,
+                      0]),
+            num=self.x_pixels
+        )
+        
+
         final_x_location = self.x_coordinates[self.y_pixels-1, self.x_pixels-1]
         final_y_location = self.y_coordinates[self.y_pixels-1, self.x_pixels-1]
         final_z_location = self.z_height * self.z_conversion_factor
-        self.final_move = np.array([
-            np.linspace(final_x_location, 0, num=self.x_pixels), 
-            np.linspace(final_y_location, 0, num=self.x_pixels),
-            np.linspace(final_z_location, 0, num=self.x_pixels),
-            np.zeros(self.x_pixels)]).T
+        # self.final_move = np.array([
+        #     np.linspace(final_x_location, 0, num=self.x_pixels), 
+        #     np.linspace(final_y_location, 0, num=self.x_pixels),
+        #     np.linspace(final_z_location, 0, num=self.x_pixels),
+        #     np.zeros(self.x_pixels)]).T
+        self.final_move = np.linspace(
+            np.array([final_x_location, final_y_location, final_z_location, 0]),
+            np.zeros(4),
+            num=self.x_pixels
+        )
         
         
        

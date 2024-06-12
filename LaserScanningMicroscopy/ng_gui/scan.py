@@ -17,12 +17,12 @@ if __name__ == '__main__':
                                             x_size=15,
                                             y_size=15,
                                             x_pixels=256,
-                                            y_pixels=5,
+                                            y_pixels=256,
                                             x_origin=10,
                                             y_origin=10,
                                             z_height=19)
     
-    scan_parameters = Scan_parameters(frequency=0.1, 
+    scan_parameters = Scan_parameters(frequency=10, 
                                       channel_num=3, 
                                       input_mapping=["ai0","ai1","ai3"])
     
