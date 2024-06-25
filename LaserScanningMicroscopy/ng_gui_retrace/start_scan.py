@@ -15,19 +15,19 @@ from main import lsm_scan
 if __name__ == '__main__':
 
     position_parameters = Position_parameters(
-                                            x_size=15,
-                                            y_size=15,
-                                            x_pixels=128,
-                                            y_pixels=128,
-                                            x_origin=10,
-                                            y_origin=10,
-                                            z_height=19)
+                                            x_size=55,
+                                            y_size=55,
+                                            x_pixels=256,
+                                            y_pixels=256,
+                                            x_origin=0,
+                                            y_origin=0,
+                                            z_height=25.5)
     
-    scan_parameters = Scan_parameters(frequency=0.5, 
-                                      input_mapping=["ai0","ai1","ai3"])
+    scan_parameters = Scan_parameters(frequency=1, 
+                                      input_mapping=["ai0","ai1"])
     
     display_parameters = Display_parameters(
-                 scan_id='01',
+                 scan_id='Test_iamging',
                  save_destination=None,
                  colormap=None,
                  channel_min=None,

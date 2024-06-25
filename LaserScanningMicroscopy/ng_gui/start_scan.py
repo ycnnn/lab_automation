@@ -23,7 +23,7 @@ if __name__ == '__main__':
                                             y_origin=10,
                                             z_height=19)
     
-    scan_parameters = Scan_parameters(frequency=0.5, 
+    scan_parameters = Scan_parameters(frequency=100, 
                                       input_mapping=["ai0","ai1","ai3"])
     
     display_parameters = Display_parameters(
