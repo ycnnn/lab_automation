@@ -66,7 +66,7 @@ class Position_parameters:
         if (self.input_check(self.x_center, self.conversion_factor, self.x_size) 
             or self.input_check(self.y_center, self.conversion_factor, self.y_size)
             or self.input_check(self.z_center, self.z_conversion_factor, 0)):
-            warnings.warn('The requested XYZ motion range is outisde the accpeted limits. For MCL NanoT115 scanner, the minimum input voltage is 0V and the max 10V. The scan will go on, but the scan region will be clipped and image may be distorted.', stacklevel=2)
+            warnings.warn('\nThe requested XYZ motion range is outside the accpeted limits. \nFor MCL NanoT115 scanner, the minimum input voltage is 0V and the max 10V. \nThe scan will go on, but the scan region will be clipped and image may be distorted.', stacklevel=2)
 
 
         self.x_coordinates_unrotated = np.repeat(
