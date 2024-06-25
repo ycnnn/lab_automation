@@ -17,17 +17,16 @@ if __name__ == '__main__':
     position_parameters = Position_parameters(
                                             x_size=60,
                                             y_size=60,
-                                            x_pixels=128,
-                                            y_pixels=127,
+                                            x_pixels=512,
                                             z_center=19,
-                                            angle=0)
+                                            angle=55)
     
-    scan_parameters = Scan_parameters(frequency=10, 
+    scan_parameters = Scan_parameters(frequency=5, 
                                       input_mapping=["ai0","ai1"],
                                       return_to_zero=True)
     
     display_parameters = Display_parameters(
-                 scan_id='Test_iamging',
+                 scan_id='512_pixels_60_um',
                  save_destination=None,
                  colormap=None,
                  channel_min=None,
