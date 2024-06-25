@@ -47,7 +47,8 @@ class Data_fetcher(mp.Process):
         # Move the obj lens back to (0,0)
         # self.acquisitor.move_origin(initialize=False)
         self.acquisitor.move_origin(initialize=False)
-        # reset_daq(self.scan_parameters)
+        if self.scan_parameters.return_to_zero:
+            reset_daq(self.scan_parameters)
         ########################################################################
 
 class Data_receiver(mp.Process):

@@ -7,9 +7,9 @@ class Position_parameters:
                  x_size=30,
                  y_size=30,
                  x_pixels=128,
-                 y_pixels=128,
-                 x_center=0,
-                 y_center=0,
+                 y_pixels=None,
+                 x_center=50,
+                 y_center=50,
                  z_center=0,
                  angle=0,
                  axis_motion_low_limit=0.0,
@@ -21,6 +21,7 @@ class Position_parameters:
         self.z_conversion_factor = z_conversion_factor
         self.x_center, self.y_center = (x_center, y_center)
         self.x_size, self.y_size = (abs(x_size), abs(y_size))
+        y_pixels = x_pixels if not y_pixels else y_pixels
         self.x_pixels, self.y_pixels = (int(abs(x_pixels)), int(abs(y_pixels)))
         self.x_pixels = max(1, self.x_pixels)
         self.y_pixels = max(1, self.y_pixels)
@@ -38,12 +39,12 @@ class Position_parameters:
             0
         ])
 
-        self.angle = angle
+        self.angle = angle * np.pi / 180
         
 
 
         self.generate_sweep_coordiantes()
-        self.generate_initial_moves()
+        self.move_center()
 
     def input_check(self, center, conversion_factor, size=0):
         if (center + size/2)*conversion_factor > self.axis_limits[1] or (center - size/2)*conversion_factor < self.axis_limits[0]:
@@ -70,10 +71,14 @@ class Position_parameters:
         self.x_coordinates_unrotated = np.repeat(
             np.linspace(-self.x_size/2,self.x_size/2,num=self.x_pixels).reshape(1,-1),
             repeats=self.y_pixels, axis=0) 
+        # print('Self x_coordinates unrot shape=')
+        # print(self.x_coordinates_unrotated.shape)
         
         self.y_coordinates_unrotated = np.repeat(
             np.linspace(-self.y_size/2,self.y_size/2,num=self.y_pixels).reshape(1,-1),
-            repeats=self.x_pixels, axis=0) 
+            repeats=self.x_pixels, axis=0).T
+        # print('Self y_coordinates unrot shape=')
+        # print(self.y_coordinates_unrotated.shape)
         
         #########################################################################
         # Rotation
@@ -88,7 +93,7 @@ class Position_parameters:
             + self.y_center)
        
         
-        self.z_coordinates = self.z_output * np.ones(self.x_coordinates.shape)
+        self.z_coordinates = self.z_center * np.ones(self.x_coordinates.shape)
 
         #########################################################################
         # Converting to DAQ output
@@ -131,9 +136,9 @@ class Position_parameters:
         # Move from current location to the center
 
         self.initial_move = np.linspace(
-            np.array([self.x_center, 
-                    self.y_center,
-                    self.z_center,
+            np.array([self.x_center_output, 
+                    self.y_center_output,
+                    self.z_center_output,
                     0]),
             np.array([self.x_output[0,0], 
                     self.y_output[0,0],
@@ -147,9 +152,9 @@ class Position_parameters:
                     self.y_output[-1,-1],
                     self.z_output[-1,-1],
                     0]),
-            np.array([self.x_center, 
-                    self.y_center,
-                    self.z_center,
+            np.array([self.x_center_output, 
+                    self.y_center_output,
+                    self.z_center_output,
                     0]),
             num=self.x_pixels
         )

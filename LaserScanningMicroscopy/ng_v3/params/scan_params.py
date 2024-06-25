@@ -7,10 +7,12 @@ class Scan_parameters:
                  retrace_frequency=None,
                  additional_channel_num=0,
                 #  channel_num=None,
-                 DAQ_name='Dev2'):
+                 DAQ_name='Dev2',
+                 return_to_zero=False):
        
         self.frequency = frequency
         self.retrace_frequency = self.frequency if not retrace_frequency else retrace_frequency
         self.channel_num = len(input_mapping) + additional_channel_num
         self.input_mapping = input_mapping
         self.DAQ_name = DAQ_name
+        self.return_to_zero = return_to_zero
