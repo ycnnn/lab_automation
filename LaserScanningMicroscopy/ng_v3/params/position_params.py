@@ -1,6 +1,6 @@
 import numpy as np
 import warnings
-
+import json
 
 class Position_parameters:
     def __init__(self,
@@ -45,6 +45,7 @@ class Position_parameters:
 
         self.generate_sweep_coordiantes()
         self.move_center()
+        self.save_params()
 
     def input_check(self, center, conversion_factor, size=0):
         if (center + size/2)*conversion_factor > self.axis_limits[1] or (center - size/2)*conversion_factor < self.axis_limits[0]:
@@ -162,8 +163,16 @@ class Position_parameters:
         
        
 
-    def save_params(self, save_name):
-        pass
+    def save_params(self):
+        self.dict = dict()
+        self.dict['centers'] = [self.x_center, self.y_center, self.z_center]
+        self.dict['angle'] = self.angle
+        self.dict['scan_size'] = [self.x_size, self.y_size]
+        self.dict['pixels'] = [self.x_pixels, self.y_pixels]
+        self.dict['conversion_factor'] = [self.conversion_factor, self.z_conversion_factor]
+        self.dict['output_limit'] = self.axis_limits
+        self.record = json.dumps(self.dict)
+        
    
 
 

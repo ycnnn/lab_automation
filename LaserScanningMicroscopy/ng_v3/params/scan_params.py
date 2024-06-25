@@ -1,4 +1,5 @@
 import numpy as np
+import json
 
 class Scan_parameters:
     def __init__(self,
@@ -16,3 +17,14 @@ class Scan_parameters:
         self.input_mapping = input_mapping
         self.DAQ_name = DAQ_name
         self.return_to_zero = return_to_zero
+        self.save_params()
+
+    def save_params(self):
+        self.dict = dict()
+        self.dict['frequencies'] = [self.frequency, self.retrace_frequency]
+        self.dict['channel_num'] = self.channel_num
+        self.dict['input_mapping'] = self.input_mapping
+        self.dict['return_to_zero_after_scan'] = self.return_to_zero
+ 
+        self.record = json.dumps(self.dict)
+        
