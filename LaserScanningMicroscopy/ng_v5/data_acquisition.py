@@ -11,13 +11,12 @@ class Data_acquisitor():
 
         self.DAQ_output_data = position_parameters.DAQ_output_data
         self.frequency = scan_parameters.frequency
-        
-    # def __new__(cls, scan_parameters):
-    #     instrument = None
-    #     if scan_parameters.instrument:
-    #         # self.instrument = scan_parameters.instrument.initialize_instrument()
-    #         instrument = scan_parameters.instrument.initialize_instrument()
-    #     # self.instrument = None
+
+        self.instrument = None
+        if scan_parameters.instrument:
+            # self.instrument = scan_parameters.instrument.initialize_instrument()
+            self.instrument = scan_parameters.instrument.initialize_instrument()
+        # self.instrument = None
     #     return instrument
         
     def run(self, 

@@ -1,12 +1,13 @@
 import numpy as np
 import multiprocessing as mp
-import sys
+# import multiprocess as mp
+# import sys
 ######################################################################
 # Custom dependencies
 from mp import Data_fetcher, Data_receiver
-from params.position_params import Position_parameters
-from params.scan_params import Scan_parameters
-from params.display_params import Display_parameters
+# from params.position_params import Position_parameters
+# from params.scan_params import Scan_parameters
+# from params.display_params import Display_parameters
 ######################################################################
 
 def lsm_scan(position_parameters, 

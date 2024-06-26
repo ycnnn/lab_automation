@@ -1,7 +1,4 @@
-import numpy as np
-import multiprocessing as mp
-import sys
-from time import sleep
+
 ######################################################################
 # Custom dependencies
 from mp import Data_fetcher, Data_receiver
@@ -17,7 +14,7 @@ from inst_driver import Lockin
 if __name__ == '__main__':
     # Setting up the external input instrument(s)
     instrument = None
-    instrument = Lockin()
+    # instrument = Lockin()
     # sleep(2)
 
     position_parameters = Position_parameters(
