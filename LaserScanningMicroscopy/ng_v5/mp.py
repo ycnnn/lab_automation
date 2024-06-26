@@ -11,6 +11,7 @@ import numpy as np
 from app import QPlot
 from data_acquisition import Data_acquisitor
 from daq_driver import reset_daq
+from inst_driver import Lockin
 ######################################################################
 
 class Data_fetcher(mp.Process):
@@ -41,14 +42,15 @@ class Data_fetcher(mp.Process):
         ###################################################################################
         ###################################################################################
         ###################################################################################
-        rm = pyvisa.ResourceManager()
-        instrument = rm.open_resource('USB0::0xB506::0x2000::002765::INSTR')
+        # rm = pyvisa.ResourceManager()
+        # instrument = rm.open_resource('USB0::0xB506::0x2000::002765::INSTR')
 
-        instrument.write('*rst')
-        instrument.query('*idn?')
-        instrument.write('capturelen 256')
-        instrument.write('capturecfg xy')
-        instrument.write('rtrg posttl')
+        # instrument.write('*rst')
+        # instrument.query('*idn?')
+        # instrument.write('capturelen 256')
+        # instrument.write('capturecfg xy')
+        # instrument.write('rtrg posttl')
+        self.instrument = Lockin()
         ###################################################################################
         ###################################################################################
         ###################################################################################
@@ -63,7 +65,8 @@ class Data_fetcher(mp.Process):
                 ###################################################################################
                 ###################################################################################
                 ###################################################################################
-                instrument.write('capturestart one, samp')
+                # instrument.write('capturestart one, samp')
+                self.instrument.start_listening()
                 ###################################################################################
                 ###################################################################################
                 ###################################################################################
@@ -75,9 +78,10 @@ class Data_fetcher(mp.Process):
                 ###################################################################################
                 ###################################################################################
                 ###################################################################################
-                instrument.write('capturestop')
-                buffer_len = int(instrument.query('captureprog?')[:-1])
-                inst_data = np.array(instrument.query_binary_values(f'captureget? 0, {buffer_len}')).reshape(-1,2)
+                # instrument.write('capturestop')
+                # buffer_len = int(instrument.query('captureprog?')[:-1])
+                # inst_data = np.array(instrument.query_binary_values(f'captureget? 0, {buffer_len}')).reshape(-1,2)
+                inst_data = self.instrument.stop_listening()
                 ###################################################################################
                 ###################################################################################
                 ###################################################################################
@@ -96,6 +100,7 @@ class Data_fetcher(mp.Process):
 
         
         self.acquisitor.move_origin(initialize=False)
+        self.instrument.close_instrument()
         
         if self.scan_parameters.return_to_zero:
             reset_daq(self.scan_parameters)
