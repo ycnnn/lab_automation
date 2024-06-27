@@ -11,7 +11,7 @@ import numpy as np
 from app import QPlot
 from data_acquisition import Data_acquisitor
 from daq_driver import reset_daq
-from inst_driver import Lockin
+import inst_driver
 ######################################################################
 
 class Data_fetcher(mp.Process):
@@ -42,15 +42,9 @@ class Data_fetcher(mp.Process):
         ###################################################################################
         ###################################################################################
         ###################################################################################
-        # rm = pyvisa.ResourceManager()
-        # instrument = rm.open_resource('USB0::0xB506::0x2000::002765::INSTR')
-
-        # instrument.write('*rst')
-        # instrument.query('*idn?')
-        # instrument.write('capturelen 256')
-        # instrument.write('capturecfg xy')
-        # instrument.write('rtrg posttl')
-        self.instrument = Lockin()
+        if self.scan_parameters.instrument:
+            # There will be some condition selection clauses
+            self.instrument = inst_driver.Lockin(self.scan_parameters, self.position_parameters)
         ###################################################################################
         ###################################################################################
         ###################################################################################
@@ -60,35 +54,36 @@ class Data_fetcher(mp.Process):
         ########################################################################
         for scan_index in range(self.scan_num):
             # Note: there are trace and retrace scans, separately
-            if scan_index % 2 == 0:
-                ###################################################################################
+
+            ###################################################################################
                 ###################################################################################
                 ###################################################################################
                 ###################################################################################
                 # instrument.write('capturestart one, samp')
+            if self.scan_parameters.instrument:
                 self.instrument.start_listening()
                 ###################################################################################
                 ###################################################################################
                 ###################################################################################
                 ###################################################################################
-                # Trace
+            if scan_index % 2 == 0:
                 data = self.acquisitor.run(scan_index)
-
-                ###################################################################################
-                ###################################################################################
-                ###################################################################################
-                ###################################################################################
-                # instrument.write('capturestop')
-                # buffer_len = int(instrument.query('captureprog?')[:-1])
-                # inst_data = np.array(instrument.query_binary_values(f'captureget? 0, {buffer_len}')).reshape(-1,2)
-                inst_data = self.instrument.stop_listening()
-                ###################################################################################
-                ###################################################################################
-                ###################################################################################
-                ###################################################################################
             else:
-                # Retrace
                 data = self.acquisitor.run(scan_index, retrace=True)
+            ###################################################################################
+            ###################################################################################
+            ###################################################################################
+            ###################################################################################
+            # instrument.write('capturestop')
+            # buffer_len = int(instrument.query('captureprog?')[:-1])
+            # inst_data = np.array(instrument.query_binary_values(f'captureget? 0, {buffer_len}')).reshape(-1,2)
+            if self.scan_parameters.instrument:
+                    inst_data = self.instrument.stop_listening()
+                    data = np.vstack((data, inst_data))
+            ###################################################################################
+            ###################################################################################
+            ###################################################################################
+            ###################################################################################
             self.pipe.send(data)
             status = self.pipe.recv()
             if not status:
@@ -100,7 +95,8 @@ class Data_fetcher(mp.Process):
 
         
         self.acquisitor.move_origin(initialize=False)
-        self.instrument.close_instrument()
+        if self.scan_parameters.instrument:
+            self.instrument.close_instrument()
         
         if self.scan_parameters.return_to_zero:
             reset_daq(self.scan_parameters)

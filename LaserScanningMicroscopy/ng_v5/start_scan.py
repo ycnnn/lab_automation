@@ -6,26 +6,26 @@ from params.position_params import Position_parameters
 from params.scan_params import Scan_parameters
 from params.display_params import Display_parameters
 from main import lsm_scan
-from inst_driver import Lockin
+from inst_driver import External_instrument, Lockin
 ######################################################################
 
 
 
 if __name__ == '__main__':
     # Setting up the external input instrument(s)
-    instrument = None
-    # instrument = Lockin()
+    # instrument = None
+    instrument = External_instrument()
     # sleep(2)
 
     position_parameters = Position_parameters(
                                             x_size=30,
                                             y_size=30,
-                                            x_pixels=127,
-                                            y_pixels=20,
+                                            x_pixels=256,
+                                            y_pixels=128,
                                             z_center=19,
                                             angle=90)
     
-    scan_parameters = Scan_parameters(frequency=25, 
+    scan_parameters = Scan_parameters(frequency=5, 
                                       input_mapping=["ai0","ai1"],
                                       instrument=instrument,
                                       return_to_zero=True)
