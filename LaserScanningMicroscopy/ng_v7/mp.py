@@ -38,17 +38,22 @@ class Data_fetcher(mp.Process):
 
         self.acquisitor.move_origin(initialize=True)
 
-        if self.scan_parameters.instrument:
+        if self.scan_parameters.instrument.instrument_type:
 
             instr = inst_driver.Lockin(self.scan_parameters, 
                                     self.position_parameters,
-                                    time_constant_level=10) 
+                                    time_constant_level=5) 
         else:
-            instr = inst_driver.Empty_instrument()
+            instr = inst_driver.Empty_instrument(
+                self.scan_parameters, 
+                self.position_parameters,)
         
-        with instr.initialize_instrument() as trigger:
+        with instr.initialize_instrument(): 
+          
             for scan_index in range(self.scan_num):
-                with instr.scan() as _:
+               
+                with instr.scan():
+                
                     if scan_index % 2 == 0:
                         data = self.acquisitor.run(scan_index)
                     else:
@@ -56,16 +61,16 @@ class Data_fetcher(mp.Process):
                 instr_data = instr.data 
                 data = np.vstack((data, instr_data))
 
-            self.pipe.send(data)
-            status = self.pipe.recv()
-            if not status:
-                raise Warning('Possible data loss: Sender not received confirmation from receiver')
+                self.pipe.send(data)
+                status = self.pipe.recv()
+                if not status:
+                    raise Warning('Possible data loss: Sender not received confirmation from receiver')
        
 
         
         self.acquisitor.move_origin(initialize=False)
-        if self.scan_parameters.instrument:
-            self.instrument.close_instrument()
+        # if self.scan_parameters.instrument:
+        #     self.instrument.close_instrument()
         
         if self.scan_parameters.return_to_zero:
             reset_daq(self.scan_parameters)

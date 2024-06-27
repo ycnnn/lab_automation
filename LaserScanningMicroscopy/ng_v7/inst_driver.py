@@ -6,14 +6,15 @@ from contextlib import contextmanager
 
 class External_instrument:
     def __init__(self, 
-                 instrument_type='Lockin',
+                 instrument_type=None,
                  address="USB0::0xB506::0x2000::002765::INSTR", 
                  **kwargs
                  ) -> None:
         self.address = address
-        if instrument_type == 'Lockin':
+        self.instrument_type = instrument_type
+        if self.instrument_type == 'Lockin':
             self.additional_channel_num = 2
-        elif instrument_type == 'Keithley':
+        elif self.instrument_type == 'Keithley':
             self.additional_channel_num = 1
         else:
             self.additional_channel_num = 0
@@ -68,7 +69,7 @@ class Lockin:
             self.instrument.close()
         
     @contextmanager
-    def scan(self, instr):
+    def scan(self):
         try:
             self.instrument.write('capturestart one, samp')
             yield None
@@ -96,7 +97,7 @@ class Empty_instrument:
             pass
         
     @contextmanager
-    def scan(self, instr):
+    def scan(self):
         try:
             pass
             yield None
