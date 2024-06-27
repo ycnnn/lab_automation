@@ -19,7 +19,7 @@ if __name__ == '__main__':
                                             x_size=30,
                                             y_size=30,
                                             x_pixels=256,
-                                            y_pixels=128,
+                                            y_pixels=32,
                                             z_center=19,
                                             angle=90)
     
@@ -32,7 +32,7 @@ if __name__ == '__main__':
     # Setting up the external input instrument(s)
     # Sometimes, the code will ask for additional parameters for setting up the instrument.
     # Even if those parameters are not supplied, the scan will go on, but the system will use default values and issue warning(s).
-    Keithley_prop = {'vals': 2.5}
+    Keithley_prop = {'start_volt': -5, 'end_volt': 5}
     instrument2 = External_instrument(instrument_type='Keithley2450', **Keithley_prop)
     
     scan_parameters.add_instrument(instrument)

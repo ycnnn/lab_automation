@@ -365,9 +365,9 @@ def ramp(smu,
     # By default, ramp Keithley 2450 SMU from current voltage level to the target voltage level (end_volt).
 
     smu.write('reading = smu.measure.read()')
-    volt_reading = smu.query_ascii_values('print(reading)')
-    # print(f'Current VOLT reading is {volt_reading} V.')
-    start_volt = start_volt if start_volt else volt_reading 
+    volt_reading = np.array(smu.query_ascii_values('print(reading)'))[0]
+    print(f'Current VOLT reading is {volt_reading} V.')
+    start_volt = start_volt if start_volt else volt_reading
 
 
     voltages = np.linspace(start_volt, end_volt, ramp_steps)

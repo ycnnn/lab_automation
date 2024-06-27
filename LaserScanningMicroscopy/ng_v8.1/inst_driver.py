@@ -4,6 +4,8 @@ import numpy as np
 import pyvisa
 from contextlib import contextmanager
 import warnings
+import Keithley2450_SMU 
+import time
 
 instrument_props = {
     'Lockin': {'additional_channel_num':2},
@@ -154,32 +156,48 @@ class Keithley2450:
     def __init__(self, scan_parameters=None, position_parameters=None, **kwargs):
         self.initialize_instrument()
         self.reading_num = position_parameters.x_pixels
+        self.volt_steps = position_parameters.y_pixels
         self.kwargs = kwargs
-        # self.start_volt = self.kwargs['start_volt']
-        # self.end_volt = self.kwargs['end_volt']
-        # if 'val' in self.kwargs:
-        #     self.data = np.random.random(size=(1, self.reading_num)) * 0.1 + self.kwargs['val']
-        # else:
-        #     warnings.warn('\n\n\nThe VAL of the SMU is not provided.\nThe VAL has been set to the default value as 0.\n\n\n')
+        instrument_params = {'start_volt':0, 'end_volt':0, 'ramp_steps':10}
+        for key, value in instrument_params.items():
+            if key in self.kwargs:
+                instrument_params[key] = self.kwargs[key]
+            else:
+                warnings.warn('\n\n\nThe ' + key + ' of the SMU is not provided.'
+                              +'\nThe ' + key + ' has been set to the default value as ' + str(value) + '.\n\n\n')
+        
+        ##################################################################################
+        # Instrument-specific initialization
+        self.volt_levels = np.repeat(
+            np.linspace(instrument_params['start_volt'],
+                        instrument_params['end_volt'],
+                        self.volt_steps).reshape(1,-1),
+            repeats=2,
+            axis=1
+        ).reshape(-1)
         
     
     @contextmanager
     def initialize_instrument(self):
         try:
-            pass
+            self.smu = Keithley2450_SMU.set_smu_ready_for_ramp()
+            self.smu.write('smu.source.output = smu.ON')
+            print('Initialization success')
+           
             yield None
         finally:
-            pass
+            self.smu.write('smu.source.output = smu.OFF')
         
     @contextmanager
     def scan(self, **kwargs):
         try:
-            pass
-            if 'val' in self.kwargs:
-                self.data = np.random.random(size=(1, self.reading_num)) * 0.1 + self.kwargs['val'] + 0.1 * kwargs['scan_index']
-            else:
-                warnings.warn('\n\n\nThe VAL of the SMU is not provided.\nThe VAL has been set to the default value as 0.\n\n\n')
-                self.data = np.random.random(size=(1, self.reading_num)) * 0.1 + 0.1 * kwargs['scan_index']
+            scan_index = kwargs['scan_index']
+            self.raw_data = Keithley2450_SMU.ramp(
+                smu=self.smu, 
+                end_volt=self.volt_levels[scan_index])
+            print(f'Ramp success @ Step {int(scan_index/2)}')
+            # self.data = np.random.random(size=(1, self.reading_num)) * 0.1 + 0.1 * self.volt_levels[scan_index]
+            self.data = np.ones(shape=(1, self.reading_num)) * self.raw_data
             yield None
         finally:
             pass
