@@ -43,7 +43,8 @@ class Data_fetcher(mp.Process):
 
             instr = inst_driver.configurate_instrument(instrument=instrument,
                                               scan_parameters=self.scan_parameters,
-                                              position_parameters=self.position_parameters)
+                                              position_parameters=self.position_parameters,
+                                              **instrument.kwargs)
             system_instruments.append(instr)
 
         instrument_manager = [instrument.initialize_instrument for instrument in system_instruments]

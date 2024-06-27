@@ -6,28 +6,10 @@ from contextlib import contextmanager
 
 instrument_props = {
     'Lockin': {'additional_channel_num':2},
-    'Keithley': {'additional_channel_num':1},
+    'Keithley2450': {'additional_channel_num':1},
     'Empty_instrument': {'additional_channel_num':0},
     'Virtual_instrument': {'additional_channel_num':1},
 }
-
-def configurate_instrument(instrument,
-                          scan_parameters, 
-                          position_parameters,):
-    if instrument.instrument_type == 'Lockin':
-        instr = Lockin(scan_parameters, 
-                    position_parameters,
-                    time_constant_level=5)
-                
-    elif instrument.instrument_type == 'Virtual_instrument':
-        instr = Virtual_instrument(
-                scan_parameters, 
-                position_parameters,)                   
-    else:
-        instr = Empty_instrument(
-                scan_parameters, 
-                position_parameters,)
-    return instr
 
 class External_instrument:
     def __init__(self, 
@@ -39,6 +21,35 @@ class External_instrument:
         self.instrument_type = instrument_type
         self.additional_channel_num = 0
         self.additional_channel_num = instrument_props[instrument_type]['additional_channel_num']
+        self.kwargs = kwargs
+
+def configurate_instrument(instrument,
+                          scan_parameters, 
+                          position_parameters,
+                          **kwargs):
+    if instrument.instrument_type == 'Lockin':
+        instr = Lockin(scan_parameters, 
+                    position_parameters,
+                    time_constant_level=5,
+                    **kwargs)
+                
+    elif instrument.instrument_type == 'Virtual_instrument':
+        instr = Virtual_instrument(
+                scan_parameters, 
+                position_parameters,
+                **kwargs)     
+
+    elif instrument.instrument_type == 'Keithley2450':
+        instr = Keithley2450(
+                scan_parameters, 
+                position_parameters,
+                **kwargs)     
+                      
+    else:
+        instr = Empty_instrument(
+                scan_parameters, 
+                position_parameters,)
+    return instr
 
 class Empty_instrument:
     def __init__(self, scan_parameters=None, position_parameters=None):
@@ -127,6 +138,33 @@ class Virtual_instrument:
             pass
             # self.data = np.empty((0, self.reading_num))
             self.data = np.random.random(size=(1, self.reading_num))
+            yield None
+        finally:
+            pass
+
+class Keithley2450:
+    def __init__(self, scan_parameters=None, position_parameters=None, **kwargs):
+        self.initialize_instrument()
+        self.reading_num = position_parameters.x_pixels
+        self.kwargs = kwargs
+        
+    
+    @contextmanager
+    def initialize_instrument(self):
+        try:
+            pass
+            yield None
+        finally:
+            pass
+        
+    @contextmanager
+    def scan(self):
+        try:
+            pass
+            if 'val' in self.kwargs:
+                self.data = np.random.random(size=(1, self.reading_num)) * 0.1 + self.kwargs['val']
+            else:
+                self.data = np.random.random(size=(1, self.reading_num)) * 0.1
             yield None
         finally:
             pass

@@ -29,7 +29,9 @@ if __name__ == '__main__':
                                       return_to_zero=True)
     # Setting up the external input instrument(s)
     instrument = External_instrument(instrument_type='Empty_instrument')
-    instrument2 = External_instrument(instrument_type='Virtual_instrument')
+
+    Keithley_prop = {'vals': 2.5}
+    instrument2 = External_instrument(instrument_type='Keithley2450', **Keithley_prop)
     
     scan_parameters.add_instrument(instrument)
     scan_parameters.add_instrument(instrument2)
