@@ -29,7 +29,9 @@ if __name__ == '__main__':
                                       return_to_zero=True)
     # Setting up the external input instrument(s)
     instrument = External_instrument(instrument_type='Empty_instrument')
-
+    # Setting up the external input instrument(s)
+    # Sometimes, the code will ask for additional parameters for setting up the instrument.
+    # Even if those parameters are not supplied, the scan will go on, but the system will use default values and issue warning(s).
     Keithley_prop = {'vals': 2.5}
     instrument2 = External_instrument(instrument_type='Keithley2450', **Keithley_prop)
     
