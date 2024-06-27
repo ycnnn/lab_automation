@@ -1,4 +1,5 @@
-
+import shutil
+import os
 ######################################################################
 # Custom dependencies
 # from mp import Data_fetcher, Data_receiver
@@ -55,3 +56,6 @@ if __name__ == '__main__':
     lsm_scan(position_parameters=position_parameters,
              scan_parameters=scan_parameters,
              display_parameters=display_parameters)
+    
+    directory_path = os.path.dirname(os.path.realpath(__file__)) + '/' + display_parameters.scan_id +  '_params.txt'
+    shutil.copy(os.path.realpath(__file__), directory_path)
