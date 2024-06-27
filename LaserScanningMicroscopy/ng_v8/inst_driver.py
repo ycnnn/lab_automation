@@ -3,6 +3,7 @@
 import numpy as np
 import pyvisa
 from contextlib import contextmanager
+import warnings
 
 instrument_props = {
     'Lockin': {'additional_channel_num':2},
@@ -75,15 +76,17 @@ class Empty_instrument:
 
 class Lockin:
     def __init__(self, scan_parameters, position_parameters, 
-                 time_constant_level=0,
-                 sample_count=128):
+                #  time_constant_level=0,
+                 sample_count=128,
+                 **kwargs):
 
         self.address = scan_parameters.instrument.address
         
         self.sample_count = sample_count
         # self.additional_channel_num = 2
         self.reading_num = position_parameters.x_pixels
-        self.time_constant_level = time_constant_level
+        # self.time_constant_level = time_constant_level
+        self.kwargs = kwargs
         # self.initialize_instrument()
  
     @contextmanager
@@ -93,6 +96,11 @@ class Lockin:
             self.instrument = rm.open_resource(self.address)
 
             # Something happens here
+            if 'time_constant_level' in self.kwargs:
+                self.time_constant_level = self.kwargs['time_constant_level']
+            else:
+                warnings.warn('\n\n\nThe time constant of the lock-in is not provided.\nThe time constant has been set to the default value as 5.\n\n\n')
+                self.time_constant_level = 5
 
             self.instrument.write('*rst')
             # self.instrument.query('*idn?')
@@ -164,6 +172,7 @@ class Keithley2450:
             if 'val' in self.kwargs:
                 self.data = np.random.random(size=(1, self.reading_num)) * 0.1 + self.kwargs['val']
             else:
+                warnings.warn('\n\n\nThe VAL of the SMU is not provided.\nThe VAL has been set to the default value as 0.\n\n\n')
                 self.data = np.random.random(size=(1, self.reading_num)) * 0.1
             yield None
         finally:
