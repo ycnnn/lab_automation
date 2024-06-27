@@ -5,7 +5,7 @@
 from params.position_params import Position_parameters
 from params.scan_params import Scan_parameters
 from params.display_params import Display_parameters
-from main import lsm_scan
+from scan_main_program import lsm_scan
 from inst_driver import External_instrument
 ######################################################################
 
