@@ -14,7 +14,7 @@ from inst_driver import External_instrument, Lockin
 if __name__ == '__main__':
     # Setting up the external input instrument(s)
     # instrument = None
-    instrument = External_instrument(instrument_type=None)
+    instrument = External_instrument(instrument_type='Virtual')
     # sleep(2)
 
     position_parameters = Position_parameters(

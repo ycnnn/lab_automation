@@ -37,17 +37,28 @@ class Data_fetcher(mp.Process):
 
 
         self.acquisitor.move_origin(initialize=True)
-
-        if self.scan_parameters.instrument.instrument_type:
+        ########################################################################
+        ########################################################################
+        ########################################################################
+        ########################################################################
+        if self.scan_parameters.instrument.instrument_type == 'Lockin':
 
             instr = inst_driver.Lockin(self.scan_parameters, 
                                     self.position_parameters,
                                     time_constant_level=5) 
+        elif self.scan_parameters.instrument.instrument_type == 'Virtual':
+            instr = inst_driver.Virtual(
+                self.scan_parameters, 
+                self.position_parameters,)
         else:
             instr = inst_driver.Empty_instrument(
                 self.scan_parameters, 
                 self.position_parameters,)
-        
+        ########################################################################
+        ########################################################################
+        ########################################################################
+        ########################################################################
+
         with instr.initialize_instrument(): 
           
             for scan_index in range(self.scan_num):

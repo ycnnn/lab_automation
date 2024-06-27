@@ -16,9 +16,32 @@ class External_instrument:
             self.additional_channel_num = 2
         elif self.instrument_type == 'Keithley':
             self.additional_channel_num = 1
+        elif self.instrument_type == 'Virtual':
+            self.additional_channel_num = 1
         else:
             self.additional_channel_num = 0
 
+class Empty_instrument:
+    def __init__(self, scan_parameters=None, position_parameters=None):
+        self.initialize_instrument()
+        self.reading_num = position_parameters.x_pixels
+        self.data = np.empty((0, self.reading_num))
+    
+    @contextmanager
+    def initialize_instrument(self):
+        try:
+            pass
+            yield None
+        finally:
+            pass
+        
+    @contextmanager
+    def scan(self):
+        try:
+            pass
+            yield None
+        finally:
+            pass
 
 class Lockin:
     def __init__(self, scan_parameters, position_parameters, 
@@ -32,22 +55,7 @@ class Lockin:
         self.reading_num = position_parameters.x_pixels
         self.time_constant_level = time_constant_level
         # self.initialize_instrument()
-    
-    # class Trigger():
-    #     def __init__(self, instr, reading_num):
-    #         self.instr = instr
-    #         self.reading_num = reading_num
-    #     @contextmanager
-    #     def scan(self):
-    #         try:
-    #             self.instr.write('capturestart one, samp')
-    #             yield None
-    #         finally:
-    #             self.instr.write('capturestop')
-    #             buffer_len = int(self.instr.query('captureprog?')[:-1])
-    #             self.data = np.array(self.instr.query_binary_values(f'captureget? 0, {buffer_len}')).reshape(-1,2)[:self.reading_num,:].T
-         
-
+ 
     @contextmanager
     def initialize_instrument(self):
         try:
@@ -80,13 +88,11 @@ class Lockin:
                 self.instrument.query_binary_values(f'captureget? 0, {buffer_len}')
                 ).reshape(-1,2)[:self.reading_num,:].T
 
-
-
-class Empty_instrument:
+class Virtual:
     def __init__(self, scan_parameters=None, position_parameters=None):
         self.initialize_instrument()
         self.reading_num = position_parameters.x_pixels
-        self.data = np.empty((0, self.reading_num))
+        
     
     @contextmanager
     def initialize_instrument(self):
@@ -100,8 +106,8 @@ class Empty_instrument:
     def scan(self):
         try:
             pass
+            # self.data = np.empty((0, self.reading_num))
+            self.data = np.random.random(size=(1, self.reading_num))
             yield None
         finally:
             pass
-
-
