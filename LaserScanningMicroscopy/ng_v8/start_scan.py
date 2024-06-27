@@ -31,7 +31,7 @@ if __name__ == '__main__':
     instrument = External_instrument(instrument_type='Empty_instrument')
     instrument2 = External_instrument(instrument_type='Virtual_instrument')
     
-    scan_parameters.add_instrument(instrument2)
+    scan_parameters.add_instrument(instrument)
     scan_parameters.add_instrument(instrument2)
     
     display_parameters = Display_parameters(

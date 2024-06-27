@@ -11,6 +11,24 @@ instrument_props = {
     'Virtual_instrument': {'additional_channel_num':1},
 }
 
+def configurate_instrument(instrument,
+                          scan_parameters, 
+                          position_parameters,):
+    if instrument.instrument_type == 'Lockin':
+        instr = Lockin(scan_parameters, 
+                    position_parameters,
+                    time_constant_level=5)
+                
+    elif instrument.instrument_type == 'Virtual_instrument':
+        instr = Virtual_instrument(
+                scan_parameters, 
+                position_parameters,)                   
+    else:
+        instr = Empty_instrument(
+                scan_parameters, 
+                position_parameters,)
+    return instr
+
 class External_instrument:
     def __init__(self, 
                  instrument_type=None,

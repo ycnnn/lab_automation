@@ -41,7 +41,7 @@ class Data_acquisitor():
                         input_mapping=["ai1", "ai4", "ai20"],
                         DAQ_name=self.scan_parameters.DAQ_name
                         )
-            print('Initialization finished! Scann started.')
+            print('Initialization finished! Scan started.')
         else:
             DAQ_output_data = self.position_parameters.final_move
             _ = daq_interface(ao0_1_write_data=DAQ_output_data, 

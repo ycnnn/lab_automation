@@ -38,22 +38,12 @@ class Data_fetcher(mp.Process):
 
         system_instruments = []
         for instrument in self.scan_parameters.instruments:
+
             print('Initializing instrument: ', instrument.instrument_type)
 
-            if instrument.instrument_type == 'Lockin':
-                instr = inst_driver.Lockin(self.scan_parameters, 
-                                    self.position_parameters,
-                                    time_constant_level=5)
-                
-            elif instrument.instrument_type == 'Virtual_instrument':
-                 instr = inst_driver.Virtual_instrument(
-                                    self.scan_parameters, 
-                                    self.position_parameters,)                   
-            else:
-                instr = inst_driver.Empty_instrument(
-                self.scan_parameters, 
-                self.position_parameters,)
-
+            instr = inst_driver.configurate_instrument(instrument=instrument,
+                                              scan_parameters=self.scan_parameters,
+                                              position_parameters=self.position_parameters)
             system_instruments.append(instr)
 
         instrument_manager = [instrument.initialize_instrument for instrument in system_instruments]
