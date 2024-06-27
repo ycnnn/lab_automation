@@ -186,6 +186,8 @@ class Keithley2450:
            
             yield None
         finally:
+            Keithley2450_SMU.ramp(
+                smu=self.smu)
             self.smu.write('smu.source.output = smu.OFF')
         
     @contextmanager
