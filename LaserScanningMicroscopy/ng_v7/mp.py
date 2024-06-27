@@ -64,8 +64,8 @@ class Data_fetcher(mp.Process):
 
         
         self.acquisitor.move_origin(initialize=False)
-        if self.scan_parameters.instrument:
-            self.instrument.close_instrument()
+        # if self.scan_parameters.instrument:
+        #     self.instrument.close_instrument()
         
         if self.scan_parameters.return_to_zero:
             reset_daq(self.scan_parameters)
