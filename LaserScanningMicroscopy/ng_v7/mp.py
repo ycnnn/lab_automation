@@ -60,10 +60,7 @@ class Data_fetcher(mp.Process):
             status = self.pipe.recv()
             if not status:
                 raise Warning('Possible data loss: Sender not received confirmation from receiver')
-        # After last scan finishes: the obj lens should move to the origin again
-        ########################################################################\
-        # Move the obj lens back to (0,0)
-        # self.acquisitor.move_origin(initialize=False)
+       
 
         
         self.acquisitor.move_origin(initialize=False)

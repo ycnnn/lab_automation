@@ -84,6 +84,8 @@ class Lockin:
 class Empty_instrument:
     def __init__(self, scan_parameters=None, position_parameters=None):
         self.initialize_instrument()
+        self.reading_num = position_parameters.x_pixels
+        self.data = np.empty((0, self.reading_num))
     
     @contextmanager
     def initialize_instrument(self):
