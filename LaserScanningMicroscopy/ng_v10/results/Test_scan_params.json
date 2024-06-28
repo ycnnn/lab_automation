@@ -1,0 +1,18 @@
+{
+    "frequencies": [
+        25,
+        25
+    ],
+    "channel_num": 6,
+    "input_mapping": [
+        "ai0",
+        "ai1"
+    ],
+    "return_to_zero_after_scan": true,
+    "instrument_list": [
+        "Empty_instrument",
+        "Keithley2450",
+        "Virtual_instrument",
+        "Lockin"
+    ]
+}

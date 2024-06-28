@@ -21,7 +21,7 @@ class Scan_parameters:
         self.return_to_zero = return_to_zero
         # self.instrument = instrument
         self.instruments = []
-        self.save_params()
+        # self.save_params()
 
     def add_instrument(self, instrument):
         self.instruments.append(instrument)

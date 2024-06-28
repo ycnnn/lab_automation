@@ -45,7 +45,7 @@ class Position_parameters:
 
         self.generate_sweep_coordiantes()
         self.move_center()
-        self.save_params()
+        # self.save_params()
 
     def input_check(self, center, conversion_factor, size=0):
         if (center + size/2)*conversion_factor > self.axis_limits[1] or (center - size/2)*conversion_factor < self.axis_limits[0]:

@@ -34,7 +34,6 @@ def configurate_instrument(instrument,
     if instrument.instrument_type == 'Lockin':
         instr = Lockin(scan_parameters, 
                     position_parameters,
-                    time_constant_level=5,
                     **kwargs)
                 
     elif instrument.instrument_type == 'Virtual_instrument':
@@ -90,18 +89,20 @@ class Lockin:
                 #  sample_count=128,
                  **kwargs):
 
-        self.address = scan_parameters.instrument.address
+       
         
         
         self.reading_num = position_parameters.x_pixels
         self.kwargs = kwargs
-        self.instrument_params = {'time_constant_level':5, 'sample_count':128}
+        self.instrument_params = {'address': "USB0::0xB506::0x2000::002765::INSTR",
+                                  'time_constant_level':5, 
+                                  'sample_count':128}
  
     @contextmanager
     def initialize_instrument(self):
         try:
             rm = pyvisa.ResourceManager()
-            self.instrument = rm.open_resource(self.address)
+            self.instrument = rm.open_resource(self.instrument_params['address'])
 
             # Something happens here
             for key, value in self.instrument_params.items():
@@ -112,7 +113,8 @@ class Lockin:
                                 +'\nThe ' + key + ' has been set to the default value as ' + str(value) + '.\n\n\n')
     
             self.instrument.write('*rst')
-            self.instrument.write(f'oflt {self.instrument_params['time_constant_level']}')
+            
+            self.instrument.write(f"oflt {self.instrument_params['time_constant_level']}")
             self.instrument.write('capturelen 256')
             self.instrument.write('capturecfg xy')
             self.instrument.write('rtrg posttl')
