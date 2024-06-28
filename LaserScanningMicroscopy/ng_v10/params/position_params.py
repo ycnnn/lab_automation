@@ -188,7 +188,7 @@ class Position_parameters:
         self.dict['output_limit'] = self.axis_limits
         # self.record = json.dumps(self.dict)
 
-        position_params_filepath = filepath + '_position_params.json'
+        position_params_filepath = filepath + 'position_params.json'
 
         with open(position_params_filepath, 'w') as file:
             json.dump(self.dict, file, indent=4)
