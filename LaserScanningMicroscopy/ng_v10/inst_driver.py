@@ -30,6 +30,7 @@ def configurate_instrument(instrument,
                           scan_parameters, 
                           position_parameters,
                           **kwargs):
+    
     if instrument.instrument_type == 'Lockin':
         instr = Lockin(scan_parameters, 
                     position_parameters,
@@ -51,20 +52,27 @@ def configurate_instrument(instrument,
     else:
         instr = Empty_instrument(
                 scan_parameters, 
-                position_parameters,)
+                position_parameters,
+                **kwargs)
     return instr
 
 class Empty_instrument:
-    def __init__(self, scan_parameters=None, position_parameters=None):
+    def __init__(self, scan_parameters=None, position_parameters=None, **kwargs):
         self.initialize_instrument()
         self.reading_num = position_parameters.x_pixels
         self.instrument_params = {}
         self.data = np.empty((0, self.reading_num))
+        self.kwargs = kwargs
     
     @contextmanager
     def initialize_instrument(self):
         try:
-            pass
+            for key, value in self.instrument_params.items():
+                if key in self.kwargs:
+                    self.instrument_params[key] = self.kwargs[key]
+                else:
+                    warnings.warn('\n\n\nThe ' + key + ' of the instrument is not provided.'
+                                +'\nThe ' + key + ' has been set to the default value as ' + str(value) + '.\n\n\n')
             yield None
         finally:
             pass
@@ -79,19 +87,15 @@ class Empty_instrument:
 
 class Lockin:
     def __init__(self, scan_parameters, position_parameters, 
-                #  time_constant_level=0,
-                 sample_count=128,
+                #  sample_count=128,
                  **kwargs):
 
         self.address = scan_parameters.instrument.address
         
-        self.sample_count = sample_count
-        # self.additional_channel_num = 2
+        
         self.reading_num = position_parameters.x_pixels
-        # self.time_constant_level = time_constant_level
         self.kwargs = kwargs
-        # self.initialize_instrument()
-        self.instrument_params = {}
+        self.instrument_params = {'time_constant_level':5, 'sample_count':128}
  
     @contextmanager
     def initialize_instrument(self):
@@ -100,15 +104,15 @@ class Lockin:
             self.instrument = rm.open_resource(self.address)
 
             # Something happens here
-            if 'time_constant_level' in self.kwargs:
-                self.time_constant_level = self.kwargs['time_constant_level']
-            else:
-                warnings.warn('\n\n\nThe time constant of the lock-in is not provided.\nThe time constant has been set to the default value as 5.\n\n\n')
-                self.time_constant_level = 5
-
+            for key, value in self.instrument_params.items():
+                if key in self.kwargs:
+                    self.instrument_params[key] = self.kwargs[key]
+                else:
+                    warnings.warn('\n\n\nThe ' + key + ' of the lockin is not provided.'
+                                +'\nThe ' + key + ' has been set to the default value as ' + str(value) + '.\n\n\n')
+    
             self.instrument.write('*rst')
-            # self.instrument.query('*idn?')
-            self.instrument.write(f'oflt {self.time_constant_level}')
+            self.instrument.write(f'oflt {self.instrument_params['time_constant_level']}')
             self.instrument.write('capturelen 256')
             self.instrument.write('capturecfg xy')
             self.instrument.write('rtrg posttl')
@@ -131,16 +135,22 @@ class Lockin:
                 ).reshape(-1,2)[:self.reading_num,:].T
 
 class Virtual_instrument:
-    def __init__(self, scan_parameters=None, position_parameters=None):
+    def __init__(self, scan_parameters=None, position_parameters=None, **kwargs):
         self.initialize_instrument()
         self.reading_num = position_parameters.x_pixels
         self.instrument_params = {}
+        self.kwargs = kwargs
         
     
     @contextmanager
     def initialize_instrument(self):
         try:
-            pass
+            for key, value in self.instrument_params.items():
+                if key in self.kwargs:
+                    self.instrument_params[key] = self.kwargs[key]
+                else:
+                    warnings.warn('\n\n\nThe ' + key + ' of the instrument is not provided.'
+                                +'\nThe ' + key + ' has been set to the default value as ' + str(value) + '.\n\n\n')
             yield None
         finally:
             pass
