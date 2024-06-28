@@ -19,24 +19,31 @@ if __name__ == '__main__':
     position_parameters = Position_parameters(
                                             x_size=30,
                                             y_size=30,
-                                            x_pixels=100,
-                                            y_pixels=45,
+                                            x_pixels=128,
+                                            y_pixels=127,
                                             z_center=19,
                                             angle=90)
     
     scan_parameters = Scan_parameters(frequency=25, 
-                                      input_mapping=["ai0","ai1"],
+                                      input_mapping=["ai0","ai1","ai2"],
                                     #   instrument=instrument,
                                       return_to_zero=True)
     # Setting up the external input instrument(s)
+    #############################################################################################
+    #############################################################################################
+    #############################################################################################
+    # Mandatory code. There MUST be at least one external instrument present dring the scan.
     instrument = External_instrument(instrument_type='Empty_instrument')
     scan_parameters.add_instrument(instrument)
+    #############################################################################################
+    #############################################################################################
+    #############################################################################################
 
     # Setting up the external input instrument(s)
     # Sometimes, the code will ask for additional parameters for setting up the instrument.
     # Even if those parameters are not supplied, the scan will go on, but the system will use default values and issue warning(s).
     
-    Keithley_prop = {'start_volt': -15, 'end_volt': 10}
+    Keithley_prop = {'start_volt': -2, 'end_volt': 2}
     instrument2 = External_instrument(instrument_type='Keithley2450', **Keithley_prop)
     scan_parameters.add_instrument(instrument2)
 

@@ -3,10 +3,11 @@
         25,
         25
     ],
-    "channel_num": 6,
+    "channel_num": 7,
     "input_mapping": [
         "ai0",
-        "ai1"
+        "ai1",
+        "ai2"
     ],
     "return_to_zero_after_scan": true,
     "instrument_list": [

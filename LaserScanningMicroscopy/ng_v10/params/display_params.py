@@ -14,10 +14,13 @@ class Display_parameters:
                  darkmode=True,
                  save_data=True):
         
-        self.scan_id = '' if not scan_id else scan_id
+        if len(scan_id) == 0:
+            scan_id = 'temp_scan'
+        
+        self.scan_id = 'temp_scan' if not scan_id else scan_id
         
         full_path = os.path.realpath(__file__)
-        path = str(Path(os.path.dirname(full_path)).parent.absolute()) + '/results/'
+        path = str(Path(os.path.dirname(full_path)).parent.absolute()) + '/results/' + self.scan_id + '/'
         self.save_destination = path if not save_destination else save_destination
 
         if not os.path.exists(self.save_destination):

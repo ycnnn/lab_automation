@@ -38,7 +38,7 @@ class Scan_parameters:
         self.dict['instrument_list'] = [instr.instrument_type for instr in self.instruments]
  
         # self.record = json.dumps(self.dict)
-        scan_params_filepath = filepath + '_scan_params.json'
+        scan_params_filepath = filepath + 'scan_params.json'
 
         with open(scan_params_filepath, 'w') as file:
             json.dump(self.dict, file, indent=4)

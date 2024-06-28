@@ -57,21 +57,29 @@ def configurate_instrument(instrument,
 
 class Empty_instrument:
     def __init__(self, scan_parameters=None, position_parameters=None, **kwargs):
-        self.initialize_instrument()
+        
         self.reading_num = position_parameters.x_pixels
         self.instrument_params = {}
         self.data = np.empty((0, self.reading_num))
         self.kwargs = kwargs
+
+        for key, value in self.instrument_params.items():
+            if key in self.kwargs:
+                self.instrument_params[key] = self.kwargs[key]
+            else:
+                warnings.warn('\n\n\nThe ' + key + ' of the instrument is not provided.'
+                                +'\nThe ' + key + ' has been set to the default value as ' + str(value) + '.\n\n\n')
+        
     
     @contextmanager
     def initialize_instrument(self):
         try:
-            for key, value in self.instrument_params.items():
-                if key in self.kwargs:
-                    self.instrument_params[key] = self.kwargs[key]
-                else:
-                    warnings.warn('\n\n\nThe ' + key + ' of the instrument is not provided.'
-                                +'\nThe ' + key + ' has been set to the default value as ' + str(value) + '.\n\n\n')
+            # for key, value in self.instrument_params.items():
+            #     if key in self.kwargs:
+            #         self.instrument_params[key] = self.kwargs[key]
+            #     else:
+            #         warnings.warn('\n\n\nThe ' + key + ' of the instrument is not provided.'
+            #                     +'\nThe ' + key + ' has been set to the default value as ' + str(value) + '.\n\n\n')
             yield None
         finally:
             pass
@@ -89,14 +97,20 @@ class Lockin:
                 #  sample_count=128,
                  **kwargs):
 
-       
-        
         
         self.reading_num = position_parameters.x_pixels
         self.kwargs = kwargs
         self.instrument_params = {'address': "USB0::0xB506::0x2000::002765::INSTR",
                                   'time_constant_level':5, 
                                   'sample_count':128}
+        
+        for key, value in self.instrument_params.items():
+            if key in self.kwargs:
+                self.instrument_params[key] = self.kwargs[key]
+            else:
+                warnings.warn('\n\n\nThe ' + key + ' of the lockin is not provided.'
+                                +'\nThe ' + key + ' has been set to the default value as ' + str(value) + '.\n\n\n')
+    
  
     @contextmanager
     def initialize_instrument(self):
@@ -105,12 +119,12 @@ class Lockin:
             self.instrument = rm.open_resource(self.instrument_params['address'])
 
             # Something happens here
-            for key, value in self.instrument_params.items():
-                if key in self.kwargs:
-                    self.instrument_params[key] = self.kwargs[key]
-                else:
-                    warnings.warn('\n\n\nThe ' + key + ' of the lockin is not provided.'
-                                +'\nThe ' + key + ' has been set to the default value as ' + str(value) + '.\n\n\n')
+            # for key, value in self.instrument_params.items():
+            #     if key in self.kwargs:
+            #         self.instrument_params[key] = self.kwargs[key]
+            #     else:
+            #         warnings.warn('\n\n\nThe ' + key + ' of the lockin is not provided.'
+            #                     +'\nThe ' + key + ' has been set to the default value as ' + str(value) + '.\n\n\n')
     
             self.instrument.write('*rst')
             
@@ -142,17 +156,24 @@ class Virtual_instrument:
         self.reading_num = position_parameters.x_pixels
         self.instrument_params = {}
         self.kwargs = kwargs
-        
+
+        for key, value in self.instrument_params.items():
+            if key in self.kwargs:
+                self.instrument_params[key] = self.kwargs[key]
+            else:
+                warnings.warn('\n\n\nThe ' + key + ' of the instrument is not provided.'
+                            +'\nThe ' + key + ' has been set to the default value as ' + str(value) + '.\n\n\n')
+    
     
     @contextmanager
     def initialize_instrument(self):
         try:
-            for key, value in self.instrument_params.items():
-                if key in self.kwargs:
-                    self.instrument_params[key] = self.kwargs[key]
-                else:
-                    warnings.warn('\n\n\nThe ' + key + ' of the instrument is not provided.'
-                                +'\nThe ' + key + ' has been set to the default value as ' + str(value) + '.\n\n\n')
+            # for key, value in self.instrument_params.items():
+            #     if key in self.kwargs:
+            #         self.instrument_params[key] = self.kwargs[key]
+            #     else:
+            #         warnings.warn('\n\n\nThe ' + key + ' of the instrument is not provided.'
+            #                     +'\nThe ' + key + ' has been set to the default value as ' + str(value) + '.\n\n\n')
             yield None
         finally:
             pass
@@ -169,11 +190,14 @@ class Virtual_instrument:
 
 class Keithley2450:
     def __init__(self, scan_parameters=None, position_parameters=None, **kwargs):
-        self.initialize_instrument()
+        
         self.reading_num = position_parameters.x_pixels
         self.volt_steps = position_parameters.y_pixels
         self.kwargs = kwargs
-        self.instrument_params = {'start_volt':0, 'end_volt':0, 'ramp_steps':10}
+        self.instrument_params = {'start_volt':0, 
+                                  'end_volt':0, 
+                                  'ramp_steps':10,
+                                  'address':"USB0::0x05E6::0x2450::04096331::INSTR"}
         for key, value in self.instrument_params.items():
             if key in self.kwargs:
                 self.instrument_params[key] = self.kwargs[key]
@@ -190,12 +214,14 @@ class Keithley2450:
             repeats=2,
             axis=1
         ).reshape(-1)
+
+        # self.initialize_instrument()
         
     
     @contextmanager
     def initialize_instrument(self):
         try:
-            self.smu = Keithley2450_SMU.set_smu_ready_for_ramp()
+            self.smu = Keithley2450_SMU.set_smu_ready_for_ramp(address=self.instrument_params['address'])
             self.smu.write('smu.source.output = smu.ON')
             print('Initialization success')
            

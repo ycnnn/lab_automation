@@ -28,8 +28,8 @@ def lsm_scan(position_parameters,
     data_fetcher.join()
     data_receiver.join()
 
-    scan_parameters.save_params(filepath=(display_parameters.save_destination + display_parameters.scan_id))
-    position_parameters.save_params(filepath=(display_parameters.save_destination + display_parameters.scan_id))
+    scan_parameters.save_params(filepath=display_parameters.save_destination)
+    position_parameters.save_params(filepath=display_parameters.save_destination)
     
 
 

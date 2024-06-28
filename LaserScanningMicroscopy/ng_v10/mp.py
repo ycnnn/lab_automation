@@ -90,11 +90,12 @@ class Data_fetcher(mp.Process):
         
         if self.scan_parameters.return_to_zero:
             reset_daq(self.scan_parameters)
+        self.save_instrument_params()
         ########################################################################
-        def save_instrument_params(self):
-            instr_params_path = self.display_parameters.save_destination + self.display_parameters.scan_id + '_instr_params.json'
-            with open(instr_params_path, 'w') as file:
-                json.dump(self.system_instrument_params, file, indent=4)
+    def save_instrument_params(self):
+        instr_params_path = self.display_parameters.save_destination + 'instr_params.json'
+        with open(instr_params_path, 'w') as file:
+            json.dump(self.system_instrument_params, file, indent=4)
 
 
 
@@ -143,6 +144,5 @@ class Data_receiver(mp.Process):
 
         if self.display_parameters.save_data:
             self.window.save_results(
-                filepath=self.display_parameters.save_destination,
-                scan_id=self.display_parameters.scan_id)
+                filepath=self.display_parameters.save_destination)
 
