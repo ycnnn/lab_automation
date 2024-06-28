@@ -57,5 +57,5 @@ if __name__ == '__main__':
              scan_parameters=scan_parameters,
              display_parameters=display_parameters)
     
-    directory_path = os.path.dirname(os.path.realpath(__file__)) + '/' + display_parameters.scan_id +  '_params.txt'
+    directory_path = os.path.dirname(os.path.realpath(__file__)) + '/' + display_parameters.scan_id +  '_code.log'
     shutil.copy(os.path.realpath(__file__), directory_path)

@@ -12,8 +12,7 @@ from mp import Data_fetcher, Data_receiver
 
 def lsm_scan(position_parameters, 
              scan_parameters, 
-             display_parameters,
-             instrument=None):
+             display_parameters):
     mp.freeze_support()
     out_pipe, in_pipe = mp.Pipe(duplex=True)
     data_fetcher = Data_fetcher(position_parameters=position_parameters,
