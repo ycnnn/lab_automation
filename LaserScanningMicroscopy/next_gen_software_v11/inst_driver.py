@@ -4,7 +4,8 @@ import numpy as np
 import pyvisa
 from contextlib import contextmanager
 import warnings
-import Keithley2450_SMU 
+# import Keithley2450_SMU 
+from external_instrument_drivers import Keithley2450_SMU as Keithley2450_SMU
 import time
 
 instrument_props = {
