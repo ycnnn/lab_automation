@@ -21,19 +21,25 @@ class Scan_parameters:
         self.return_to_zero = return_to_zero
         # self.instrument = instrument
         self.instruments = []
-        self.save_params()
+        # self.save_params()
 
     def add_instrument(self, instrument):
         self.instruments.append(instrument)
         self.channel_num += instrument.additional_channel_num
         pass
 
-    def save_params(self):
+    def save_params(self, filepath):
         self.dict = dict()
         self.dict['frequencies'] = [self.frequency, self.retrace_frequency]
         self.dict['channel_num'] = self.channel_num
         self.dict['input_mapping'] = self.input_mapping
         self.dict['return_to_zero_after_scan'] = self.return_to_zero
+        self.dict['channel_num'] = self.channel_num
+        self.dict['instrument_list'] = [instr.instrument_type for instr in self.instruments]
  
-        self.record = json.dumps(self.dict)
+        # self.record = json.dumps(self.dict)
+        scan_params_filepath = filepath + 'scan_params.json'
+
+        with open(scan_params_filepath, 'w') as file:
+            json.dump(self.dict, file, indent=4)
         

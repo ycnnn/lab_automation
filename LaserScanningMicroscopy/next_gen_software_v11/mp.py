@@ -3,6 +3,7 @@ from PySide6.QtWidgets import QApplication
 import sys
 import numpy as np
 from contextlib import ExitStack
+import json
 ######################################################################
 # Custom dependencies
 from app import QPlot
@@ -15,12 +16,14 @@ class Data_fetcher(mp.Process):
     def __init__(self, 
                  position_parameters,
                  scan_parameters,
+                 display_parameters,
                  pipe) -> None:
         mp.Process.__init__(self)
         self.position_parameters = position_parameters
         self.scan_parameters = scan_parameters
         self.line_width = self.position_parameters.x_pixels
         self.scan_num = 2 * self.position_parameters.y_pixels
+        self.display_parameters = display_parameters
         self.pipe = pipe
         self.acquisitor = Data_acquisitor(self.position_parameters,
                                           self.scan_parameters)
@@ -52,9 +55,11 @@ class Data_fetcher(mp.Process):
 
         with ExitStack() as stack:
             _ = [stack.enter_context(instr()) for instr in instrument_manager]
+            
             for scan_index in range(self.scan_num):
+                auxiliary_scan_info = {'scan_index': scan_index}
                 with ExitStack() as stack:
-                    _ = [stack.enter_context(instr_scan()) for instr_scan in scan_manager]
+                    _ = [stack.enter_context(instr_scan(**auxiliary_scan_info)) for instr_scan in scan_manager]
     
                     if scan_index % 2 == 0:
                         data = self.acquisitor.run(scan_index)
@@ -75,12 +80,22 @@ class Data_fetcher(mp.Process):
 
      
         self.acquisitor.move_origin(initialize=False)
-   
+
+        ########################################################################
+        # [resource.data for resource in system_instruments]
+        self.system_instrument_params = {}
+        for instr_index, instrument in enumerate(self.scan_parameters.instruments):
+            self.system_instrument_params[instrument.instrument_type] = system_instruments[instr_index].instrument_params
+            
         
         if self.scan_parameters.return_to_zero:
             reset_daq(self.scan_parameters)
+        self.save_instrument_params()
         ########################################################################
-
+    def save_instrument_params(self):
+        instr_params_path = self.display_parameters.save_destination + 'instr_params.json'
+        with open(instr_params_path, 'w') as file:
+            json.dump(self.system_instrument_params, file, indent=4)
 
 
 
@@ -129,6 +144,5 @@ class Data_receiver(mp.Process):
 
         if self.display_parameters.save_data:
             self.window.save_results(
-                filepath=self.display_parameters.save_destination,
-                scan_id=self.display_parameters.scan_id)
+                filepath=self.display_parameters.save_destination)
 

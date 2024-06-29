@@ -1,5 +1,6 @@
 import numpy as np
 import pyvisa as pv
+import time
 
 def set_smu_ready(address):
     rm = pv.ResourceManager()
@@ -261,19 +262,21 @@ def output_paramater_generator(
                   'delay':delay}
     return parameters
 
-def fetch_readings(gate, timeout):
+def fetch_readings(gate, timeout, ramp_steps=0):
     for _ in range(int(timeout/(gate.timeout/1000))):
         try:
-            status = gate.query('print(trigger.model.state())')
+            # Check if SMU has finished the scan every 10 milliseconds
+            time.sleep(0.01)
+            _ = gate.query('print(trigger.model.state())')
             break
         except:
             print('Sweep started >>>>>>>>', end = '\r')
     gate.clear()
     print('Sweep completed >>>>>>', end='\r')
     gate_query_data = gate.query_ascii_values('printbuffer(1, defbuffer1.n, defbuffer1.sourcevalues, defbuffer1.readings)')
-    gate_readings = np.array(gate_query_data).reshape(-1,2)
+    gate_readings = np.array(gate_query_data).reshape(-1,2)[ramp_steps:-ramp_steps,:]
     drain_query_data = gate.query_ascii_values('printbuffer(1, node[2].defbuffer1.n, node[2].defbuffer1.sourcevalues, node[2].defbuffer1.readings)')
-    drain_readings = np.array(drain_query_data).reshape(-1,2)
+    drain_readings = np.array(drain_query_data).reshape(-1,2)[ramp_steps:-ramp_steps,:]
     return gate_readings, drain_readings
 
 def transfer(
@@ -302,12 +305,11 @@ def transfer(
     gate.write(transfer_params['script_name'] + '.run()')
     gate.write('script.delete(\"' + transfer_params['script_name'] +'\")')
 
-    gate_readings, drain_readings = fetch_readings(gate, timeout=36000)
+    gate_readings, drain_readings = fetch_readings(gate, timeout=36000, ramp_steps=ramp_steps)
     _ = set_smu_ready(gate_address)
     _ = set_smu_ready(drain_address)
 
     return gate_readings, drain_readings
-
 
 def output(
             drain_start,
@@ -334,7 +336,7 @@ def output(
     write_script(gate=gate, **output_params)
     gate.write(output_params['script_name'] + '.run()')
     gate.write('script.delete(\"' + output_params['script_name'] +'\")')
-    gate_readings, drain_readings = fetch_readings(gate, timeout=36000)
+    gate_readings, drain_readings = fetch_readings(gate, timeout=36000, ramp_steps=ramp_steps)
     _ = set_smu_ready(gate_address)
     _ = set_smu_ready(drain_address)
 
@@ -359,9 +361,19 @@ def set_smu_ready_for_ramp(address="USB0::0x05E6::0x2450::04096331::INSTR"):
     smu.write("smu.source.level = 0")
     return smu
 
-def ramp(smu, start_volt=0, end_volt=0):
+def ramp(smu,
+         start_volt=None, 
+         end_volt=0, 
+         ramp_steps=10):
+    # By default, ramp Keithley 2450 SMU from current voltage level to the target voltage level (end_volt).
 
-    voltages = np.linspace(start_volt, end_volt, 20)
+    smu.write('reading = smu.measure.read()')
+    volt_reading = np.array(smu.query_ascii_values('print(reading)'))[0]
+    print(f'Current VOLT reading is {volt_reading} V.')
+    start_volt = start_volt if start_volt else volt_reading
+
+
+    voltages = np.linspace(start_volt, end_volt, ramp_steps)
     volt_readings = []
     # return start_volt
     for volt in voltages:
@@ -372,4 +384,4 @@ def ramp(smu, start_volt=0, end_volt=0):
         volt_readings.append(volt_reading)
         # break
 
-    return np.array(volt_readings).reshape(-1)
+    return np.array(volt_readings).reshape(-1)[-1]

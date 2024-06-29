@@ -141,12 +141,12 @@ class QPlot(QMainWindow):
         self.setWindowTitle(f'{self.channel_num} Channel Scan: Frame {self.counter}, Est time {self.remaining_time} s')
         QApplication.processEvents()
 
-    def save_results(self, filepath=None, scan_id='', fileformat='png'):
+    def save_results(self, filepath=None, fileformat='png'):
         img = self.mainWidget.grab(self.mainWidget.rect())
-        img.save(filepath + '/_' + str(scan_id) + '_screenshot.png', fileformat)
+        img.save(filepath + 'screenshot.' + fileformat, fileformat)
         final_data = np.flip(np.array([self.data, self.retrace_data]), axis=(2,3))
-        np.save(filepath + '/_' + str(scan_id) + '_data', final_data)
-        # np.save(filepath + '/_' + str(scan_id) + '_retrace_data', self.retrace_data)
+        np.save(filepath + 'data', final_data)
+      
 
 
 

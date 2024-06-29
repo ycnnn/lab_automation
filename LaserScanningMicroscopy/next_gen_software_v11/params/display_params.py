@@ -14,11 +14,18 @@ class Display_parameters:
                  darkmode=True,
                  save_data=True):
         
-        self.scan_id = '' if not scan_id else scan_id
+        if len(scan_id) == 0:
+            scan_id = 'temp_scan'
+        
+        self.scan_id = 'temp_scan' if not scan_id else scan_id
         
         full_path = os.path.realpath(__file__)
-        path = str(Path(os.path.dirname(full_path)).parent.absolute()) + '/'
+        path = str(Path(os.path.dirname(full_path)).parent.absolute()) + '/results/' + self.scan_id + '/'
         self.save_destination = path if not save_destination else save_destination
+
+        if not os.path.exists(self.save_destination):
+            # If the directory does not exist, create it
+            os.makedirs(self.save_destination)
 
         self.colormap = colormap
         self.channel_min = channel_min
