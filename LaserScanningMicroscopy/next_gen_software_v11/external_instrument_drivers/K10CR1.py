@@ -51,7 +51,7 @@ class K10CR1_stage:
         # Call device methods.
         print("Homing the rotation stage of SN:  " + self.address)
         self.device.Home(timeout)  # 60 second timeout.
-        print("Done")
+        print("The system is at home position. This position will be referred as 0 degree.")
 
     def move(self, angle=0):
         new_pos = Decimal(angle)  # Must be a .NET decimal.
@@ -60,6 +60,7 @@ class K10CR1_stage:
         print("Movement finished.")
 
     def quit(self):
+        self.home_device()
         # Stop polling loop and disconnect device before program finishes. 
         self.device.StopPolling()
         self.device.Disconnect()
