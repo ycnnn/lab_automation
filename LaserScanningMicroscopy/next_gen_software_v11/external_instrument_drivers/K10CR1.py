@@ -21,60 +21,63 @@ from Thorlabs.MotionControl.GenericMotorCLI import *
 from Thorlabs.MotionControl.IntegratedStepperMotorsCLI import *
 from System import Decimal 
 
-def connect_and_initialize(serial_no=55425494):
-    serial_no = str(serial_no)
-    pass
+class K10CR1_stage:
+    def __init__(self, serial_no=55425494) -> None:
+        self.address = str(serial_no)
 
-def main():
-    """The main entry point for the application"""
-
-
-    try:
-        # Build device list.  
+    def initialize_instrument(self):
         DeviceManagerCLI.BuildDeviceList()
+        self.device = CageRotator.CreateCageRotator(self.address)
+        self.device.Connect(self.address)
 
-        # create new device.
-        serial_no = "55425494"  # Replace this line with your device's serial number.
-        device = CageRotator.CreateCageRotator(serial_no)
-       
-        # Connect to device. 
-        device.Connect(serial_no)
-
-        # Ensure that the device settings have been initialized.
-        if not device.IsSettingsInitialized():
-            device.WaitForSettingsInitialized(10000)  # 10 second timeout.
-            assert device.IsSettingsInitialized() is True
-
+        if not self.device.IsSettingsInitialized():
+            self.device.WaitForSettingsInitialized(10000)  # 10 second timeout.
+            assert self.device.IsSettingsInitialized() is True
+        
         # Start polling loop and enable device.
-        device.StartPolling(250)  #250ms polling rate.
-        time.sleep(25)
-        device.EnableDevice()
+        self.device.StartPolling(250)  #250ms polling rate.
+        time.sleep(2)
+        self.device.EnableDevice()
         time.sleep(0.25)  # Wait for device to enable.
 
         # Get Device Information and display description.
-        device_info = device.GetDeviceInfo()
-        print(device_info.Description)
-
+        self.device_info = self.device.GetDeviceInfo()
+        print(self.device_info.Description)
         # Load any configuration settings needed by the controller/stage.
-        device.LoadMotorConfiguration(serial_no, DeviceConfiguration.DeviceSettingsUseOptionType.UseDeviceSettings)
-        motor_config = device.LoadMotorConfiguration(serial_no)
+        self.device.LoadMotorConfiguration(self.address, DeviceConfiguration.DeviceSettingsUseOptionType.UseDeviceSettings)
+        motor_config = self.device.LoadMotorConfiguration(self.address)
 
-        # # Call device methods.
-        # print("Homing Device")
-        # device.Home(60000)  # 60 second timeout.
-        # print("Done")
+    def home_device(self, timeout=60000):
+        # Call device methods.
+        print("Homing the rotation stage of SN:  " + self.address)
+        self.device.Home(timeout)  # 60 second timeout.
+        print("Done")
 
-        # new_pos = Decimal(150.0)  # Must be a .NET decimal.
-        # print(f'Moving to {new_pos}')
-        # device.MoveTo(new_pos, 60000)  # 60 second timeout.
-        # print("Done")
+    def move(self, angle=0):
+        new_pos = Decimal(angle)  # Must be a .NET decimal.
+        print("Moving the rotation stage of SN: " + self.address + f' to {new_pos} degrees')
+        self.device.MoveTo(new_pos, 60000)  # 60 second timeout.
+        print("Movement finished.")
 
+    def quit(self):
         # Stop polling loop and disconnect device before program finishes. 
-        device.StopPolling()
-        device.Disconnect()
+        self.device.StopPolling()
+        self.device.Disconnect()
+        print("Disconnectd the rotation stage of SN: " + self.address)
 
-    except Exception as e:
-        print(e)
+    
+
+def main():
+    """The main entry point for the application"""
+    pass
+    stage = K10CR1_stage()
+    stage.initialize_instrument()
+    stage.home_device()
+    time.sleep(1)
+    stage.move(150)
+    time.sleep(1)
+    stage.quit()
+
         
 
 if __name__ == "__main__":
