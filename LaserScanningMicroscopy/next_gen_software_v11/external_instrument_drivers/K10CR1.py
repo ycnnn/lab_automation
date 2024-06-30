@@ -23,6 +23,7 @@ from System import Decimal
 
 class K10CR1_stage:
     def __init__(self, serial_no=55425494) -> None:
+        print('Important: make sure you are not running Kinesis softeare in the meantime. \nOtherwise the initialization will fail.')
         self.address = str(serial_no)
 
     def initialize_instrument(self):
