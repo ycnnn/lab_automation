@@ -102,8 +102,12 @@ class Lockin:
         self.reading_num = position_parameters.x_pixels
         self.kwargs = kwargs
         self.instrument_params = {'address': "USB0::0xB506::0x2000::002765::INSTR",
-                                  'time_constant_level':5, 
-                                  'sample_count':128}
+                                  'time_constant_level':9, 
+                                  'volt_input_range':1, 
+                                  'signal_sensitivity':6,
+                                  'ref_frequency':20170,
+                                  'sine_amplitude':0.5
+                                  }
         
         for key, value in self.instrument_params.items():
             if key in self.kwargs:
@@ -115,28 +119,73 @@ class Lockin:
  
     @contextmanager
     def initialize_instrument(self):
+
         try:
             rm = pyvisa.ResourceManager()
             self.instrument = rm.open_resource(self.instrument_params['address'])
 
-            # Something happens here
-            # for key, value in self.instrument_params.items():
-            #     if key in self.kwargs:
-            #         self.instrument_params[key] = self.kwargs[key]
-            #     else:
-            #         warnings.warn('\n\n\nThe ' + key + ' of the lockin is not provided.'
-            #                     +'\nThe ' + key + ' has been set to the default value as ' + str(value) + '.\n\n\n')
-    
+            # Reset
             self.instrument.write('*rst')
-            
-            self.instrument.write(f"oflt {self.instrument_params['time_constant_level']}")
+            self.instrument.query('*idn?')
+
+            # build buffer
             self.instrument.write('capturelen 256')
+
+            # record XY signals
             self.instrument.write('capturecfg xy')
+
+            # Set the capture mode as external trigger
             self.instrument.write('rtrg posttl')
+
+            # Set the input source as VOLTAGE
+            self.instrument.write('ivmd volt')
+            self.instrument.query('ivmd?')
+
+            # Set the input mode as A
+            self.instrument.write('isrc 0')
+            self.instrument.query('isrc?')
+
+            # Set the input coupling. Always use AC coupling unless signal frequency <= 0.16 Hz (unlikely)
+            self.instrument.write('icpl 0')
+            self.instrument.query('icpl?')
+
+            # Set the voltage input shield as float
+            self.instrument.write('ignd 0')
+            self.instrument.query('ignd?')
+
+            # Set the voltage input range
+            # Levels and range: 0->1V, 1->300mV, 2->100mV 3->30mV, 4->10mV
+            self.instrument.write(f"irng {self.instrument_params['volt_input_range']}")
+            self.instrument.query('irng?')
+
+            # Set the signal sensitivity
+            # Levels and range: 0->1V, 1->500mV, 2->200mV 3->100mV, 4->50mV, 5->20mV, 6->10mV, 7->5mV, 8->2mV, 
+            # 9->1mV, 10->500uV, 11->200uV, 12->100uV, 13->50uV, 14->20uV
+            self.instrument.write(f"scal {self.instrument_params['signal_sensitivity']}")
+            self.instrument.query('scal?')
+
+            # Set the time constant
+            # Levels and range: 0->1us, 1->3us, 2->10us 3->30us, 4->100us, 5->300us, 6->1ms, 7->3ms, 8->10ms, 
+            # 9->30ms, 10->100ms, 11->300ms, 12->1s, 13->3s, 14->10s, 15->30s, 16->100s, 17->300s, 18->1000s, 19->3000s, 20->10000s
+            self.instrument.write(f"oflt {self.instrument_params['time_constant_level']}")
+            self.instrument.query('oflt?')
+
+            # Set the reference frequency of the sine output signal as 20.17 kHz
+            self.instrument.write(f"freq {self.instrument_params['ref_frequency']}")
+            self.instrument.query('freq?')
+
+            # Set the amplitude of the sine output signal 
+            self.instrument.write(f"slvl {self.instrument_params['sine_amplitude']}")
+            self.instrument.query('slvl?')
+
 
             yield self.instrument
 
         finally:
+            # Turn off sine output
+            self.instrument.write(f"slvl 0")
+            self.instrument.query('slvl?')
+            # Disconnect 
             self.instrument.close()
         
     @contextmanager

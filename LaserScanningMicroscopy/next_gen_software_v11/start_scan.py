@@ -14,17 +14,17 @@ from inst_driver import External_instrument
 
 if __name__ == '__main__':
     
-    display_parameters = Display_parameters(scan_id='MOKE_Test_sample_high_resolution')
+    display_parameters = Display_parameters(scan_id='Test_lockin')
 
     position_parameters = Position_parameters(
                                             x_size=60,
                                             y_size=60,
-                                            x_pixels=384,
+                                            x_pixels=100,
                                             # y_pixels=127,
                                             z_center=25,
                                             angle=90)
     
-    scan_parameters = Scan_parameters(frequency=1, 
+    scan_parameters = Scan_parameters(frequency=5, 
                                       input_mapping=["ai0","ai1"],
                                       return_to_zero=True)
     
@@ -55,9 +55,16 @@ if __name__ == '__main__':
     # scan_parameters.add_instrument(instrument3)
 
 
-    # Lockin_prop = {'time_constant_level': 1, 'sample_count': 128}
-    # instrument4 = External_instrument(instrument_type='Lockin', **Lockin_prop)
-    # scan_parameters.add_instrument(instrument4)
+    Lockin_prop = {
+                    'time_constant_level':9, 
+                    'volt_input_range':1, 
+                    'signal_sensitivity':6,
+                    'ref_frequency':20160,
+                    'sine_amplitude':0.55
+                    }
+        
+    instrument4 = External_instrument(instrument_type='Lockin', **Lockin_prop)
+    scan_parameters.add_instrument(instrument4)
 
     
     #############################################################################################
