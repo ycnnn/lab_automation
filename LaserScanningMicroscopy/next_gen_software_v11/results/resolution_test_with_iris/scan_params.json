@@ -1,0 +1,15 @@
+{
+    "frequencies": [
+        5,
+        5
+    ],
+    "channel_num": 2,
+    "input_mapping": [
+        "ai0",
+        "ai1"
+    ],
+    "return_to_zero_after_scan": true,
+    "instrument_list": [
+        "Empty_instrument"
+    ]
+}

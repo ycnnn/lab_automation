@@ -1,0 +1,24 @@
+{
+    "centers": [
+        50,
+        50,
+        25
+    ],
+    "angle_in_radian": 1.5707963267948966,
+    "scan_size": [
+        30,
+        0
+    ],
+    "pixels": [
+        120,
+        120
+    ],
+    "conversion_factor": [
+        0.1,
+        0.2
+    ],
+    "output_limit": [
+        0.0,
+        9.5
+    ]
+}

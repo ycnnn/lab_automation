@@ -196,9 +196,10 @@ class Lockin:
         finally:
             self.instrument.write('capturestop')
             buffer_len = int(self.instrument.query('captureprog?')[:-1])
-            self.data = np.array(
+            input_data = np.array(
                 self.instrument.query_binary_values(f'captureget? 0, {buffer_len}')
                 ).reshape(-1,2)[:self.reading_num,:].T
+            self.data = np.flip(input_data, axis=1)
 
 class Virtual_instrument:
     def __init__(self, scan_parameters=None, position_parameters=None, **kwargs):
