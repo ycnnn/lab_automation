@@ -1,0 +1,11 @@
+{
+    "Empty_instrument": {},
+    "Lockin": {
+        "address": "USB0::0xB506::0x2000::002765::INSTR",
+        "time_constant_level": 9,
+        "volt_input_range": 1,
+        "signal_sensitivity": 6,
+        "ref_frequency": 20160,
+        "sine_amplitude": 0.5
+    }
+}

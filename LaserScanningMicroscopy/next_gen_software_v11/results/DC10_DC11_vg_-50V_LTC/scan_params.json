@@ -1,0 +1,16 @@
+{
+    "frequencies": [
+        0.125,
+        0.5
+    ],
+    "channel_num": 4,
+    "input_mapping": [
+        "ai0",
+        "ai1"
+    ],
+    "return_to_zero_after_scan": true,
+    "instrument_list": [
+        "Empty_instrument",
+        "Lockin"
+    ]
+}
