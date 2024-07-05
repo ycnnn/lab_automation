@@ -14,21 +14,21 @@ from inst_driver import External_instrument
 
 if __name__ == '__main__':
     
-    display_parameters = Display_parameters(scan_id='DC1_DC2_vertical_line_scan_large')
+    display_parameters = Display_parameters(scan_id='scan_pattern_-45_deg')
 
     position_parameters = Position_parameters(
-                                            # x_size=17,
-                                            x_size=11,
-                                            y_size=0,
+                                            x_size=21,
+                                            # x_size=32,
+                                            y_size=21,
                                             x_center=51,
-                                            y_center=50,
-                                            x_pixels=80,
-                                            y_pixels=60,
-                                            z_center=40,
-                                            angle=45)
+                                            y_center=51,
+                                            x_pixels=250,
+                                            y_pixels=250,
+                                            z_center=25.5,
+                                            angle=-45)
     
-    scan_parameters = Scan_parameters(frequency=0.125, 
-                                      retrace_frequency=0.5,
+    scan_parameters = Scan_parameters(frequency=2,
+                                    #   retrace_frequency=0.5,
                                       input_mapping=["ai0","ai1"],
                                       return_to_zero=True)
     
@@ -51,24 +51,24 @@ if __name__ == '__main__':
     # Sometimes, the code will ask for additional parameters for setting up the instrument.
     # Even if those parameters are not supplied, the scan will go on, but the system will use default values and issue warning(s).
     
-    Keithley_prop = {'start_volt': -80, 'end_volt': -50}
-    instrument2 = External_instrument(instrument_type='Keithley2450', **Keithley_prop)
-    scan_parameters.add_instrument(instrument2)
+    # Keithley_prop = {'start_volt': -80, 'end_volt': 80}
+    # instrument2 = External_instrument(instrument_type='Keithley2450', **Keithley_prop)
+    # scan_parameters.add_instrument(instrument2)
 
     # instrument3 = External_instrument(instrument_type='Virtual_instrument')
     # scan_parameters.add_instrument(instrument3)
 
 
-    Lockin_prop = {
-                    'time_constant_level':10, 
-                    'volt_input_range':1, 
-                    'signal_sensitivity':6,
-                    'ref_frequency':20160,
-                    'sine_amplitude':1.5
-                    }
+    # Lockin_prop = {
+    #                 'time_constant_level':10, 
+    #                 'volt_input_range':1, 
+    #                 'signal_sensitivity':6,
+    #                 'ref_frequency':20160,
+    #                 'sine_amplitude':1.5
+    #                 }
         
-    instrument4 = External_instrument(instrument_type='Lockin', **Lockin_prop)
-    scan_parameters.add_instrument(instrument4)
+    # instrument4 = External_instrument(instrument_type='Lockin', **Lockin_prop)
+    # scan_parameters.add_instrument(instrument4)
 
     
     #############################################################################################
