@@ -79,7 +79,7 @@ def format(fig=None,
     
     fig = fig or plt.gcf()
 
-    for ax in fig.axes():
+    for ax in fig.axes:
 
         ax.tick_params(axis="y",direction="in")
         ax.tick_params(axis="x",direction="in")
@@ -101,7 +101,7 @@ def label_format(fig=None,
            show_labels=True):
     
     fig = fig or plt.gcf()
-    for ax in fig.axes():
+    for ax in fig.axes:
         if show_ticks:
             # ax.xaxis.set_major_formatter(x_format)
             # ax.yaxis.set_major_formatter(y_format)
