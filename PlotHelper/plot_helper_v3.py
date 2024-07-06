@@ -12,6 +12,7 @@ from matplotlib.lines import Line2D
 
 
 svg = {'bbox_inches':'tight', 'transparent':True,'pad_inches':0}
+font_size = 10
 
 def generate_colormap(N=1024):
     
@@ -73,23 +74,24 @@ def generate_colormap(N=1024):
     return cmap_red, cmap_blue, cmap_red_black, cmap_blue_black
 
 
-def format(ax=None,
-           linewidth=0.5, 
-           unit_pt=True):
+def format(fig=None,
+           linewidth=0.5):
     
-    ax = ax or plt.gca()
+    fig = fig or plt.gcf()
 
-    ax.tick_params(axis="y",direction="in")
-    ax.tick_params(axis="x",direction="in")
-    for axis in ['top','bottom','left','right']:
-        ax.spines[axis].set_linewidth(linewidth)
-    ax.xaxis.set_tick_params(width=linewidth)
-    ax.yaxis.set_tick_params(width=linewidth)
+    for ax in fig.axes():
+
+        ax.tick_params(axis="y",direction="in")
+        ax.tick_params(axis="x",direction="in")
+        for axis in ['top','bottom','left','right']:
+            ax.spines[axis].set_linewidth(linewidth)
+        ax.xaxis.set_tick_params(width=linewidth)
+        ax.yaxis.set_tick_params(width=linewidth)
 
 
         
-def label_format(ax=None,
-           label_size=7,
+def label_format(fig=None,
+           label_size=font_size,
            decimal_digits=0,
            x_format='{x:<.1f}',
            y_format='{x:<.1f}',
@@ -98,23 +100,24 @@ def label_format(ax=None,
            show_ticks=True,
            show_labels=True):
     
-    ax = ax or plt.gca()
-    if show_ticks:
-        # ax.xaxis.set_major_formatter(x_format)
-        # ax.yaxis.set_major_formatter(y_format)
-        ax.yaxis.labelpad = y_label_pad
-        ax.xaxis.labelpad = x_label_pad
-        for label in ax.get_xticklabels():
-            label.set_fontsize(label_size)   
-        for label in ax.get_yticklabels():
-            label.set_fontsize(label_size)
-    else:
-        ax.set_xticklabels([])
-        ax.set_yticklabels([])
-        
-    if show_labels:
-        ax.xaxis.label.set_size(label_size)
-        ax.yaxis.label.set_size(label_size)
+    fig = fig or plt.gcf()
+    for ax in fig.axes():
+        if show_ticks:
+            # ax.xaxis.set_major_formatter(x_format)
+            # ax.yaxis.set_major_formatter(y_format)
+            ax.yaxis.labelpad = y_label_pad
+            ax.xaxis.labelpad = x_label_pad
+            for label in ax.get_xticklabels():
+                label.set_fontsize(label_size)   
+            for label in ax.get_yticklabels():
+                label.set_fontsize(label_size)
+        else:
+            ax.set_xticklabels([])
+            ax.set_yticklabels([])
+            
+        if show_labels:
+            ax.xaxis.label.set_size(label_size)
+            ax.yaxis.label.set_size(label_size)
   
 
 
@@ -184,7 +187,7 @@ def boxplot(data,
 def scatter_format(scatter, 
                    edgecolor='red',
                    facecolor='None',
-                   linewidth=0.25,
+                   linewidth=0.5,
                    markersize=10):
     
     scatter.set_edgecolor(edgecolor)
@@ -194,7 +197,7 @@ def scatter_format(scatter,
     
 def line_format(lines, 
                    color='red',
-                   linewidth=0.25,
+                   linewidth=0.5,
                    linestyle='dashed'):
     for line in lines:
         line.set_color(color)
