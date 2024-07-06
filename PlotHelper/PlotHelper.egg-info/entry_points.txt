@@ -1,0 +1,2 @@
+[console_scripts]
+command = plot_helper:format
