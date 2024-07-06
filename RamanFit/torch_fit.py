@@ -152,7 +152,7 @@ def one_peak_map_fit(
                     x_input, 
                     y_input,
                     learning_rate=0.1,
-                    iterations=250,
+                    iterations=5000,
                     use_GPU=True,
                     spec_cutoff_range=(500.0,550.0)
                     ):
@@ -228,7 +228,7 @@ def two_peak_map_fit(
                     x_input, 
                     y_input,
                     learning_rate=0.1,
-                    iterations=250,
+                    iterations=5000,
                     use_GPU=True,
                     spec_cutoff_range=(350.0,450.0),
                     peak_0_center_initial_guess=384.0,
