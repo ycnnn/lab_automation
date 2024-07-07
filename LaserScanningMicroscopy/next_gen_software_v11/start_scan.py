@@ -63,7 +63,7 @@ if __name__ == '__main__':
     #                 'time_constant_level':10, 
     #                 'volt_input_range':1, 
     #                 'signal_sensitivity':6,
-    #                 'ref_frequency':20160,
+    #                 'ref_frequency':20170,
     #                 'sine_amplitude':1.5
     #                 }
         
