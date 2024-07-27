@@ -3,17 +3,9 @@
 import numpy as np
 import time
 
-# import nidaqmx as ni
-# from nidaqmx.constants import WAIT_INFINITELY
+# Note: this file is only used to test the non-DAQ-related part of the code.
+# In real experiment, refer to daq_driver instead of this file when calling DAQ functions in other files.
 
-
-# def query_devices():
-#     """Queries all the device information connected to the local system."""
-#     local = ni.system.System.local()
-#     for device in local.devices:
-#         print(f"Device Name: {device.name}, Product Type: {device.product_type}")
-#         print("Input channels:", [chan.name for chan in device.ai_physical_chans])
-#         print("Output channels:", [chan.name for chan in device.ao_physical_chans])
 
 
 def playrec(data, samplerate, input_mapping, output_mapping):
