@@ -21,8 +21,8 @@ if __name__ == '__main__':
                                             y_size=21,
                                             x_center=51,
                                             y_center=51,
-                                            x_pixels=200,
-                                            y_pixels=100,
+                                            x_pixels=2000,
+                                            y_pixels=1000,
                                             z_center=25.5,
                                             angle=-45)
     

@@ -1,12 +1,43 @@
 import sys
+import os
 import time
 from PySide6.QtWidgets import QApplication, QMainWindow, QLabel, QVBoxLayout, QWidget, QLabel
-from PySide6.QtGui import QGuiApplication
+from PySide6.QtGui import QGuiApplication, QFontDatabase, QFont
 from PySide6.QtCore import Qt
 import pyqtgraph as pg
 import numpy as np
 from decimal import Decimal
 
+def load_font(font_path):
+    dir_path = os.path.dirname(os.path.realpath(__file__))
+
+    font_id = QFontDatabase.addApplicationFont(dir_path + '/' +  font_path)
+    if font_id == -1:
+        print(f"Failed to load font from {font_path}")
+        return None
+    font_families = QFontDatabase.applicationFontFamilies(font_id)
+    if not font_families:
+        print(f"No font families found for {font_path}")
+        return None
+    return font_families[0]
+
+# def main():
+#     app = QApplication(sys.argv)
+    
+#     font_path = "fonts/DejaVuSansMono.ttf"  # Path to your font file
+#     font_family = load_font(font_path)
+    
+#     if font_family:
+#         app.setFont(QFont(font_family))
+    
+#     window = QWidget()
+#     layout = QVBoxLayout()
+#     label = QLabel("This is a custom font!")
+#     layout.addWidget(label)
+#     window.setLayout(layout)
+#     window.show()
+
+#     sys.exit(app.exec())
 
 
 
@@ -44,9 +75,9 @@ class SubWindow(QMainWindow):
        
         self.chart = pg.PlotWidget()
         self.img = pg.PlotWidget()
-        self.info_label = QLabel('  Currently scanning line 0')
-        self.top_label = QLabel('  Plot Max = 0.0')
-        self.bot_label = QLabel('  Plot Min = 0.0')
+        self.info_label = QLabel(' Currently scanning line 0')
+        self.top_label = QLabel(' Plot Max = 0.0')
+        self.bot_label = QLabel(' Plot Min = 0.0')
         
 
         
@@ -73,6 +104,13 @@ class QPlot:
                  channel_num) -> None:
 
         self.app = QApplication(sys.argv)
+
+        
+        font_family = load_font('font/SourceCodePro-Medium.ttf')
+        
+        if font_family:
+            self.app.setFont(QFont(font_family))
+
         self.counter = 0
         self.time = time.time()
         self.screen_width, self.screen_height = self.app.primaryScreen().size().toTuple()
@@ -144,13 +182,13 @@ class QPlot:
         for row_id in range(self.channel_num):
             self.charts[row_id].setData(fetched_data[row_id])
             new_chart_data_viewrange = self.charts[row_id].getViewBox().viewRange()[1]
-            self.top_labels[row_id].setText('  Plot Max = ' + f"{Decimal(new_chart_data_viewrange[0]):.2E}")
-            self.bot_labels[row_id].setText('  Plot Min = ' + f"{Decimal(new_chart_data_viewrange[1]):.2E}")
+            self.top_labels[row_id].setText(' Plot Max = ' + f"{Decimal(new_chart_data_viewrange[0]):.2E}")
+            self.bot_labels[row_id].setText(' Plot Min = ' + f"{Decimal(new_chart_data_viewrange[1]):.2E}")
             
 
 
             self.imgs[row_id].setImage(self.data[row_id])
-            self.info_labels[row_id].setText(f'  Scanning line {self.counter}, estimated time {self.remaining_time} s')
+            self.info_labels[row_id].setText(f' Scanning line {self.counter}, estimated time {self.remaining_time} s')
             
         
         QApplication.processEvents()

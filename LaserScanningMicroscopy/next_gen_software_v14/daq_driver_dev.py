@@ -33,6 +33,7 @@ def playrec(data, samplerate, input_mapping, output_mapping):
     nsamples = data.shape[1]
 
     return np.random.random(size=(nsamples, len(input_mapping)))
+    # return np.zeros(shape=(nsamples, len(input_mapping)))
     
 
 def daq_interface(ao0_1_write_data,

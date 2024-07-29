@@ -1,0 +1,18 @@
+{
+    "point_time_constant": [
+        1e-07,
+        1e-07
+    ],
+    "channel_num": 5,
+    "input_mapping": [
+        "ai0",
+        "ai1",
+        "ai2",
+        "ai3",
+        "ai4"
+    ],
+    "return_to_zero_after_scan": true,
+    "instrument_list": [
+        "Empty_instrument"
+    ]
+}
