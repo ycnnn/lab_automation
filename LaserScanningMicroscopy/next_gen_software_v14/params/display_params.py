@@ -13,6 +13,8 @@ class Display_parameters:
                  window_height=None,
                  darkmode=True,
                  text_bar_height=20,
+                 window_width_min=300, 
+                 window_width_max=500,
                  save_data=True):
         
         if len(scan_id) == 0:
@@ -34,7 +36,10 @@ class Display_parameters:
         self.window_width = window_width
         self.window_height = window_height
         self.text_bar_height = text_bar_height
+        self.window_width_min = window_width_min
+        self.window_width_max = window_width_max
         self.darkmode = darkmode
         self.save_data = save_data
+
        
         

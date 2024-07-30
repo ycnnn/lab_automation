@@ -126,7 +126,9 @@ class Data_receiver(mp.Process):
         self.app = QPlot(line_width=self.line_width, 
                          scan_num=self.scan_num, 
                          channel_num=self.scan_parameters.channel_num,
-                         text_bar_height=self.display_parameters.text_bar_height)
+                         text_bar_height=self.display_parameters.text_bar_height,
+                         window_width_min=self.display_parameters.window_width_min,
+                         window_width_max=self.display_parameters.window_width_max)
         #####################################################################
 
         for scan_index in range(self.scan_num):

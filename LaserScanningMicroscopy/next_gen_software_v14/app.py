@@ -85,6 +85,8 @@ class QPlot:
                  line_width, 
                  scan_num,
                  channel_num,
+                 window_width_min,
+                 window_width_max,
                  text_bar_height=20) -> None:
 
         self.app = QApplication(sys.argv)
@@ -108,7 +110,8 @@ class QPlot:
         self.bot_labels = []
         self.viewranges = []
         self.channel_num = channel_num
-        self.window_width = max(300,self.screen_width/(1+self.channel_num))
+        self.window_width = min(window_width_max, 
+                                max(window_width_min,self.screen_width/(1+self.channel_num)))
         self.window_height = self.window_width
         self.window_distance = self.screen_width/(1+self.channel_num)
         self.chart_height = self.window_height/2.5

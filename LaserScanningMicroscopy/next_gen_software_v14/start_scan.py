@@ -14,7 +14,7 @@ from inst_driver import External_instrument
 
 if __name__ == '__main__':
     
-    display_parameters = Display_parameters(scan_id='scan_pattern_-45_deg')
+    display_parameters = Display_parameters(scan_id='test')
 
     position_parameters = Position_parameters(
                                             x_size=21,
@@ -28,7 +28,7 @@ if __name__ == '__main__':
     
     scan_parameters = Scan_parameters(point_time_constant=0.001,
                                       # retrace_point_time_constant=0.000001,
-                                      input_mapping=["ai0","ai1", "ai2"],
+                                      input_mapping=["ai0"],
                                       return_to_zero=True)
 
 
