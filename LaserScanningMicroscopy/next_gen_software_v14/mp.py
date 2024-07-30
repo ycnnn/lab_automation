@@ -8,7 +8,7 @@ import json
 # Custom dependencies
 from app import QPlot
 from data_acquisition import Data_acquisitor
-from daq_driver_dev import reset_daq
+from daq_driver import reset_daq
 import inst_driver
 ######################################################################
 

@@ -1,5 +1,5 @@
 import numpy as np
-from daq_driver_dev import daq_interface
+from daq_driver import daq_interface
 
 
 class Data_acquisitor():
