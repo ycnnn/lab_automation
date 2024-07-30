@@ -182,8 +182,8 @@ class QPlot:
         for row_id in range(self.channel_num):
             self.charts[row_id].setData(fetched_data[row_id])
             new_chart_data_viewrange = self.charts[row_id].getViewBox().viewRange()[1]
-            self.top_labels[row_id].setText(' Plot Max = ' + f"{Decimal(new_chart_data_viewrange[0]):.2E}")
-            self.bot_labels[row_id].setText(' Plot Min = ' + f"{Decimal(new_chart_data_viewrange[1]):.2E}")
+            self.top_labels[row_id].setText(' Plot Max = ' + f"{Decimal(new_chart_data_viewrange[1]):.2E}")
+            self.bot_labels[row_id].setText(' Plot Min = ' + f"{Decimal(new_chart_data_viewrange[0]):.2E}")
             
 
 
