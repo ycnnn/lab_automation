@@ -28,7 +28,7 @@ if __name__ == '__main__':
     
     scan_parameters = Scan_parameters(point_time_constant=0.0000001,
                                       # retrace_point_time_constant=0.000001,
-                                      input_mapping=["ai0","ai1", "ai2", "ai3","ai4"],
+                                      input_mapping=["ai0","ai1", "ai2"],
                                       return_to_zero=True)
 
 

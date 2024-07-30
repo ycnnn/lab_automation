@@ -101,7 +101,8 @@ class QPlot:
     def __init__(self, 
                  line_width, 
                  scan_num,
-                 channel_num) -> None:
+                 channel_num,
+                 text_bar_height=20) -> None:
 
         self.app = QApplication(sys.argv)
 
@@ -129,7 +130,7 @@ class QPlot:
         self.window_distance = self.screen_width/(1+self.channel_num)
         self.chart_height = self.window_height/2.5
         self.img_height = max(50, self.window_width * self.scan_num/self.line_width)
-        self.label_height = 15
+        self.label_height = text_bar_height
         self.total_width_scaling_factor = 1.08
         self.total_height_scaling_factor = 1.08
 
@@ -180,15 +181,16 @@ class QPlot:
         self.remaining_time = int(elapse_time*(self.scan_num - self.counter))
 
         for row_id in range(self.channel_num):
+            self.windows[row_id].setWindowTitle(f'Channel {row_id}, estimated time {self.remaining_time} s')
             self.charts[row_id].setData(fetched_data[row_id])
             new_chart_data_viewrange = self.charts[row_id].getViewBox().viewRange()[1]
-            self.top_labels[row_id].setText(' Plot Max = ' + f"{Decimal(new_chart_data_viewrange[1]):.2E}")
-            self.bot_labels[row_id].setText(' Plot Min = ' + f"{Decimal(new_chart_data_viewrange[0]):.2E}")
+            self.top_labels[row_id].setText(' Plot Max = ' + f"{Decimal(new_chart_data_viewrange[1]):+.1E}")
+            self.bot_labels[row_id].setText(' Plot Min = ' + f"{Decimal(new_chart_data_viewrange[0]):+.1E}")
             
 
 
             self.imgs[row_id].setImage(self.data[row_id])
-            self.info_labels[row_id].setText(f' Scanning line {self.counter}, estimated time {self.remaining_time} s')
+            self.info_labels[row_id].setText(f' Scanning line {self.counter}/{self.scan_num}')
             
         
         QApplication.processEvents()

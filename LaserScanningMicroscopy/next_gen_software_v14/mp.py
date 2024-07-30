@@ -123,7 +123,10 @@ class Data_receiver(mp.Process):
         # self.app = QApplication(sys.argv)
         # self.window = QPlot(line_width=self.line_width, scan_num=self.scan_num, channel_num=self.scan_parameters.channel_num)
         # self.window.show()
-        self.app = QPlot(line_width=self.line_width, scan_num=self.scan_num, channel_num=self.scan_parameters.channel_num)
+        self.app = QPlot(line_width=self.line_width, 
+                         scan_num=self.scan_num, 
+                         channel_num=self.scan_parameters.channel_num,
+                         text_bar_height=self.display_parameters.text_bar_height)
         #####################################################################
 
         for scan_index in range(self.scan_num):
