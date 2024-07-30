@@ -21,23 +21,6 @@ def load_font(font_path):
         return None
     return font_families[0]
 
-# def main():
-#     app = QApplication(sys.argv)
-    
-#     font_path = "fonts/DejaVuSansMono.ttf"  # Path to your font file
-#     font_family = load_font(font_path)
-    
-#     if font_family:
-#         app.setFont(QFont(font_family))
-    
-#     window = QWidget()
-#     layout = QVBoxLayout()
-#     label = QLabel("This is a custom font!")
-#     layout.addWidget(label)
-#     window.setLayout(layout)
-#     window.show()
-
-#     sys.exit(app.exec())
 
 
 
