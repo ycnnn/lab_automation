@@ -107,6 +107,8 @@ def daq_interface(ao0_1_write_data,
     # Something needs to be done here!
 
     # time.sleep(1/frequency)
+    if len(sampled_data.shape) == 1:
+        sampled_data = sampled_data.reshape(-1,1)
     return np.flip(sampled_data, axis=1)
 
 def set_z_height(scan_parameters, position_parameters):
