@@ -182,6 +182,7 @@ class Position_parameters:
         self.dict = dict()
         self.dict['centers'] = [self.x_center, self.y_center, self.z_center]
         self.dict['angle_in_radian'] = self.angle
+        self.dict['angle_in_degrees'] = self.angle / np.pi * 180.0
         self.dict['scan_size'] = [self.x_size, self.y_size]
         self.dict['pixels'] = [self.x_pixels, self.y_pixels]
         self.dict['conversion_factor'] = [self.conversion_factor, self.z_conversion_factor]
