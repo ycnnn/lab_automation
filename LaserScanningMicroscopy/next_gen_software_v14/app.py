@@ -34,7 +34,7 @@ def widget_format(widget):
     for axis_label in ['left', 'right', 'bottom', 'top']:
         widget.showAxis(axis_label)
         widget.getAxis(axis_label).setTicks([])
-        widget.getAxis(axis_label).setStyle(tickLength=2,showValues=True)
+        widget.getAxis(axis_label).setStyle(tickLength=2,showValues=False)
       
 
 
