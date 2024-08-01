@@ -58,9 +58,9 @@ class SubWindow(QMainWindow):
        
         self.chart = pg.PlotWidget()
         self.img = pg.PlotWidget()
-        self.info_label = QLabel(' Currently scanning line 0')
-        self.top_label = QLabel(' Plot Max = 0.0')
-        self.bot_label = QLabel(' Plot Min = 0.0')
+        self.info_label = QLabel('Currently scanning line 0')
+        self.top_label = QLabel('Plot Max = 0.0')
+        self.bot_label = QLabel('Plot Min = 0.0')
         
 
         
@@ -170,13 +170,13 @@ class QPlot:
             self.windows[row_id].setWindowTitle(f'Channel {row_id}, estimated time {self.remaining_time} s')
             self.charts[row_id].setData(fetched_data[row_id])
             new_chart_data_viewrange = self.charts[row_id].getViewBox().viewRange()[1]
-            self.top_labels[row_id].setText(' Plot Max = ' + f"{Decimal(new_chart_data_viewrange[1]):+.1E}")
-            self.bot_labels[row_id].setText(' Plot Min = ' + f"{Decimal(new_chart_data_viewrange[0]):+.1E}")
+            self.top_labels[row_id].setText('Plot Max = ' + f"{Decimal(new_chart_data_viewrange[1]):+.1E}")
+            self.bot_labels[row_id].setText('Plot Min = ' + f"{Decimal(new_chart_data_viewrange[0]):+.1E}")
             
 
 
             self.imgs[row_id].setImage(self.data[row_id])
-            self.info_labels[row_id].setText(f' Scanning line {self.counter}/{self.scan_num}')
+            self.info_labels[row_id].setText(f'Scanning line {self.counter}/{self.scan_num}')
             
         
         QApplication.processEvents()
