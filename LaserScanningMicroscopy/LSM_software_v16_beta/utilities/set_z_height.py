@@ -4,7 +4,8 @@ parentdir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 os.sys.path.insert(0,parentdir) 
 from source.params.position_params import Position_parameters
 from source.params.scan_params import Scan_parameters
-from source.daq_driver_simulated import reset_daq, set_z_height, read_daq_output
+# from source.daq_driver_simulated import reset_daq, set_z_height, read_daq_output
+from source.daq_driver import reset_daq, set_z_height, read_daq_output
 
 if __name__=='__main__':
     message = 'Enter command.\nEnter a number to move the stage height;\nEnter R for resetting the DAQ;\nPress enter to switch the stage height between the last two values you entered.\nEnter anything else to quit the code.\n\n'
