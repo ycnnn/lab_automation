@@ -72,12 +72,12 @@ def reset_daq(scan_parameters, destination=np.array([0,0,0,0]), ramp_steps=50):
     return np.array([0,0,0,0])
 
 
+def set_z_height(scan_parameters, position_parameters):
+    if position_parameters.z_center < -0.25 or position_parameters.z_center > 49.0:
+        print('Error: input z height is beyond the piezo stage travel range.')
+        return
+    print(f'Stage Z height has been moved to {position_parameters.z_center}.\n')
+    return
 
-
-# def lockin_acquision(position_parameters,lockin=None):
-    
-#     lockin.buffer.stop_capture()
-#     x_data = np.array(lockin.buffer.get_capture_data(position_parameters.x_pixels)['X'])
-#     y_data = np.array(lockin.buffer.get_capture_data(position_parameters.x_pixels)['Y'])
-#     lockin.buffer.start_capture('ONE','SAMP')
-#     pass
+def read_daq_output(scan_parameters):
+    return np.array([1,1,1,1])

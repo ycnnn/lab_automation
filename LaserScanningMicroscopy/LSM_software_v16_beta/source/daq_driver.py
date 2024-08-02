@@ -127,6 +127,7 @@ def set_z_height(scan_parameters, position_parameters):
             # write_task.ao_channels.add_ao_voltage_chan(scan_parameters.DAQ_name + "/ao2",
             #                             min_val=-10, max_val=10)
         write_task.write(position_parameters.center_output)
+    print(f'Stage Z height has been moved to {position_parameters.z_center}.\n')
     return
 
 def read_daq_output(scan_parameters):
