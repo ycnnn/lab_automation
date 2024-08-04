@@ -137,6 +137,12 @@ class QPlot:
             self.windows.append(temp_window)
 
             chart = temp_window.chart.plot(self.data[channel_id,:,0])
+
+
+            temp_window.chart.getViewBox().setDefaultPadding(padding=0.1)
+            temp_window.chart.getViewBox().enableAutoRange(pg.ViewBox.XAxis, False)
+
+            
             zero_line = pg.InfiniteLine(pos=0, angle=0, pen=pg.mkPen('r', width=2, style=Qt.DashLine))
             if self.show_zero_level:
                 temp_window.chart.addItem(zero_line)
