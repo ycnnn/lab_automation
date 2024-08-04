@@ -337,6 +337,7 @@ class LaserDiode:
             yield None
         finally:
             self.instrument.write('output:state 0')
+            self.instrument.write(f"source1:current:level:amplitude 0.01")
             self.instrument.close()
         
     @contextmanager
