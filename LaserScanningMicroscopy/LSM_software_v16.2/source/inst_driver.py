@@ -328,7 +328,7 @@ class LaserDiode:
         try:
             rm = pyvisa.ResourceManager()
             self.instrument = rm.open_resource(self.instrument_params['address'])
-            self.instrument.write('*rst')
+            # self.instrument.write('*rst')
             if self.instrument_params['current_level'] < 0 or self.instrument_params['current_level'] >= 0.101:
                 print('Warning: the laser current setpoint is outside the allowed range.\nFor your safety, the laser power has been set to 10 mA.')
                 self.instrument_params['current_level'] = 0.01
