@@ -5,7 +5,6 @@ os.sys.path.insert(0,parentdir)
 import sys
 ######################################################################
 # Custom dependencies
-# from mp import Data_fetcher, Data_receiver
 from source.params.position_params import Position_parameters
 from source.params.scan_params import Scan_parameters
 from source.params.display_params import Display_parameters
@@ -39,24 +38,16 @@ if __name__ == '__main__':
                                       input_mapping=["ai0"],
                                       return_to_zero=True)
 
-
+    
+    
+    # Setting up the external input instrument(s)
+ 
   
     Laser_prop = {'current_level': 0.080}
     instrument3 = External_instrument(instrument_type='Laser', **Laser_prop)
     scan_parameters.add_instrument(instrument3)
 
   
-
-    # Setting up the external input instrument(s)
-    # Sometimes, the code will ask for additional parameters for setting up the instrument.
-    # Even if those parameters are not supplied, the scan will go on, but the system will use default values and issue warning(s).
-    # Uncomment the following code as needed.
-    
-
-
-    # instrument2 = External_instrument(instrument_type='Virtual_instrument')
-    # scan_parameters.add_instrument(instrument2)
-
     Keithley_prop = {'start_volt': -60, 'end_volt': 60}
     instrument3 = External_instrument(instrument_type='Keithley2450', **Keithley_prop)
     scan_parameters.add_instrument(instrument3)
