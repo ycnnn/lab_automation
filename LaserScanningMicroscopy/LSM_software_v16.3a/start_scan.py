@@ -39,20 +39,18 @@ if __name__ == '__main__':
                                       return_to_zero=True)
 
 
-  
-    # Laser_prop = {'current_level': 0.010}
-    # instrument3 = External_instrument(instrument_type='Laser', **Laser_prop)
-    # scan_parameters.add_instrument(instrument3)
-
-  
-
     # Setting up the external input instrument(s)
     # Sometimes, the code will ask for additional parameters for setting up the instrument.
     # Even if those parameters are not supplied, the scan will go on, but the system will use default values and issue warning(s).
     # Uncomment the following code as needed.
+
     
+    # Laser_prop = {'current_level': 0.010}
+    # instrument3 = External_instrument(instrument_type='Laser', **Laser_prop)
+    # scan_parameters.add_instrument(instrument3)
 
 
+    
     # instrument2 = External_instrument(instrument_type='Virtual_instrument')
     # scan_parameters.add_instrument(instrument2)
 
