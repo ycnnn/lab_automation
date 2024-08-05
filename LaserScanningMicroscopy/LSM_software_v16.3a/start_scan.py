@@ -1,5 +1,6 @@
 import shutil
 import os
+import sys
 ######################################################################
 # Custom dependencies
 # from mp import Data_fetcher, Data_receiver
@@ -14,22 +15,13 @@ from source.inst_driver import External_instrument
 
 if __name__ == '__main__':
     
-    # display_parameters = Display_parameters(scan_id='HJ_equal_Vg_-30V')
-
-    # position_parameters = Position_parameters(
-    #                                         x_size=50,
-    #                                         y_size=50,
-    #                                         x_pixels=100,
-    #                                         y_pixels=100,
-    #                                         z_center=9.5,
-    #                                         angle=-35)
+    try:
+        scan_id = sys.argv[1]
+    except:
+        scan_id = 'scan'
     
-    # scan_parameters = Scan_parameters(point_time_constant=0.12,
-    #                                   retrace_point_time_constant=0.02,
-    #                                   input_mapping=["ai0"],
-    #                                   return_to_zero=True)
     
-    display_parameters = Display_parameters(scan_id='test_laser')
+    display_parameters = Display_parameters(scan_id=scan_id)
 
     position_parameters = Position_parameters(
                                             x_size=0,
@@ -37,20 +29,20 @@ if __name__ == '__main__':
                                             x_center=0,
                                             y_center=0,
                                             x_pixels=100,
-                                            y_pixels=30,
+                                            y_pixels=100,
                                             z_center=0,
                                             angle=-35)
     
-    scan_parameters = Scan_parameters(point_time_constant=0.03,
-                                      retrace_point_time_constant=0.02,
+    scan_parameters = Scan_parameters(point_time_constant=0.0001,
+                                    #   retrace_point_time_constant=0.00002,
                                       input_mapping=["ai0"],
                                       return_to_zero=True)
 
 
   
-    Laser_prop = {'current_level': 0.010}
-    instrument3 = External_instrument(instrument_type='Laser', **Laser_prop)
-    scan_parameters.add_instrument(instrument3)
+    # Laser_prop = {'current_level': 0.010}
+    # instrument3 = External_instrument(instrument_type='Laser', **Laser_prop)
+    # scan_parameters.add_instrument(instrument3)
 
   
 

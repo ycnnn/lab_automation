@@ -2,11 +2,22 @@ import sys
 import os
 import time
 from PySide6.QtWidgets import QApplication, QMainWindow, QLabel, QVBoxLayout, QWidget, QLabel
-from PySide6.QtGui import QGuiApplication, QFontDatabase, QFont
+from PySide6.QtGui import QGuiApplication, QFontDatabase, QFont, QColor
 from PySide6.QtCore import Qt
 import pyqtgraph as pg
 import numpy as np
 from decimal import Decimal
+
+
+class CustomAxisItem(pg.AxisItem):
+    def __init__(self, axis_label_ticks_distance, *args, **kwargs):
+        pg.AxisItem.__init__(self, *args, **kwargs)
+        self.setStyle(tickTextOffset=axis_label_ticks_distance)  # Move tick labels inside
+    def tickStrings(self, values, scale, spacing):
+        # Generate tick strings with scientific notation, 1 digit after decimal, and always show sign
+        return [f"{Decimal(value):+.1E}" for value in values]
+        
+  
 
 def load_font(font_path):
     dir_path = os.path.dirname(os.path.realpath(__file__))
@@ -19,6 +30,7 @@ def load_font(font_path):
     if not font_families:
         print(f"No font families found for {font_path}")
         return None
+
     return font_families[0]
 
 
@@ -31,7 +43,9 @@ def widget_format(widget):
     # widget.setXRange(0, x_range, padding=0)
     widget.setDefaultPadding(0)
 
-    for axis_label in ['left', 'right', 'bottom', 'top']:
+    for axis_label in [
+        # 'left', 
+                       'right', 'bottom', 'top']:
         widget.showAxis(axis_label)
         widget.getAxis(axis_label).setTicks([])
         widget.getAxis(axis_label).setStyle(tickLength=2,showValues=False)
@@ -59,8 +73,6 @@ class SubWindow(QMainWindow):
         self.chart = pg.PlotWidget()
         self.img = pg.PlotWidget()
         self.info_label = QLabel('Currently scanning line 0')
-        self.top_label = QLabel('Plot Max = 0.0')
-        self.bot_label = QLabel('Plot Min = 0.0')
         
 
         
@@ -70,9 +82,7 @@ class SubWindow(QMainWindow):
         
 
         self.layout.addWidget(self.info_label)
-        self.layout.addWidget(self.top_label)
         self.layout.addWidget(self.chart)
-        self.layout.addWidget(self.bot_label)
         self.layout.addWidget(self.img)
 
         widget_format(self.chart)
@@ -88,15 +98,21 @@ class QPlot:
                  window_width_min,
                  window_width_max,
                  show_zero_level,
+                 font_size,
+                 axis_label_ticks_distance=10,
                  text_bar_height=20) -> None:
 
         self.app = QApplication(sys.argv)
+        self.font_size = font_size
 
         
         font_family = load_font('font/SourceCodePro-Medium.ttf')
         
+        
         if font_family:
-            self.app.setFont(QFont(font_family))
+            global_font = QFont(font_family)
+            global_font.setPixelSize(self.font_size)
+            self.app.setFont(global_font)
 
         self.counter = 0
         self.time = time.time()
@@ -107,22 +123,46 @@ class QPlot:
         self.charts = []
         self.imgs = []
         self.info_labels = []
-        self.top_labels = []
-        self.bot_labels = []
-        self.viewranges = []
         self.channel_num = channel_num
+        self.axis_label_ticks_distance = axis_label_ticks_distance
+
+
+
+
+
         self.window_width = min(window_width_max, 
                                 max(window_width_min,self.screen_width/(1+self.channel_num)))
         self.window_height = self.window_width
         self.window_distance = self.screen_width/(1+self.channel_num)
+
         self.chart_height = self.window_height/2.5
-        self.img_height = max(50, self.window_width * self.scan_num/self.line_width)
+        character_aspect_ratio = 0.5
+
+        self.axis_tick_label_width = 7 * self.font_size * character_aspect_ratio + self.axis_label_ticks_distance
+
+        self.img_height = min(
+            max(
+                50, 
+                (self.window_width - self.axis_tick_label_width) * self.scan_num/self.line_width),
+
+            self.screen_height * 0.9)
+        
+        
+        self.img_height = min(self.img_height, self.screen_height *0.8)
+        
+
         self.label_height = text_bar_height
         self.total_width_scaling_factor = 1.08
         self.total_height_scaling_factor = 1.08
+        self.axis_label_ticks_distance = axis_label_ticks_distance
 
         self.total_width = self.total_width_scaling_factor*self.window_width
-        self.total_height = self.total_height_scaling_factor*(self.chart_height + self.img_height + 3 * self.label_height)
+        self.total_height = self.total_height_scaling_factor*(5 + self.chart_height + self.img_height + self.label_height)
+
+
+
+
+
 
         self.data = np.zeros(shape=(self.channel_num, self.line_width, self.scan_num))
         self.retrace_data = np.zeros(shape=(self.channel_num, self.line_width, self.scan_num))
@@ -144,6 +184,23 @@ class QPlot:
 
             
             zero_line = pg.InfiniteLine(pos=0, angle=0, pen=pg.mkPen('r', width=2, style=Qt.DashLine))
+
+            y_axis = CustomAxisItem(orientation='left',
+                                     axis_label_ticks_distance=self.axis_label_ticks_distance)
+            img_y_axis = CustomAxisItem(orientation='left',
+                                        axis_label_ticks_distance=self.axis_label_ticks_distance)
+
+            # Replace the default y-axis with the custom axis for both the cart and the image
+            temp_window.chart.setAxisItems({'left': y_axis})
+            temp_window.img.setAxisItems({'left': img_y_axis})
+
+            # Set the color of y tick labels in the chart 
+            # color_for_chart_axis_tick_label = QColor(0, 0, 0, 0)
+            temp_window.chart.getAxis('left').setTextPen('white')
+
+            # Hide the y axis of the image 
+            transparent_color_for_img_axis_tick_label = QColor(0, 0, 0, 0)
+            temp_window.img.getAxis('left').setTextPen(transparent_color_for_img_axis_tick_label)
             if self.show_zero_level:
                 temp_window.chart.addItem(zero_line)
 
@@ -152,21 +209,18 @@ class QPlot:
 
             self.charts.append(chart)
             self.imgs.append(img)
-            self.viewranges.append([chart.getViewBox().viewRange()])
             self.info_labels.append(temp_window.info_label)
-            self.top_labels.append(temp_window.top_label)
-            self.bot_labels.append(temp_window.bot_label)
 
             
 
         # Move windows around, and set the size of each window
         for channel_id in range(self.channel_num):
             self.windows[channel_id].info_label.setFixedHeight(self.label_height)
-            self.windows[channel_id].top_label.setFixedHeight(self.label_height)
-            self.windows[channel_id].bot_label.setFixedHeight(self.label_height)
 
             self.windows[channel_id].chart.setFixedSize(self.window_width, self.chart_height)
+            
             self.windows[channel_id].img.setFixedSize(self.window_width, self.img_height)
+
             self.windows[channel_id].setFixedSize(self.total_width, self.total_height)
             self.windows[channel_id].move(self.window_distance*channel_id, 0)
 
@@ -184,9 +238,6 @@ class QPlot:
 
             self.charts[row_id].setData(fetched_data[row_id])
 
-            new_chart_data_viewrange = self.charts[row_id].getViewBox().viewRange()[1]
-            self.top_labels[row_id].setText('Plot Max = ' + f"{Decimal(new_chart_data_viewrange[1]):+.1E}")
-            self.bot_labels[row_id].setText('Plot Min = ' + f"{Decimal(new_chart_data_viewrange[0]):+.1E}")
 
             
             

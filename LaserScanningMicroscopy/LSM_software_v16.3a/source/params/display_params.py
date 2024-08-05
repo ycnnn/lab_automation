@@ -16,7 +16,9 @@ class Display_parameters:
                  text_bar_height=20,
                  window_width_min=300, 
                  window_width_max=500,
+                 axis_label_ticks_distance=12,
                  show_zero_level=True,
+                 font_size=12,
                  save_data=True):
         
         if len(scan_id) == 0:
@@ -29,6 +31,9 @@ class Display_parameters:
         path = str(Path(os.path.dirname(full_path)).parents[1].absolute()) + '/results/' + self.scan_id + '/'
     
         self.save_destination = path if not save_destination else save_destination
+        self.axis_label_ticks_distance = axis_label_ticks_distance
+        self.font_size = font_size
+       
 
         # The following code save the data.
         # In case there is already a filder that hav the same name as the save desitnation,

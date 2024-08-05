@@ -128,7 +128,10 @@ class Data_receiver(mp.Process):
                          channel_num=self.scan_parameters.channel_num,
                          text_bar_height=self.display_parameters.text_bar_height,
                          window_width_min=self.display_parameters.window_width_min,
-                         window_width_max=self.display_parameters.window_width_max)
+                         window_width_max=self.display_parameters.window_width_max,
+                         show_zero_level=self.display_parameters.show_zero_level,
+                         font_size=self.display_parameters.font_size,
+                         axis_label_ticks_distance=self.display_parameters.axis_label_ticks_distance)
         #####################################################################
 
         for scan_index in range(self.scan_num):
