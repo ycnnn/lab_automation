@@ -33,8 +33,8 @@ if __name__ == '__main__':
                                             z_center=0,
                                             angle=-35)
     
-    scan_parameters = Scan_parameters(point_time_constant=0.0001,
-                                    #   retrace_point_time_constant=0.00002,
+    scan_parameters = Scan_parameters(point_time_constant=0.01,
+                                    #   retrace_point_time_constant=0.01,
                                       input_mapping=["ai0"],
                                       return_to_zero=True)
 

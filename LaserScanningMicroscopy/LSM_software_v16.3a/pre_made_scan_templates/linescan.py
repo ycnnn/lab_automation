@@ -21,6 +21,8 @@ if __name__ == '__main__':
       scan_id = sys.argv[1]
     except:
        scan_id = 'linescan'
+
+    start_gate_bias, end_gate_bias = (-60,60)
     
 
     display_parameters = Display_parameters(scan_id=scan_id)
@@ -48,7 +50,7 @@ if __name__ == '__main__':
     scan_parameters.add_instrument(instrument3)
 
   
-    Keithley_prop = {'start_volt': -60, 'end_volt': 60}
+    Keithley_prop = {'start_volt': start_gate_bias, 'end_volt': end_gate_bias}
     instrument3 = External_instrument(instrument_type='Keithley2450', **Keithley_prop)
     scan_parameters.add_instrument(instrument3)
 
