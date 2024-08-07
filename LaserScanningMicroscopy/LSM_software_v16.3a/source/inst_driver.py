@@ -110,7 +110,7 @@ class Lockin:
         self.kwargs = kwargs
         self.instrument_params = {'address': "USB0::0xB506::0x2000::002765::INSTR",
                                   'time_constant_level':9, 
-                                  'volt_input_range':1, 
+                                  'volt_input_range':2, 
                                   'signal_sensitivity':6,
                                   'ref_frequency':20170,
                                   'sine_amplitude':0.5
