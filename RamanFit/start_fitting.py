@@ -27,22 +27,24 @@ if __name__ == "__main__":
         peak_0_center_initial_guess = float(input('Initial E peak position guess (in cm-1) ? \n'))
         peak_1_center_initial_guess = float(input('Initial A peak position guess (in cm-1) ? \n'))
         save_format = float(input('How to save the result? Enter 0 for .csv file, enter 1 for .npy file. \n'))
+
+        filename = sys.argv[1].split('.txt') + '_'
         si_params, params = start_MoS2_fit(sys.argv[1],
                         peak_0_center_initial_guess=peak_0_center_initial_guess,
                         peak_1_center_initial_guess=peak_1_center_initial_guess)
         if save_format == 0:
-            np.savetxt('Si_peak_position.csv', si_params['peak_0_centers'])
-            np.savetxt('E_peak_position.csv', params['peak_0_centers'])
-            np.savetxt('A_peak_position.csv', params['peak_1_centers'])
+            np.savetxt(filename + 'Si_peak_position.csv', si_params['peak_0_centers'])
+            np.savetxt(filename + 'E_peak_position.csv', params['peak_0_centers'])
+            np.savetxt(filename + 'A_peak_position.csv', params['peak_1_centers'])
         else:
-            np.save('Si_peak_position', si_params['peak_0_centers'])
-            np.save('E_peak_position', params['peak_0_centers'])
-            np.save('A_peak_position', params['peak_1_centers'])
+            np.save(filename + 'Si_peak_position', si_params['peak_0_centers'])
+            np.save(filename + 'E_peak_position', params['peak_0_centers'])
+            np.save(filename + 'A_peak_position', params['peak_1_centers'])
     else:
         si_params, params = start_MoS2_fit(sys.argv[1])
-        np.savetxt('Si_peak_position.csv', si_params['peak_0_centers'])
-        np.savetxt('E_peak_position.csv', params['peak_0_centers'])
-        np.savetxt('A_peak_position.csv', params['peak_1_centers'])
+        np.savetxt(filename + 'Si_peak_position.csv', si_params['peak_0_centers'])
+        np.savetxt(filename + 'E_peak_position.csv', params['peak_0_centers'])
+        np.savetxt(filename + 'A_peak_position.csv', params['peak_1_centers'])
         
   
 
