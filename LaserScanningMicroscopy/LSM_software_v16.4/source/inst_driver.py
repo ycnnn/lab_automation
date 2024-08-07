@@ -343,8 +343,8 @@ class LaserDiode:
             # self.instrument.write('*rst')
             if np.min(self.current_levels) < 0 or np.max(self.current_levels) >= 0.101:
                 print('Warning: the laser current setpoint is outside the allowed range.\nFor your safety, the laser power has been set to 10 mA.')
-                self.instrument_params['current_level'] = 0.01
-            self.instrument.write(f"source1:current:level:amplitude {self.instrument_params['current_level']}")
+                self.current_levels = 0.01 * np.ones(self.current_levels.shape) 
+            self.instrument.write(f"source1:current:level:amplitude {self.current_levels[0]}")
             self.instrument.write('output:state 1')
             yield None
         finally:
