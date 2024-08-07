@@ -22,7 +22,7 @@ def start_MoS2_fit(filename,
 
 if __name__ == "__main__":
 
-    filename = sys.argv[1].split('.txt') + '_'
+    filename = sys.argv[1].split('.txt')[0] + '_'
     
  
     peak_0_center_initial_guess = 384.0
