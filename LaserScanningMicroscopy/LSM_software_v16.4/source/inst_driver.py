@@ -17,6 +17,16 @@ instrument_props = {
     'Laser':{'additional_channel_num':0}
 }
 
+def parameter_list_generator(start_val, end_val, position_parameters):
+    parameter_levels = np.repeat(
+            np.linspace(start_val,
+                        end_val,
+                        position_parameters.y_pixels).reshape(1,-1),
+            repeats=2,
+            axis=1
+        ).reshape(-1)
+    return parameter_levels
+
 class External_instrument:
     def __init__(self, 
                  instrument_type=None,
@@ -123,9 +133,12 @@ class Lockin:
             else:
                 warnings.warn('\n\n\nThe ' + key + ' of the lockin is not provided.'
                                 +'\nThe ' + key + ' has been set to the default value as ' + str(value) + '.\n\n\n')
-        self.sine_amplitudes = np.linspace(self.instrument_params['start_sine_amplitude'],
-                                           self.instrument_params['end_sine_amplitude'],
-                                           num=position_parameters.y_pixels)
+        # self.sine_amplitudes = np.linspace(self.instrument_params['start_sine_amplitude'],
+        #                                    self.instrument_params['end_sine_amplitude'],
+        #                                    num=position_parameters.y_pixels)
+        self.sine_amplitudes = parameter_list_generator(start_val=self.instrument_params['start_sine_amplitude'],
+                                                    end_val=self.instrument_params['end_sine_amplitude'],
+                                                    position_parameters=position_parameters)
     
  
     @contextmanager
@@ -272,13 +285,16 @@ class Keithley2450:
         
         ##################################################################################
         # Instrument-specific initialization
-        self.volt_levels = np.repeat(
-            np.linspace(self.instrument_params['start_volt'],
-                        self.instrument_params['end_volt'],
-                        self.volt_steps).reshape(1,-1),
-            repeats=2,
-            axis=1
-        ).reshape(-1)
+        # self.volt_levels = np.repeat(
+        #     np.linspace(self.instrument_params['start_volt'],
+        #                 self.instrument_params['end_volt'],
+        #                 self.volt_steps).reshape(1,-1),
+        #     repeats=2,
+        #     axis=1
+        # ).reshape(-1)
+        self.volt_levels = parameter_list_generator(start_val=self.instrument_params['start_volt'],
+                                                    end_val=self.instrument_params['end_volt'],
+                                                    position_parameters=position_parameters)
 
         # self.initialize_instrument()
         
@@ -330,9 +346,12 @@ class LaserDiode:
                 warnings.warn('\n\n\nThe ' + key + ' of the instrument is not provided.'
                             +'\nThe ' + key + ' has been set to the default value as ' + str(value) + '.\n\n\n')
                 
-        self.current_levels = np.linspace(self.instrument_params['start_current_level'],
-                                           self.instrument_params['end_current_level'],
-                                           num=position_parameters.y_pixels)
+        # self.current_levels = np.linspace(self.instrument_params['start_current_level'],
+        #                                    self.instrument_params['end_current_level'],
+        #                                    num=position_parameters.y_pixels)
+        self.current_levels = parameter_list_generator(start_val=self.instrument_params['start_current_level'],
+                                                    end_val=self.instrument_params['end_current_level'],
+                                                    position_parameters=position_parameters)
     
     
     @contextmanager
