@@ -375,7 +375,7 @@ class LaserDiode:
     def scan(self, **kwargs):
         try:
             scan_index = kwargs['scan_index']
-            self.instrument.write(f"slvl {self.current_levels[scan_index]}")
+            self.instrument.write(f"source1:current:level:amplitude {self.current_levels[scan_index]}")
             yield None
         finally:
             pass
