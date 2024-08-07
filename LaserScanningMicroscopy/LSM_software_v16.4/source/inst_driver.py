@@ -186,7 +186,7 @@ class Lockin:
             self.instrument.query('freq?')
 
             # Set the amplitude of the sine output signal 
-            self.instrument.write(f"slvl {self.instrument_params['sine_amplitude']}")
+            self.instrument.write(f"slvl {self.sine_amplitudes[0]}")
             self.instrument.query('slvl?')
 
 
