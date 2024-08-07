@@ -39,6 +39,10 @@ if __name__ == '__main__':
                                     #   retrace_point_time_constant=0.01,
                                       input_mapping=["ai0"],
                                       return_to_zero=True)
+    
+    Laser_prop = {'current_level': 0.080}
+    instrument3 = External_instrument(instrument_type='Laser', **Laser_prop)
+    scan_parameters.add_instrument(instrument3)
 
 
 
