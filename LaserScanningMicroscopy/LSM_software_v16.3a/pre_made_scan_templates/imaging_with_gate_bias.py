@@ -60,7 +60,7 @@ if __name__ == '__main__':
     # 9->30ms, 10->100ms, 11->300ms, 12->1s, 13->3s, 14->10s, 15->30s, 16->100s, 17->300s, 18->1000s, 19->3000s, 20->10000s
     Lockin_prop = {
                     'time_constant_level':10, 
-                    'volt_input_range':1, 
+                    'volt_input_range':2, 
                     'signal_sensitivity':6,
                     'ref_frequency':20170,
                     'sine_amplitude':1.0
