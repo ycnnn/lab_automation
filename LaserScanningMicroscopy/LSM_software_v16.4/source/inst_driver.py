@@ -6,6 +6,7 @@ from contextlib import contextmanager
 import warnings
 # import Keithley2450_SMU 
 from external_instrument_drivers import Keithley2450_SMU as Keithley2450_SMU
+from external_instrument_drivers import K10CR1 as K10CR1
 import time
 
 instrument_props = {
@@ -379,3 +380,50 @@ class LaserDiode:
             yield None
         finally:
             pass
+
+
+    class Rotator:
+        def __init__(self, scan_parameters=None, position_parameters=None, **kwargs):
+            self.initialize_instrument()
+            self.reading_num = position_parameters.x_pixels
+            self.data = np.empty((0, self.reading_num))
+            self.instrument_params = {'address':'USB0::0x1313::0x804F::M00332686::INSTR',
+                                    'start_angle':0,
+                                    'end_angle':360}
+            self.kwargs = kwargs
+
+
+            for key, value in self.instrument_params.items():
+                if key in self.kwargs:
+                    self.instrument_params[key] = self.kwargs[key]
+                else:
+                    warnings.warn('\n\n\nThe ' + key + ' of the instrument is not provided.'
+                                +'\nThe ' + key + ' has been set to the default value as ' + str(value) + '.\n\n\n')
+                    
+            # self.current_levels = np.linspace(self.instrument_params['start_current_level'],
+            #                                    self.instrument_params['end_current_level'],
+            #                                    num=position_parameters.y_pixels)
+            self.angle_levels = parameter_list_generator(
+                start_val=self.instrument_params['start_angle'],
+                end_val=self.instrument_params['end_angle'],
+                position_parameters=position_parameters)
+        
+        
+        @contextmanager
+        def initialize_instrument(self):
+            try:
+                self.instrument = K10CR1(serial_no=self.instrument_params['address'])
+                self.instrument.initialize_instrument()
+                self.instrument.home_device()
+                yield None
+            finally:
+                self.instrument.quit()
+            
+        @contextmanager
+        def scan(self, **kwargs):
+            try:
+                scan_index = kwargs['scan_index']
+                self.instrument.move(self.angle_levels[scan_index])
+                yield None
+            finally:
+                pass
