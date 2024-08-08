@@ -387,7 +387,7 @@ class LaserDiode:
             self.initialize_instrument()
             self.reading_num = position_parameters.x_pixels
             self.data = np.empty((0, self.reading_num))
-            self.instrument_params = {'address':'USB0::0x1313::0x804F::M00332686::INSTR',
+            self.instrument_params = {'address':55425494,
                                     'start_angle':0,
                                     'end_angle':360}
             self.kwargs = kwargs
