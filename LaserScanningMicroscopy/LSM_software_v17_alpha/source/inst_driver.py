@@ -117,27 +117,6 @@ class EmptyInstrument(Instrument):
     def data_acquisition(self, **kwargs):
         # scan_index = kwargs['total_scan_index']
         pass
-        
-class VirtualInstrument(Instrument):
-    def __init__(self, address, position_parameters, **kwargs):
-        super().__init__(address, channel_num=1, 
-                         reading_num=position_parameters.x_pixels, 
-                         scan_num=position_parameters.y_pixels, 
-                         **kwargs)
-    
-    def initialize(self, **kwargs):
-        super().initialize(**kwargs)
-
-
-    def quit(self, **kwargs):
-        super().quit(**kwargs)
- 
-
-    def data_acquisition(self, **kwargs):
-        super().data_acquisition(**kwargs)
-        # scan_index = kwargs['total_scan_index']
-        self.data = np.random.normal(loc=self.scan_index,
-                                     size=(self.channel_num, self.reading_num))
    
 class SimulatedInstrument(Instrument):
     def __init__(self, address, position_parameters, **kwargs):

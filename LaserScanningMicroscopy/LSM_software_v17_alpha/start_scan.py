@@ -49,13 +49,6 @@ if __name__ == '__main__':
     
 
 
-    vir_instr = inst_driver.VirtualInstrument(
-                    address='',
-                    position_parameters=position_parameters,
-                    scan_parameters=scan_parameters,
-                    )
-    instruments.append(vir_instr)
-
 
 
     sim_instr_params = {'param1': 22, 'param2':[0,100], 'param3':np.random.random(
