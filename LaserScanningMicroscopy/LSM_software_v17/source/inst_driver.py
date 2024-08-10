@@ -95,8 +95,9 @@ class Instrument:
         print('Initialized ' + self.__class__.__name__)
 
     def data_acquisition(self, **kwargs):
-        self.scan_index = int(kwargs['total_scan_index']/2)
-        self.trace_flag = True if self.scan_index % 2 == 0 else False
+        total_scan_index = kwargs['total_scan_index']
+        self.scan_index = int(total_scan_index/2)
+        self.trace_flag = True if total_scan_index % 2 == 0 else False
         trace_sign = 'Trace' if self.trace_flag else 'retrace'
         print(trace_sign + ': ' + self.__class__.__name__ + f' Scanning at scan_index {self.scan_index}')
 
