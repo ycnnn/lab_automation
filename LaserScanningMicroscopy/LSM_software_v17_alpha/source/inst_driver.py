@@ -18,31 +18,41 @@ class Instrument:
                  reading_num, 
                  scan_num,
                  **kwargs):
-
+        
+        self.name = self.__class__.__name__
         self.address = address
         self.channel_num = channel_num
         self.scan_num = scan_num
         self.reading_num = reading_num
         self.data = np.zeros(shape=(self.channel_num, self.reading_num))
+        # self.params stores the default parameter setting for the instrument
         self.params = {}
+        # self.customized_params are the customized parameter setting 
+        # for the instrument from the user
         self.customized_params = kwargs
+        # self.params_sweep_lists stores the instrument parameter for each trace and retrace step
         self.params_sweep_lists = {}
+        # self.params_state stores the lasest snapshot of the instrument parameter, 
+        # e.g., parameters used for the last scan
+        self.params_state = {}
     
     def set_up_parameter_list(self):
 
         for param, _ in self.params.items():
+            # Set up initial parameters sanpshot
+            self.params_state[param] = None
             if param in self.customized_params:
                 # Customization
-                print(self.__class__.__name__ + ': default parameter overridden: ' + param)
-                print(self.__class__.__name__ + ': ' + param + ' set to ' + str(
+                print(self.name + ': default parameter overridden: ' + param)
+                print(self.name + ': ' + param + ' set to ' + str(
                     self.customized_params[param]) + '\n')
                 param_sweep_list = self.sweep_parameter_generator(
                     param, self.customized_params[param])
                 
             else:
                 # Using default value
-                print(self.__class__.__name__ + ': default parameter used: ' + param)
-                print(self.__class__.__name__ + ': ' + param + ' set to ' + str(
+                print(self.name + ': default parameter used: ' + param)
+                print(self.name + ': ' + param + ' set to ' + str(
                     self.params[param]))
                 param_sweep_list = self.sweep_parameter_generator(param, self.params[param] + '\n')
             
@@ -81,25 +91,47 @@ class Instrument:
             # First array defines the sweep list of the trace scan;
             # Second array defines the sweep list of the reverse scan.
             if (not isinstance(param_val, np.ndarray)) or param_val.shape!= (2, self.scan_num):
-                raise TypeError('\n\nError when setting up ' + param + ' for ' +  self.__class__.__name__ + ': the user either enetered the wrong parameter format, or indicated customized paramter sweep list, but does not supply a list of correct shape. Acceptable formats: a number, or a tuple of (start_val, end_val), or a numpy array of shape (2, scan_num).')
+                raise TypeError('\n\nError when setting up ' + param + ' for ' +  self.name + ': the user either enetered the wrong parameter format, or indicated customized paramter sweep list, but does not supply a list of correct shape. Acceptable formats: a number, or a tuple of (start_val, end_val), or a numpy array of shape (2, scan_num).')
             param_sweep_list = param_val
         
         return param_sweep_list
     
     # Methods that are instrument-specific
+    ##############################################################################################
+    ##############################################################################################
+    ##############################################################################################
+    ##############################################################################################
+    ##############################################################################################
+
     def initialize(self, **kwargs):
         self.set_up_parameter_list()
-        print('Initialized ' + self.__class__.__name__)
+        print('Initialized ' + self.name)
+        # # Save the snapshot
+        # for param in self.params_sweep_lists:
+        #     self.params_state[param] = self.params_sweep_lists[param][0,0]
 
     def quit(self, **kwargs):
-        print('Initialized ' + self.__class__.__name__)
+        print('Initialized ' + self.name)
+
+    def write_param_to_instrument(self, param, target_val):
+        pass
 
     def data_acquisition(self, **kwargs):
         total_scan_index = kwargs['total_scan_index']
         self.scan_index = int(total_scan_index/2)
         self.trace_flag = True if total_scan_index % 2 == 0 else False
+        self.trace_id = 0 if total_scan_index % 2 == 0 else 1
         trace_sign = 'Trace' if self.trace_flag else 'Retrace'
-        print(trace_sign + ': ' + self.__class__.__name__ + f' Scanning at scan_index {self.scan_index}')
+        print(trace_sign + ': ' + self.name + f' Scanning at scan_index {self.scan_index}')
+
+        for param, param_sweep_list in self.params_sweep_lists.items():
+            target_val = param_sweep_list[self.trace_id,self.scan_index]
+            if target_val != self.params_state[param]:
+                self.write_param_to_instrument(param, target_val)
+                print(f'At ' + trace_sign + f' scan {self.scan_index}, ' + param + ' for ' + self.name + f' set to {target_val}.')
+            else:
+                print(f'At ' + trace_sign + f' scan {self.scan_index}, writing ' + param + ' for ' + self.name +' skipped because no change in its set value.')
+            self.params_state[param] = target_val
 
 class EmptyInstrument(Instrument):
     def __init__(self, address, position_parameters, **kwargs):
@@ -134,89 +166,84 @@ class SimulatedInstrument(Instrument):
     def quit(self, **kwargs):
         super().quit(**kwargs)
 
-    def data_acquisition(self, **kwargs):
-        super().data_acquisition(**kwargs)
-        
-        
-        if self.trace_flag:
-            # Trace
-            
-            self.data = np.random.normal(loc=self.params_sweep_lists['param2'][0,self.scan_index],
-                                     size=(self.channel_num, self.reading_num))
-        else:
-            # Retrace 
-            self.data = np.random.normal(loc=self.params_sweep_lists['param2'][1,self.scan_index],
-                                     size=(self.channel_num, self.reading_num))
-
-class SMU(Instrument):
-    def __init__(self, 
-                 address="USB0::0x05E6::0x2450::04096331::INSTR",
-                 position_parameters=None, 
-                 ramp_steps=10,
-                 **kwargs):
-        
-        super().__init__(address=address, channel_num=1, 
-                         reading_num=position_parameters.x_pixels, 
-                         scan_num=position_parameters.y_pixels, 
-                         **kwargs)
-        
-        self.params = {'voltage':[0,1]}
-        
-        self.ramp_steps = ramp_steps
-
-    def ramp(self, start_volt=None, end_volt=0):
-    # By default, ramp Keithley 2450 SMU from current voltage level to the target voltage level (end_volt).
-        ramp_steps=self.ramp_steps
-        self.smu.write('reading = smu.measure.read()')
-        volt_reading = np.array(self.smu.query_ascii_values('print(reading)'))[0]
-        # print(f'Current VOLT reading is {volt_reading} V.')
-        start_volt = start_volt if start_volt else volt_reading
-
-        voltages = np.linspace(start_volt, end_volt, ramp_steps)
-        volt_readings = []
-        # return start_volt
-        for volt in voltages:
-            self.smu.write(f"smu.source.level = {volt}")
-            self.smu.write('reading = smu.measure.read()')
-            volt_reading = self.smu.query_ascii_values('print(reading)')
-            self.smu.write('waitcomplete()')
-            volt_readings.append(volt_reading)
-
-        return np.array(volt_readings).reshape(-1)[-1]
-
-    def initialize(self, **kwargs):
-        super().initialize(**kwargs)
-        rm = pyvisa.ResourceManager()
-        smu = rm.open_resource(self.address)
-        smu.timeout = 500
-        smu.write('reset()')
-        smu.write("smu.source.autorange = smu.ON")
-        smu.write("smu.measure.func = smu.FUNC_DC_VOLTAGE")
-        smu.write("smu.measure.autorange = smu.ON")
-        smu.write("smu.measure.terminals = smu.TERMINALS_FRONT")
-        smu.write("smu.measure.func = smu.FUNC_DC_VOLTAGE")
-        smu.write("smu.source.level = 0")
-
-        self.smu = smu
-
-    def quit(self, **kwargs):
-        super().quit(**kwargs)
-        self.ramp()
-        self.smu.write('smu.source.output = smu.OFF')
+    def write_param_to_instrument(self, param, param_val):
+        super().write_param_to_instrument(param, param_val)
 
     def data_acquisition(self, **kwargs):
         super().data_acquisition(**kwargs)
+
+        self.data = np.random.normal(
+                loc=self.params_sweep_lists['param2'][self.trace_id,self.scan_index],
+                size=(self.channel_num, self.reading_num))
+  
+
+# class SMU(Instrument):
+#     def __init__(self, 
+#                  address="USB0::0x05E6::0x2450::04096331::INSTR",
+#                  position_parameters=None, 
+#                  ramp_steps=10,
+#                  **kwargs):
         
+#         super().__init__(address=address, channel_num=1, 
+#                          reading_num=position_parameters.x_pixels, 
+#                          scan_num=position_parameters.y_pixels, 
+#                          **kwargs)
         
-        if self.trace_flag:
-            # Trace
-            target_voltage = self.params_sweep_lists['voltage'][0, self.scan_index]       
-        else:
-            # Retrace 
-            target_voltage = self.params_sweep_lists['voltage'][0, self.scan_index]
-            
-        last_volt_reading = self.ramp(end_volt=target_voltage)
-        self.data = np.ones(shape=(1, self.reading_num)) * last_volt_reading
+#         self.params = {'voltage':[0,1]}
+        
+#         self.ramp_steps = ramp_steps
+
+#     def ramp(self, start_volt=None, end_volt=0):
+#     # By default, ramp Keithley 2450 SMU from current voltage level to the target voltage level (end_volt).
+#         ramp_steps=self.ramp_steps
+#         self.smu.write('reading = smu.measure.read()')
+#         volt_reading = np.array(self.smu.query_ascii_values('print(reading)'))[0]
+#         # print(f'Current VOLT reading is {volt_reading} V.')
+#         start_volt = start_volt if start_volt else volt_reading
+
+#         voltages = np.linspace(start_volt, end_volt, ramp_steps)
+#         volt_readings = []
+#         # return start_volt
+#         for volt in voltages:
+#             self.smu.write(f"smu.source.level = {volt}")
+#             self.smu.write('reading = smu.measure.read()')
+#             volt_reading = self.smu.query_ascii_values('print(reading)')
+#             self.smu.write('waitcomplete()')
+#             volt_readings.append(volt_reading)
+
+#         return np.array(volt_readings).reshape(-1)[-1]
+
+#     def initialize(self, **kwargs):
+#         super().initialize(**kwargs)
+#         rm = pyvisa.ResourceManager()
+#         smu = rm.open_resource(self.address)
+#         smu.timeout = 500
+#         smu.write('reset()')
+#         smu.write("smu.source.autorange = smu.ON")
+#         smu.write("smu.measure.func = smu.FUNC_DC_VOLTAGE")
+#         smu.write("smu.measure.autorange = smu.ON")
+#         smu.write("smu.measure.terminals = smu.TERMINALS_FRONT")
+#         smu.write("smu.measure.func = smu.FUNC_DC_VOLTAGE")
+#         smu.write("smu.source.level = 0")
+#         self.smu = smu
+
+#     def quit(self, **kwargs):
+#         super().quit(**kwargs)
+#         self.ramp()
+#         self.smu.write('smu.source.output = smu.OFF')
+
+#     def data_acquisition(self, **kwargs):
+#         super().data_acquisition(**kwargs)
+
+#         target_voltage = self.params_sweep_lists[
+#             'voltage'
+#             ][0 if self.trace_flag else 1, self.scan_index]
+        
+#         if target_voltage != self.params_state['voltage']:
+#             latest_volt_reading = self.ramp(end_volt=target_voltage)
+#             self.data = np.ones(shape=(1, self.reading_num)) * latest_volt_reading
+        
+#         self.params_state['voltage'] = target_voltage
         
   
 
