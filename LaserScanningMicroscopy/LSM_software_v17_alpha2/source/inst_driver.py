@@ -45,6 +45,9 @@ class Instrument:
         # self.params_state stores the lasest snapshot of the instrument parameter, 
         # e.g., parameters used for the last scan
         self.params_state = {}
+        # self.params_config_save stores the parameter configuration that is actuall used in this scan. 
+        # It will be saved as a json file for future reference.
+        self.params_config_save = {}
     
     def set_up_parameter_list(self):
 
@@ -56,18 +59,22 @@ class Instrument:
                 self.logger.info(self.name + ': default parameter overridden: ' + param)
                 self.logger.info(self.name + ': ' + param + ' set to ' + str(
                     self.customized_params[param]) + '\n')
+                self.params_config_save[param]= self.customized_params[param]    
                 param_sweep_list = self.sweep_parameter_generator(
                     param, self.customized_params[param])
+                
                 
             else:
                 # Using default value
                 self.logger.info(self.name + ': default parameter used: ' + param)
                 self.logger.info(self.name + ': ' + param + ' set to ' + str(
                     self.params[param]))
+                self.params_config_save[param]= self.params[param]
                 param_sweep_list = self.sweep_parameter_generator(param, self.params[param] + '\n')
             
             self.params_sweep_lists[param] = param_sweep_list
-                
+
+
     @contextmanager
     def initialize_and_quit(self, **kwargs):
         try:

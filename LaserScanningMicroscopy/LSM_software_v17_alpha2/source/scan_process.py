@@ -1,6 +1,7 @@
 import numpy as np
 import multiprocessing as mp
 from contextlib import ExitStack
+import json
 import os
 # import multiprocess as mp
 # import sys
@@ -127,5 +128,24 @@ class LSM_scan:
             self.acquisitor.move_origin(initialize=False)
 
         self.data_receiver.join()
+
+        ######################################################################
+        # Save all scanning-related parameters
+
+        self.scan_parameters.save_params(self.display_parameters.save_destination)
+        self.position_parameters.save_params(self.display_parameters.save_destination)
+        
+        instr_params_save_filepath = self.display_parameters.save_destination + 'parameters/instr_params.json'
+
+        instr_params = {}
+        for instr in self.instruments:
+            instr_params[instr.name] = instr.params_config_save
+
+        with open(instr_params_save_filepath, 'w') as file:
+            json.dump(instr_params, file, indent=8)
+
+
+
+  
 
         

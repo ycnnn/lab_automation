@@ -22,7 +22,7 @@ class Scan_parameters:
         self.DAQ_name = DAQ_name
         self.return_to_zero = return_to_zero
         # self.instrument = instrument
-        self.instruments = []
+
         # self.save_params()
 
 
@@ -33,7 +33,7 @@ class Scan_parameters:
         self.dict['input_mapping'] = self.input_mapping
         self.dict['return_to_zero_after_scan'] = self.return_to_zero
         self.dict['channel_num'] = self.channel_num
-        self.dict['instrument_list'] = [instr.instrument_type for instr in self.instruments]
+
  
         # self.record = json.dumps(self.dict)
         scan_params_filepath = filepath + 'parameters/scan_params.json'
