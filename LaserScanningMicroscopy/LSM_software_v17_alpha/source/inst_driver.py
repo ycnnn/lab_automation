@@ -147,8 +147,38 @@ class SimulatedInstrument(Instrument):
             # Retrace 
             self.data = np.random.normal(loc=self.params_sweep_lists['param2'][1,self.scan_index],
                                      size=(self.channel_num, self.reading_num))
+
+class SMU(Instrument):
+    def __init__(self, address, position_parameters, **kwargs):
+        super().__init__(address, channel_num=1, 
+                         reading_num=position_parameters.x_pixels, 
+                         scan_num=position_parameters.y_pixels, 
+                         **kwargs)
         
+        self.params = {'param1':20, 'param2':[0,1], 'param3':0}
+
     
+    def initialize(self, **kwargs):
+        super().initialize(**kwargs)
+
+    def quit(self, **kwargs):
+        super().quit(**kwargs)
+
+    def data_acquisition(self, **kwargs):
+        super().data_acquisition(**kwargs)
+        
+        
+        if self.trace_flag:
+            # Trace
+            
+            self.data = np.random.normal(loc=self.params_sweep_lists['param2'][0,self.scan_index],
+                                     size=(self.channel_num, self.reading_num))
+        else:
+            # Retrace 
+            self.data = np.random.normal(loc=self.params_sweep_lists['param2'][1,self.scan_index],
+                                     size=(self.channel_num, self.reading_num))
+        
+  
 
 
 
