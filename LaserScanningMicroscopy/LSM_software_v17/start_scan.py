@@ -60,7 +60,7 @@ if __name__ == '__main__':
 
     sim_instr_params = {'param1': 22, 'param2':[0,100], 'param3':np.random.random(
         size=(2, position_parameters.y_pixels))}
-    sim_instr = inst_driver.SimulatedlInstrument(
+    sim_instr = inst_driver.SimulatedInstrument(
                     address='',
                     position_parameters=position_parameters,
                     scan_parameters=scan_parameters,
