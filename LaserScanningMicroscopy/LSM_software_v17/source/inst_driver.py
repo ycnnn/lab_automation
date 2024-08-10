@@ -139,7 +139,7 @@ class VirtualInstrument(Instrument):
         self.data = np.random.normal(loc=self.scan_index,
                                      size=(self.channel_num, self.reading_num))
    
-class SimulatedlInstrument(Instrument):
+class SimulatedInstrument(Instrument):
     def __init__(self, address, position_parameters, **kwargs):
         super().__init__(address, channel_num=1, 
                          reading_num=position_parameters.x_pixels, 
