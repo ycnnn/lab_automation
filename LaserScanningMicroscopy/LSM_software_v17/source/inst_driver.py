@@ -98,7 +98,7 @@ class Instrument:
         total_scan_index = kwargs['total_scan_index']
         self.scan_index = int(total_scan_index/2)
         self.trace_flag = True if total_scan_index % 2 == 0 else False
-        trace_sign = 'Trace' if self.trace_flag else 'retrace'
+        trace_sign = 'Trace' if self.trace_flag else 'Retrace'
         print(trace_sign + ': ' + self.__class__.__name__ + f' Scanning at scan_index {self.scan_index}')
 
 class EmptyInstrument(Instrument):
