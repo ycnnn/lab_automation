@@ -149,20 +149,60 @@ class SimulatedInstrument(Instrument):
                                      size=(self.channel_num, self.reading_num))
 
 class SMU(Instrument):
-    def __init__(self, address, position_parameters, **kwargs):
-        super().__init__(address, channel_num=1, 
+    def __init__(self, 
+                 address="USB0::0x05E6::0x2450::04096331::INSTR",
+                 position_parameters=None, 
+                 ramp_steps=10,
+                 **kwargs):
+        
+        super().__init__(address=address, channel_num=1, 
                          reading_num=position_parameters.x_pixels, 
                          scan_num=position_parameters.y_pixels, 
                          **kwargs)
         
-        self.params = {'param1':20, 'param2':[0,1], 'param3':0}
+        self.params = {'voltage':[0,1]}
+        
+        self.ramp_steps = ramp_steps
 
-    
+    def ramp(self, start_volt=None, end_volt=0):
+    # By default, ramp Keithley 2450 SMU from current voltage level to the target voltage level (end_volt).
+        ramp_steps=self.ramp_steps
+        self.smu.write('reading = smu.measure.read()')
+        volt_reading = np.array(self.smu.query_ascii_values('print(reading)'))[0]
+        # print(f'Current VOLT reading is {volt_reading} V.')
+        start_volt = start_volt if start_volt else volt_reading
+
+        voltages = np.linspace(start_volt, end_volt, ramp_steps)
+        volt_readings = []
+        # return start_volt
+        for volt in voltages:
+            self.smu.write(f"smu.source.level = {volt}")
+            self.smu.write('reading = smu.measure.read()')
+            volt_reading = self.smu.query_ascii_values('print(reading)')
+            self.smu.write('waitcomplete()')
+            volt_readings.append(volt_reading)
+
+        return np.array(volt_readings).reshape(-1)[-1]
+
     def initialize(self, **kwargs):
         super().initialize(**kwargs)
+        rm = pyvisa.ResourceManager()
+        smu = rm.open_resource(self.address)
+        smu.timeout = 500
+        smu.write('reset()')
+        smu.write("smu.source.autorange = smu.ON")
+        smu.write("smu.measure.func = smu.FUNC_DC_VOLTAGE")
+        smu.write("smu.measure.autorange = smu.ON")
+        smu.write("smu.measure.terminals = smu.TERMINALS_FRONT")
+        smu.write("smu.measure.func = smu.FUNC_DC_VOLTAGE")
+        smu.write("smu.source.level = 0")
+
+        self.smu = smu
 
     def quit(self, **kwargs):
         super().quit(**kwargs)
+        self.ramp()
+        self.smu.write('smu.source.output = smu.OFF')
 
     def data_acquisition(self, **kwargs):
         super().data_acquisition(**kwargs)
@@ -170,13 +210,13 @@ class SMU(Instrument):
         
         if self.trace_flag:
             # Trace
-            
-            self.data = np.random.normal(loc=self.params_sweep_lists['param2'][0,self.scan_index],
-                                     size=(self.channel_num, self.reading_num))
+            target_voltage = self.params_sweep_lists['voltage'][0, self.scan_index]       
         else:
             # Retrace 
-            self.data = np.random.normal(loc=self.params_sweep_lists['param2'][1,self.scan_index],
-                                     size=(self.channel_num, self.reading_num))
+            target_voltage = self.params_sweep_lists['voltage'][0, self.scan_index]
+            
+        last_volt_reading = self.ramp(end_volt=target_voltage)
+        self.data = np.ones(shape=(1, self.reading_num)) * last_volt_reading
         
   
 
