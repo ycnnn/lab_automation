@@ -1,19 +1,34 @@
 import numpy as np
 import os
 from source.daq_driver import daq_interface
+from source.logger import Logger
+import shutil
+
+def temp_file_handler():
+    if os.path.exists(os.path.dirname(os.path.dirname(__file__)) + '/temp_files/'):
+        shutil.rmtree(os.path.dirname(os.path.dirname(__file__)) + '/temp_files/')
+    os.makedirs(os.path.dirname(os.path.dirname(__file__)) + '/temp_files/')
 
 
 class Data_acquisitor():
 
+    temp_file_handler()
+
+    log_file_path = os.path.dirname(os.path.dirname(__file__)) + '/temp_files/temp_scan_log.txt'
+    logger = Logger(log_file_path)
+
     def __init__(self, position_parameters, scan_parameters):
+
+        
 
         self.position_parameters = position_parameters
         self.scan_parameters = scan_parameters
         self.DAQ_output_data = position_parameters.DAQ_output_data
         self.frequency = 1/(scan_parameters.point_time_constant * self.position_parameters.x_pixels)
         self.retrace_frequency = 1/(scan_parameters.retrace_point_time_constant * self.position_parameters.x_pixels)
+        # self.logger = Logger(os.path.dirname(os.path.realpath(__file__)) + '/')
 
-        print(f'Acuisitor frequency: {self.frequency}' )
+        # self.logger.info(f'Acuisitor frequency: {self.frequency}' )
 
 
     
@@ -48,7 +63,7 @@ class Data_acquisitor():
                         input_mapping=["ai1", "ai4", "ai20"],
                         DAQ_name=self.scan_parameters.DAQ_name
                         )
-            print('Initialization finished! Scan started.')
+            self.logger.info('Initialization finished! Scan started.')
         else:
             DAQ_output_data = self.position_parameters.final_move
             _ = daq_interface(ao0_1_write_data=DAQ_output_data, 
@@ -57,7 +72,9 @@ class Data_acquisitor():
                         input_mapping=["ai1", "ai4", "ai20"],
                         DAQ_name=self.scan_parameters.DAQ_name
                         )
-            print('Scan finished!')
+            self.logger.info('Scan finished!')
+
+            os.remove(self.log_file_path)
         
         
 

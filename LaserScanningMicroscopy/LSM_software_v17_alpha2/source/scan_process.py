@@ -1,13 +1,14 @@
 import numpy as np
 import multiprocessing as mp
 from contextlib import ExitStack
+import os
 # import multiprocess as mp
 # import sys
 ######################################################################
 # Custom dependencies
 # from source.inst_driver import External_instrument
 from source.app import QPlot
-from source.app import QPlot
+from source.logger import Logger
 from source.data_acquisition import Data_acquisitor
 from source.daq_driver import reset_daq
 import source.inst_driver as inst_driver
@@ -23,6 +24,9 @@ class LSM_scan:
                   scan_parameters, 
                   display_parameters,
                   instruments=[]):
+        
+        self.log_file_path = display_parameters.save_destination +'/temp_scan_log.txt'
+        self.logger = Logger(self.log_file_path)
           
         self.scan_parameters = scan_parameters
         self.position_parameters = position_parameters
@@ -49,7 +53,7 @@ class LSM_scan:
 
         self.acquisitor = Data_acquisitor(position_parameters,scan_parameters)
 
-        print('Acuisitor initilized!')
+
 
         self.channel_num = self.scan_parameters.channel_num
 
@@ -61,7 +65,6 @@ class LSM_scan:
 
     def start_scan(self):
 
-        print('Channel num: ' + str(self.channel_num))
 
         
 

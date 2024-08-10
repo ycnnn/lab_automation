@@ -16,8 +16,7 @@ import source.inst_driver as inst_driver
 
 
 if __name__ == '__main__':
-
-    
+   
     
     try:
         scan_id = sys.argv[1]
@@ -38,7 +37,7 @@ if __name__ == '__main__':
                                             angle=-35)
   
     
-    scan_parameters = Scan_parameters(point_time_constant=0.0001,
+    scan_parameters = Scan_parameters(point_time_constant=0.00001,
                                     #   retrace_point_time_constant=0.01,
                                       input_mapping=["ai0"],
                                       return_to_zero=True)
@@ -51,12 +50,13 @@ if __name__ == '__main__':
 
 
 
-    sim_instr_params = {'param1': 22, 'param2':[0,100], 'param3':np.random.random(
+    sim_instr_params = {'param1': 22, 'param2':[0,0,1], 'param3':np.random.random(
         size=(2, position_parameters.y_pixels))}
     sim_instr = inst_driver.SimulatedInstrument(
                     address='',
                     position_parameters=position_parameters,
-                    scan_parameters=scan_parameters,
+                
+                    # name='Sim1',
                     **sim_instr_params
                     )
     instruments.append(sim_instr)
