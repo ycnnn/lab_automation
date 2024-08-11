@@ -8,14 +8,12 @@ import os
 ######################################################################
 # Custom dependencies
 # from source.inst_driver import External_instrument
-from source.app import QPlot
-from source.logger import Logger
-from source.data_acquisition import Data_acquisitor
+# from source.app import QPlot
+# from source.logger import Logger
+# from source.data_acquisition import Data_acquisitor
 from source.daq_driver import reset_daq
 import source.inst_driver as inst_driver
 from source.plot_process import Data_receiver
-
-
 
 
 class LSM_scan:
@@ -26,8 +24,7 @@ class LSM_scan:
                   display_parameters,
                   instruments=[]):
         
-        self.log_file_path = display_parameters.save_destination +'/temp_scan_log.txt'
-        self.logger = Logger(self.log_file_path)
+    
           
         self.scan_parameters = scan_parameters
         self.position_parameters = position_parameters
@@ -41,34 +38,36 @@ class LSM_scan:
                     position_parameters=position_parameters,
                     scan_parameters=scan_parameters
                     )
+        self.instruments.append(empty_instr)
+
+        daq_exists = any(
+            isinstance(instrument, inst_driver.DAQ) for instrument in self.instruments)
+        if not daq_exists:
+            raise RuntimeError('DAQ not added to instrument list.')
         
-        instruments.append(empty_instr)
 
+        for instr_index, instr in enumerate(self.instruments):
+            if isinstance(instr, inst_driver.DAQ):
+                break
 
+        daq = self.instruments[instr_index]
+        self.instruments.pop(instr_index)
+        self.instruments.append(daq)
 
-
-
+        # for instr_index, instr in enumerate(self.instruments):
+        #     print(type(instr))
 
         self.line_width = self.position_parameters.x_pixels
         self.total_scan_num = 2 * self.position_parameters.y_pixels
 
-        self.acquisitor = Data_acquisitor(position_parameters,scan_parameters)
-
-
-
-        self.channel_num = self.scan_parameters.channel_num
+        self.channel_num = 0
 
         for instrument in self.instruments:
             self.channel_num += instrument.channel_num
 
         self.start_scan()
 
-
     def start_scan(self):
-
-
-        
-
 
         # mp.freeze_support()
         self.out_pipe, self.in_pipe = mp.Pipe(duplex=True)
@@ -80,12 +79,6 @@ class LSM_scan:
                                     pipe=self.in_pipe)
         
         self.data_receiver.start()
-
-        ########################################################################
-        # Initialize the system position
-        reset_daq(self.scan_parameters, destination=self.position_parameters.center_output)
-        self.acquisitor.move_origin(initialize=True)
-        ########################################################################
      
     
         instrument_manager = [
@@ -96,8 +89,6 @@ class LSM_scan:
         with ExitStack() as stack:
             _ = [stack.enter_context(instr()) for instr in instrument_manager]
 
-      
-
             for total_scan_index in range(self.total_scan_num):
                     auxiliary_scan_info = {'total_scan_index': total_scan_index}
                         
@@ -105,27 +96,16 @@ class LSM_scan:
                         _ = [stack.enter_context(
                                 instr_scan(**auxiliary_scan_info)
                                 ) for instr_scan in scan_manager]
-                        if total_scan_index % 2 == 0:
-                            data = self.acquisitor.run(total_scan_index)
-                        else:
-                            data = self.acquisitor.run(total_scan_index, retrace=True)
-
+                 
                     instr_data = np.vstack([
                             resource.data for resource in self.instruments
                             ])
 
-                    data = np.vstack((data, instr_data))
-
-                      
-
-                    self.out_pipe.send(data)
+                    self.out_pipe.send(instr_data)
 
                     status = self.out_pipe.recv()
                     if not status:
                         raise Warning('Possible data loss: Sender not received confirmation from receiver')
-
-
-            self.acquisitor.move_origin(initialize=False)
 
         self.data_receiver.join()
 
@@ -143,9 +123,3 @@ class LSM_scan:
 
         with open(instr_params_save_filepath, 'w') as file:
             json.dump(instr_params, file, indent=8)
-
-
-
-  
-
-        

@@ -11,13 +11,14 @@ import warnings
 # from external_instrument_drivers import Keithley2450_SMU as Keithley2450_SMU
 # from external_instrument_drivers import K10CR1 as K10CR1
 import time
-from source.logger import Logger
+# from source.logger import Logger
+from source.daq_driver import daq_interface, reset_daq
 
 
 class Instrument:
 
-    log_file_path = os.path.dirname(os.path.dirname(__file__)) + '/temp_files/temp_instr_log.txt'
-    logger = Logger(log_file_path)
+    # log_file_path = os.path.dirname(os.path.dirname(__file__)) + '/temp_files/temp_instr_log.txt'
+    # logger = Logger(log_file_path)
 
     def __init__(self, 
                  address, 
@@ -56,8 +57,8 @@ class Instrument:
             self.params_state[param] = None
             if param in self.customized_params:
                 # Customization
-                self.logger.info(self.name + ': default parameter overridden: ' + param)
-                self.logger.info(self.name + ': ' + param + ' set to ' + str(
+                print(self.name + ': default parameter overridden: ' + param)
+                print(self.name + ': ' + param + ' set to ' + str(
                     self.customized_params[param]) + '\n')
                 self.params_config_save[param]= self.customized_params[param]    
                 param_sweep_list = self.sweep_parameter_generator(
@@ -66,8 +67,8 @@ class Instrument:
                 
             else:
                 # Using default value
-                self.logger.info(self.name + ': default parameter used: ' + param)
-                self.logger.info(self.name + ': ' + param + ' set to ' + str(
+                print(self.name + ': default parameter used: ' + param)
+                print(self.name + ': ' + param + ' set to ' + str(
                     self.params[param]))
                 self.params_config_save[param]= self.params[param]
                 param_sweep_list = self.sweep_parameter_generator(param, self.params[param] + '\n')
@@ -109,7 +110,7 @@ class Instrument:
             # Second array defines the sweep list of the reverse scan.
             if (not isinstance(param_val, np.ndarray)) or param_val.shape!= (2, self.scan_num):
                 error_message = '\n\nError when setting up ' + param + ' for ' +  self.name + ': the user either enetered the wrong parameter format, or indicated customized paramter sweep list, but does not supply a list of correct shape. Acceptable formats: a number, or a tuple of (start_val, end_val), or a numpy array of shape (2, scan_num).'
-                self.logger.info(error_message)
+                print(error_message)
                 raise TypeError(error_message)
             param_sweep_list = param_val
         
@@ -124,30 +125,30 @@ class Instrument:
 
     def initialize(self, **kwargs):
         self.set_up_parameter_list()
-        self.logger.info('Initialized ' + self.name)
+        print('Initialized ' + self.name)
    
 
     def quit(self, **kwargs):
-        self.logger.info('Quitted ' + self.name)
-        os.remove(self.log_file_path)
+        print('Quitted ' + self.name)
+        # os.remove(self.log_file_path)
 
     def write_param_to_instrument(self, param, target_val):
         return None
 
     def data_acquisition_start(self, **kwargs):
-        total_scan_index = kwargs['total_scan_index']
-        self.scan_index = int(total_scan_index/2)
-        self.trace_flag = True if total_scan_index % 2 == 0 else False
-        self.trace_id = 0 if total_scan_index % 2 == 0 else 1
+        self.total_scan_index = kwargs['total_scan_index']
+        self.scan_index = int(self.total_scan_index/2)
+        self.trace_flag = True if self.total_scan_index % 2 == 0 else False
+        self.trace_id = 0 if self.total_scan_index % 2 == 0 else 1
         trace_sign = 'Trace' if self.trace_flag else 'Retrace'
-        self.logger.info(trace_sign + ': ' + self.name + f' Scanning at scan_index {self.scan_index}')
+        print(trace_sign + ': ' + self.name + f' Scanning at scan_index {self.scan_index}')
         ramp_data = {}
 
         for param, param_sweep_list in self.params_sweep_lists.items():
             target_val = param_sweep_list[self.trace_id,self.scan_index]
 
             ramp_data[param] = self.write_param_to_instrument(param, target_val)
-            self.logger.info(f'At ' + trace_sign + f' scan {self.scan_index}, ' + param + ' for ' + self.name + f' set to {target_val}.')
+            print(f'At ' + trace_sign + f' scan {self.scan_index}, ' + param + ' for ' + self.name + f' set to {target_val}.')
      
             self.params_state[param] = target_val
         
@@ -160,9 +161,9 @@ class Instrument:
         #     target_val = param_sweep_list[self.trace_id,self.scan_index]
         #     if target_val != self.params_state[param]:
         #         self.write_param_to_instrument(param, target_val)
-        #         self.logger.info(f'At ' + trace_sign + f' scan {self.scan_index}, ' + param + ' for ' + self.name + f' set to {target_val}.')
+        #         print(f'At ' + trace_sign + f' scan {self.scan_index}, ' + param + ' for ' + self.name + f' set to {target_val}.')
         #     else:
-        #         self.logger.info(f'At ' + trace_sign + f' scan {self.scan_index}, writing ' + param + ' for ' + self.name +' skipped because no change in its set value.')
+        #         print(f'At ' + trace_sign + f' scan {self.scan_index}, writing ' + param + ' for ' + self.name +' skipped because no change in its set value.')
         #     self.params_state[param] = target_val
 
 class EmptyInstrument(Instrument):
@@ -250,8 +251,8 @@ class SMU(Instrument):
     # By default, ramp Keithley 2450 SMU from current voltage level to the target voltage level (end_volt).
         ramp_steps=self.ramp_steps
         self.smu.write('reading = smu.measure.read()')
-        volt_reading = np.array(self.smu.query_ascii_values('self.logger.info(reading)'))[0]
-        self.logger.info(f'Current VOLT reading is {volt_reading} V.')
+        volt_reading = np.array(self.smu.query_ascii_values('print(reading)'))[0]
+        print(f'Current VOLT reading is {volt_reading} V.')
         start_volt = volt_reading
         end_volt = param_val
         voltages = np.linspace(start_volt, end_volt, ramp_steps)
@@ -260,7 +261,7 @@ class SMU(Instrument):
         for volt in voltages:
             self.smu.write(f"smu.source.level = {volt}")
             self.smu.write('reading = smu.measure.read()')
-            volt_reading = self.smu.query_ascii_values('self.logger.info(reading)')
+            volt_reading = self.smu.query_ascii_values('print(reading)')
             self.smu.write('waitcomplete()')
             volt_readings.append(volt_reading)
 
@@ -441,9 +442,6 @@ class LaserDiode(Instrument):
     def data_acquisition_start(self, **kwargs):
         super().data_acquisition_start(**kwargs)
 
-
-
-   
 class RotationStage(Instrument):
     def __init__(self, address=55425494, position_parameters=None, name=None,**kwargs):
         super().__init__(address=55425494, channel_num=0, 
@@ -471,27 +469,58 @@ class RotationStage(Instrument):
     def data_acquisition_start(self, **kwargs):
         super().data_acquisition_start(**kwargs)
 
+class DAQ(Instrument):
+    def __init__(self, 
+                 address='Dev2/', 
+                 position_parameters=None, 
+                 name=None,
+                 input_mapping=['ai0'],
+                 scan_parameters=None,
+                 **kwargs):
+        super().__init__(address, channel_num=len(input_mapping), 
+                         reading_num=position_parameters.x_pixels, 
+                         scan_num=position_parameters.y_pixels, 
+                         **kwargs)
+        
+        self.name = self.name if not name else name
+        self.input_mapping = input_mapping
+        self.scan_parameters = scan_parameters
+        self.position_parameters = position_parameters
+        self.params = {}
 
+        self.DAQ_output_data = self.position_parameters.DAQ_output_data
+        self.frequency = 1/(self.scan_parameters.point_time_constant * self.position_parameters.x_pixels)
+        self.retrace_frequency = 1/(self.scan_parameters.retrace_point_time_constant * self.position_parameters.x_pixels)
 
+    def move_to_origin(self):
+     
+        DAQ_output_data = self.position_parameters.final_move
+        _ = daq_interface(ao0_1_write_data=DAQ_output_data, 
+                    # frequency=self.frequency,
+                    frequency=max(1, self.frequency),
+                    input_mapping=["ai0"],
+                    DAQ_name=self.address)
+    
+    def initialize(self, **kwargs):
+        super().initialize(**kwargs)
+        reset_daq(self.scan_parameters, destination=self.position_parameters.center_output)
 
+    def quit(self, **kwargs):
+        super().quit(**kwargs)
+        self.move_to_origin()
+        if self.scan_parameters.return_to_zero:
+            reset_daq(self.scan_parameters, destination=np.array([0,0,0,0]))
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    def data_acquisition_start(self, **kwargs):
+        super().data_acquisition_start(**kwargs)
+        frequency = self.frequency if self.trace_flag else self.retrace_frequency
+        DAQ_output_data = self.DAQ_output_data[:,self.total_scan_index,:].T
+        DAQ_input_data = daq_interface(ao0_1_write_data=DAQ_output_data, 
+                                       frequency=frequency,
+                                       input_mapping=self.input_mapping,
+                                       DAQ_name=self.address)
+        
+        self.data = np.mean(
+            DAQ_input_data[:,:,np.newaxis].reshape(len(self.input_mapping),-1,2), 
+            axis=2)
 

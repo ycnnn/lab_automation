@@ -1,5 +1,5 @@
-import shutil
-import os
+# import shutil
+# import os
 import sys
 import numpy as np
 ######################################################################
@@ -32,20 +32,24 @@ if __name__ == '__main__':
                                             x_center=0,
                                             y_center=0,
                                             x_pixels=100,
-                                            y_pixels=99,
+                                            y_pixels=20,
                                             z_center=0,
                                             angle=-35)
   
     
-    scan_parameters = Scan_parameters(point_time_constant=0.00001,
+    scan_parameters = Scan_parameters(point_time_constant=0.00025,
                                     #   retrace_point_time_constant=0.01,
-                                      input_mapping=["ai0", "ai2"],
                                       return_to_zero=True)
 
     instruments = []
 
-
-    
+    daq = inst_driver.DAQ(
+                    address='',
+                    position_parameters=position_parameters,
+                    scan_parameters=scan_parameters,
+                    input_mapping=['ai0', 'ai1'],
+                    )
+    instruments.append(daq)
 
 
 
@@ -60,7 +64,7 @@ if __name__ == '__main__':
                     )
     instruments.append(sim_instr)
 
-
+    
 
 
 
