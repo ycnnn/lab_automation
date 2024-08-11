@@ -52,6 +52,12 @@ class LSM_scan:
 
         daq = self.instruments[instr_index]
         self.instruments.pop(instr_index)
+
+        daq_exists = any(
+            isinstance(instrument, inst_driver.DAQ) for instrument in self.instruments)
+        if daq_exists:
+            raise RuntimeError('DAQ has been added twice. Check instruments settings.')
+        
         self.instruments.append(daq)
 
         # for instr_index, instr in enumerate(self.instruments):

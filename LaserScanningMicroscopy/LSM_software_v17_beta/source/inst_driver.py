@@ -520,6 +520,10 @@ class DAQ(Instrument):
                                        input_mapping=self.input_mapping,
                                        DAQ_name=self.address)
         
+        if len(DAQ_input_data) == 0:
+            return
+
+        
         self.data = np.mean(
             DAQ_input_data[:,:,np.newaxis].reshape(len(self.input_mapping),-1,2), 
             axis=2)
