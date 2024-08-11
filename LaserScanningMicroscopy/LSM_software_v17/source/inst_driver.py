@@ -9,7 +9,7 @@ import warnings
 # from pathlib import Path
 # import Keithley2450_SMU 
 # from external_instrument_drivers import Keithley2450_SMU as Keithley2450_SMU
-# from external_instrument_drivers import K10CR1 as K10CR1
+from external_instrument_drivers import K10CR1 as K10CR1
 import time
 # from source.logger import Logger
 from source.daq_driver import daq_interface, reset_daq
@@ -71,7 +71,7 @@ class Instrument:
                 print(self.name + ': ' + param + ' set to ' + str(
                     self.params[param]))
                 self.params_config_save[param]= self.params[param]
-                param_sweep_list = self.sweep_parameter_generator(param, self.params[param] + '\n')
+                param_sweep_list = self.sweep_parameter_generator(param, self.params[param])
             
             self.params_sweep_lists[param] = param_sweep_list
 
@@ -151,6 +151,8 @@ class Instrument:
             print(f'At ' + trace_sign + f' scan {self.scan_index}, ' + param + ' for ' + self.name + f' set to {target_val}.')
      
             self.params_state[param] = target_val
+
+
         
         return ramp_data
     
@@ -225,21 +227,23 @@ class SMU(Instrument):
         
         self.name = self.name if not name else name
         self.ramp_steps = ramp_steps
-        self.params = {'volatge':0}
+        self.params = {'voltage':0}
         
     def initialize(self, **kwargs):
         super().initialize(**kwargs)
         rm = pyvisa.ResourceManager()
-        smu = rm.open_resource(self.address)
-        smu.timeout = 500
-        smu.write('reset()')
-        smu.write("smu.source.autorange = smu.ON")
-        smu.write("smu.measure.func = smu.FUNC_DC_VOLTAGE")
-        smu.write("smu.measure.autorange = smu.ON")
-        smu.write("smu.measure.terminals = smu.TERMINALS_FRONT")
-        smu.write("smu.measure.func = smu.FUNC_DC_VOLTAGE")
-        smu.write("smu.source.level = 0")
-        self.smu = smu
+        print('\n\nIntializing...\n\n')
+        self.smu = rm.open_resource(self.address)
+        self.smu.timeout = 500
+        self.smu.write('reset()')
+        self.smu.write("smu.source.autorange = smu.ON")
+        self.smu.write("smu.measure.func = smu.FUNC_DC_VOLTAGE")
+        self.smu.write("smu.measure.autorange = smu.ON")
+        self.smu.write("smu.measure.terminals = smu.TERMINALS_FRONT")
+        self.smu.write("smu.measure.func = smu.FUNC_DC_VOLTAGE")
+        self.smu.write("smu.source.level = 0")
+        self.smu.write('smu.source.output = smu.ON')
+
 
     def quit(self, **kwargs):
         super().quit(**kwargs)
@@ -279,7 +283,7 @@ class Lockin(Instrument):
                  position_parameters=None, 
                  name=None, 
                  **kwargs):
-        super().__init__(address, channel_num=1, 
+        super().__init__(address, channel_num=2, 
                          reading_num=position_parameters.x_pixels, 
                          scan_num=position_parameters.y_pixels, 
                          **kwargs)
@@ -290,7 +294,7 @@ class Lockin(Instrument):
                         'volt_input_range':2, 
                         'signal_sensitivity':6,
                         'ref_frequency':20170,
-                        'sine_amplitude':0.5,
+                        'sine_amplitude':1,
                                   }
         
     def initialize(self, **kwargs):
@@ -301,7 +305,7 @@ class Lockin(Instrument):
 
         # Reset
         self.instrument.write('*rst')
-        # self.instrument.query('*idn?')
+        # print(self.instrument.query('*idn?'))
 
         # build buffer
         self.instrument.write('capturelen 256')
@@ -314,44 +318,44 @@ class Lockin(Instrument):
 
         # Set the input source as VOLTAGE
         self.instrument.write('ivmd volt')
-        # self.instrument.query('ivmd?')
+        # print(self.instrument.query('ivmd?'))
 
         # Set the input mode as A
         self.instrument.write('isrc 0')
-        # self.instrument.query('isrc?')
+        # print(self.instrument.query('isrc?'))
 
         # Set the input coupling. Always use AC coupling unless signal frequency <= 0.16 Hz (unlikely)
         self.instrument.write('icpl 0')
-        # self.instrument.query('icpl?')
+        # print(self.instrument.query('icpl?'))
 
         # Set the voltage input shield as float
         self.instrument.write('ignd 0')
-        # self.instrument.query('ignd?')
+        # print(self.instrument.query('ignd?'))
 
         # Set the voltage input range
         # Levels and range: 0->1V, 1->300mV, 2->100mV 3->30mV, 4->10mV
         self.instrument.write(f"irng {self.params_sweep_lists['volt_input_range'][0,0]}")
-        # self.instrument.query('irng?')
+        # print(self.instrument.query('irng?'))
 
         # Set the signal sensitivity
         # Levels and range: 0->1V, 1->500mV, 2->200mV 3->100mV, 4->50mV, 5->20mV, 6->10mV, 7->5mV, 8->2mV, 
         # 9->1mV, 10->500uV, 11->200uV, 12->100uV, 13->50uV, 14->20uV
         self.instrument.write(f"scal {self.params_sweep_lists['signal_sensitivity'][0,0]}")
-        # self.instrument.query('scal?')
+        # print(self.instrument.query('scal?'))
 
         # Set the time constant
         # Levels and range: 0->1us, 1->3us, 2->10us 3->30us, 4->100us, 5->300us, 6->1ms, 7->3ms, 8->10ms, 
         # 9->30ms, 10->100ms, 11->300ms, 12->1s, 13->3s, 14->10s, 15->30s, 16->100s, 17->300s, 18->1000s, 19->3000s, 20->10000s
         self.instrument.write(f"oflt {self.params_sweep_lists['time_constant_level'][0,0]}")
-        # self.instrument.query('oflt?')
+        # print(self.instrument.query('oflt?'))
 
         # Set the reference frequency of the sine output signal as 20.17 kHz
         self.instrument.write(f"freq {self.params_sweep_lists['ref_frequency'][0,0]}")
-        # self.instrument.query('freq?')
+        # print(self.instrument.query('freq?'))
 
         # Set the amplitude of the sine output signal 
         self.instrument.write(f"slvl {self.params_sweep_lists['sine_amplitude'][0,0]}")
-        # self.instrument.query('slvl?')
+        # print(self.instrument.query('slvl?'))
 
     def quit(self, **kwargs):
         super().quit(**kwargs)
@@ -364,8 +368,8 @@ class Lockin(Instrument):
     def write_param_to_instrument(self, param, param_val):
         super().write_param_to_instrument(param, param_val)
 
-        if self.params_stae[param] == param_val:
-            print('Writing ' + param + f' at level {param_val} skipped because ' + param + ' is already at this level.' )
+        if self.params_state[param] == param_val:
+            print('Writing ' + param + f' at level {param_val} skipped, because there is no change in the set value.' )
             return None
 
         if param == 'time_constant_level':
@@ -375,7 +379,7 @@ class Lockin(Instrument):
         elif param == 'signal_sensitivity':
             self.instrument.write(f"scal {param_val}")
         elif param == 'ref_frequency':
-            self.instrument.write(f"scal {param_val}")
+            self.instrument.write(f"freq {param_val}")
         elif param == 'sine_amplitude':
             self.instrument.write(f"slvl {param_val}")
  
@@ -387,9 +391,7 @@ class Lockin(Instrument):
         self.instrument.write('capturestart one, samp')
 
 
-        self.data = np.random.normal(
-                loc=self.params_sweep_lists['param2'][self.trace_id,self.scan_index],
-                size=(self.channel_num, self.reading_num))       
+  
     
     def data_acquisition_finish(self, **kwargs):
         super().data_acquisition_finish(**kwargs)
@@ -415,13 +417,14 @@ class LaserDiode(Instrument):
         
         self.name = self.name if not name else name
 
-        self.params = {'current':10}
+        self.params = {'current':0.01}
+        
         
     def initialize(self, **kwargs):
         super().initialize(**kwargs)
         rm = pyvisa.ResourceManager()
-        self.instrument = rm.open_resource(self.instrument_params['address'])
-        # self.instrument.write('*rst')
+        self.instrument = rm.open_resource(self.address)
+   
         if np.min(
             self.params_sweep_lists['current']
             ) < 0 or np.max(
@@ -441,6 +444,8 @@ class LaserDiode(Instrument):
 
     def write_param_to_instrument(self, param, param_val):
         super().write_param_to_instrument(param, param_val)
+        if param_val == self.params_state[param]:
+            print('Writing ' + param + ' for ' + self.name + ' skipped, because there is no change in the set value.')
         self.instrument.write(f"source1:current:level:amplitude {param_val}")
 
     def data_acquisition_start(self, **kwargs):
@@ -458,7 +463,7 @@ class RotationStage(Instrument):
         
     def initialize(self, **kwargs):
         super().initialize(**kwargs)
-        self.instrument = K10CR1(serial_no=self.address)
+        self.instrument = K10CR1.K10CR1_stage(serial_no=self.address)
         self.instrument.initialize_instrument()
         self.instrument.home_device()
 
@@ -468,6 +473,9 @@ class RotationStage(Instrument):
 
     def write_param_to_instrument(self, param, param_val):
         super().write_param_to_instrument(param, param_val)
+        if param_val == self.params_state[param]:
+            print('Writing ' + param + f' at level {param_val} skipped, because there is no change in the set value.' )
+            return
         self.instrument.move(param_val)
 
     def data_acquisition_start(self, **kwargs):

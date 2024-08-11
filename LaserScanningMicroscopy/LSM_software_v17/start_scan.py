@@ -32,12 +32,12 @@ if __name__ == '__main__':
                                             x_center=0,
                                             y_center=0,
                                             x_pixels=100,
-                                            y_pixels=20,
+                                            y_pixels=10,
                                             z_center=0,
                                             angle=-35)
   
     
-    scan_parameters = Scan_parameters(point_time_constant=0.00025,
+    scan_parameters = Scan_parameters(point_time_constant=0.01,
                                     #   retrace_point_time_constant=0.01,
                                       return_to_zero=True)
 
@@ -46,22 +46,58 @@ if __name__ == '__main__':
     daq = inst_driver.DAQ(
                     position_parameters=position_parameters,
                     scan_parameters=scan_parameters,
-                    input_mapping=['ai0', 'ai1'],
+                    input_mapping=['ai0'],
                     )
     instruments.append(daq)
 
+    # smu = inst_driver.SMU(
+    #                 position_parameters=position_parameters,
+    #                 scan_parameters=scan_parameters,
+    #                 **{'voltage':1},
+    #                 )
+    # instruments.append(smu)
+
+    # laser = inst_driver.LaserDiode(
+    #                 position_parameters=position_parameters,
+    #                 scan_parameters=scan_parameters,
+    #                 **{'current':0.005},
+    #                 )
+    # instruments.append(laser)
+
+
+    # lockin_prop = {
+    #     'time_constant_level':9,
+    #     'volt_input_range':2,
+    #     'signal_sensitivity':6,
+    #     'ref_frequency':[1000,100000],
+    #     'sine_amplitude':0.1,}
+    
+    # lockin = inst_driver.Lockin(
+    #                 position_parameters=position_parameters,
+    #                 scan_parameters=scan_parameters,
+    #                 **lockin_prop,
+    #                 )
+    # instruments.append(lockin)
 
 
 
-    sim_instr_params = {'param1': 22, 'param2':[0,0], 'param3':0}
-    sim_instr = inst_driver.SimulatedInstrument(
-                    address='',
-                    position_parameters=position_parameters,
+
+    # sim_instr_params = {'param1': 22, 'param2':[0,0], 'param3':0}
+    # sim_instr = inst_driver.SimulatedInstrument(
+    #                 address='',
+    #                 position_parameters=position_parameters,
                 
-                    # name='Sim1',
-                    **sim_instr_params
+    #                 # name='Sim1',
+    #                 **sim_instr_params
+    #                 )
+    # instruments.append(sim_instr)
+
+    rotator = inst_driver.RotationStage(
+                    position_parameters=position_parameters,
+                    scan_parameters=scan_parameters,
+                    **{'angle':150},
                     )
-    instruments.append(sim_instr)
+    instruments.append(rotator)
 
     
 
