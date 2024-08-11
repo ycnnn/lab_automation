@@ -475,7 +475,7 @@ class RotationStage(Instrument):
 
 class DAQ(Instrument):
     def __init__(self, 
-                 address='Dev2/', 
+                 address='Dev2', 
                  position_parameters=None, 
                  name=None,
                  input_mapping=['ai0'],
