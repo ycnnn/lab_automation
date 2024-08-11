@@ -364,6 +364,10 @@ class Lockin(Instrument):
     def write_param_to_instrument(self, param, param_val):
         super().write_param_to_instrument(param, param_val)
 
+        if self.params_stae[param] == param_val:
+            print('Writing ' + param + f' at level {param_val} skipped because ' + param + ' is already at this level.' )
+            return None
+
         if param == 'time_constant_level':
             self.instrument.write(f"oflt {param_val}")
         elif param == 'volt_input_range':

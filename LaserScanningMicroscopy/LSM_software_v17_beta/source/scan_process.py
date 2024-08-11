@@ -92,14 +92,14 @@ class LSM_scan:
         
         scan_manager = [instrument.scan for instrument in self.instruments]
 
-        with ExitStack() as stack:
-            _ = [stack.enter_context(instr()) for instr in instrument_manager]
+        with ExitStack() as init_stack:
+            _ = [init_stack.enter_context(instr()) for instr in instrument_manager]
 
             for total_scan_index in range(self.total_scan_num):
                     auxiliary_scan_info = {'total_scan_index': total_scan_index}
                         
-                    with ExitStack() as stack:
-                        _ = [stack.enter_context(
+                    with ExitStack() as scan_stack:
+                        _ = [scan_stack.enter_context(
                                 instr_scan(**auxiliary_scan_info)
                                 ) for instr_scan in scan_manager]
                  
