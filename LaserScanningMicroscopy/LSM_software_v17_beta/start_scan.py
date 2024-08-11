@@ -44,7 +44,7 @@ if __name__ == '__main__':
     instruments = []
 
     daq = inst_driver.DAQ(
-                    address='',
+                    address='Dev2/',
                     position_parameters=position_parameters,
                     scan_parameters=scan_parameters,
                     input_mapping=['ai0', 'ai1'],
