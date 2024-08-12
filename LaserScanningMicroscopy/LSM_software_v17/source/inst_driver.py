@@ -7,8 +7,6 @@ import pyvisa
 from contextlib import contextmanager
 import warnings
 # from pathlib import Path
-# import Keithley2450_SMU 
-# from external_instrument_drivers import Keithley2450_SMU as Keithley2450_SMU
 from external_instrument_drivers import K10CR1 as K10CR1
 import time
 # from source.logger import Logger
@@ -25,14 +23,31 @@ class Instrument:
                  channel_num, 
                  reading_num, 
                  scan_num,
+                 channel_name_list=None,
                  **kwargs):
         
         self.name = self.__class__.__name__
         self.address = address
 
-        # self.logger = Logger(os.path.dirname(os.path.realpath(__file__)) + '/')
 
+        # self.logger = Logger(os.path.dirname(os.path.realpath(__file__)) + '/')
         self.channel_num = channel_num
+
+        # self.channel_name_list stores the name for each channel. 
+        # It has to be of size self.channel_num.
+        # If user doesn't supply it, then it will be automatically generated 
+        # Channel name list will ONLY be used to name the channels for collected data, 
+        # so it is not necessary to create a channel name list for instruments with 0 channel 
+        # (i.e., does not collect or acquisit data).
+      
+        self.channel_name_list = []
+        for chan_id in range(self.channel_num):
+            if channel_name_list:
+                self.channel_name_list.append(self.name + '_' + channel_name_list[chan_id])
+            else:
+                self.channel_name_list.append(self.name + f'_ch_{chan_id}')
+
+
         self.scan_num = scan_num
         self.reading_num = reading_num
         self.data = np.zeros(shape=(self.channel_num, self.reading_num))
@@ -190,6 +205,7 @@ class SimulatedInstrument(Instrument):
         super().__init__(address, channel_num=1, 
                          reading_num=position_parameters.x_pixels, 
                          scan_num=position_parameters.y_pixels, 
+                         channel_name_list=['Sim_instr'],
                          **kwargs)
         
         self.name = self.name if not name else name
@@ -223,11 +239,13 @@ class SMU(Instrument):
         super().__init__(address, channel_num=1, 
                          reading_num=position_parameters.x_pixels, 
                          scan_num=position_parameters.y_pixels, 
+                         channel_name_list=['Voltage'],
                          **kwargs)
         
         self.name = self.name if not name else name
         self.ramp_steps = ramp_steps
         self.params = {'voltage':0}
+
         
     def initialize(self, **kwargs):
         super().initialize(**kwargs)
@@ -286,6 +304,7 @@ class Lockin(Instrument):
         super().__init__(address, channel_num=2, 
                          reading_num=position_parameters.x_pixels, 
                          scan_num=position_parameters.y_pixels, 
+                         channel_name_list = ['X', 'Y'],
                          **kwargs)
         
         self.name = self.name if not name else name
@@ -296,6 +315,7 @@ class Lockin(Instrument):
                         'ref_frequency':20170,
                         'sine_amplitude':1,
                                   }
+        
         
     def initialize(self, **kwargs):
         super().initialize(**kwargs)
@@ -492,6 +512,7 @@ class DAQ(Instrument):
         super().__init__(address, channel_num=len(input_mapping), 
                          reading_num=position_parameters.x_pixels, 
                          scan_num=position_parameters.y_pixels, 
+                         channel_name_list=input_mapping,
                          **kwargs)
         
         self.name = self.name if not name else name
@@ -508,7 +529,6 @@ class DAQ(Instrument):
      
         DAQ_output_data = self.position_parameters.final_move
         _ = daq_interface(ao0_1_write_data=DAQ_output_data, 
-                    # frequency=self.frequency,
                     frequency=max(1, self.frequency),
                     input_mapping=["ai0"],
                     DAQ_name=self.address)
@@ -534,7 +554,6 @@ class DAQ(Instrument):
         
         if len(DAQ_input_data) == 0:
             return
-
         
         self.data = np.mean(
             DAQ_input_data[:,:,np.newaxis].reshape(len(self.input_mapping),-1,2), 

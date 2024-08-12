@@ -3,6 +3,7 @@ import multiprocessing as mp
 from contextlib import ExitStack
 import json
 import os
+import base64
 # import multiprocess as mp
 # import sys
 ######################################################################
@@ -72,6 +73,8 @@ class LSM_scan:
             self.channel_num += instrument.channel_num
 
         self.start_scan()
+        self.save_parameters()
+        self.save_data()
 
     def start_scan(self):
 
@@ -112,9 +115,16 @@ class LSM_scan:
                     status = self.out_pipe.recv()
                     if not status:
                         raise Warning('Possible data loss: Sender not received confirmation from receiver')
+        
+        self.data, self.retrace_data = self.out_pipe.recv()
 
+        self.screenshots = self.out_pipe.recv()
+
+       
         self.data_receiver.join()
 
+        
+    def save_parameters(self):
         ######################################################################
         # Save all scanning-related parameters
 
@@ -129,3 +139,52 @@ class LSM_scan:
 
         with open(instr_params_save_filepath, 'w') as file:
             json.dump(instr_params, file, indent=8)
+    
+    def save_data(self):
+
+        filepath = self.display_parameters.save_destination
+        
+        # for channel_id in range(self.channel_num):
+        #     img = self.windows[channel_id].grab(self.windows[channel_id].rect())
+        #     img.save(filepath + f'screenshot_channel_{channel_id}.' + fileformat, fileformat)
+
+        save_channel_name_list = []
+
+        for instrument in self.instruments:
+            for channel_name in instrument.channel_name_list:
+                save_channel_name_list.append(channel_name)
+        
+
+
+        
+        for channel_id in range(self.channel_num):
+
+            image_base64 = self.screenshots[channel_id]
+            # Decode the base64 string into binary data
+            image_data = base64.b64decode(image_base64)
+            # Save the binary data as a PNG file
+            with open(filepath + save_channel_name_list[channel_id] + '.png', "wb") as file:
+                file.write(image_data)
+
+            np.save(
+                (filepath + f'data/trace_data_' + save_channel_name_list[
+                    channel_id]), 
+                       self.data[channel_id])
+            
+            np.save(
+                (filepath + f'data/retrace_data_' + save_channel_name_list[
+                    channel_id]), 
+                       self.data[channel_id])
+            
+            np.savetxt(
+                (filepath + f'data_text/trace_data_' + save_channel_name_list[
+                    channel_id] + '.csv'), 
+                       self.data[channel_id], 
+                       delimiter=',')
+            np.savetxt(
+                (filepath + f'data_text/retrace_data_' + save_channel_name_list[
+                    channel_id] + '.csv'), 
+                       self.retrace_data[channel_id], 
+                       delimiter=',')
+
+

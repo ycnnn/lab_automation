@@ -31,8 +31,8 @@ if __name__ == '__main__':
                                             y_size=0,
                                             x_center=0,
                                             y_center=0,
-                                            x_pixels=100,
-                                            y_pixels=10,
+                                            x_pixels=10,
+                                            y_pixels=200,
                                             z_center=0,
                                             angle=-35)
   
@@ -46,7 +46,7 @@ if __name__ == '__main__':
     daq = inst_driver.DAQ(
                     position_parameters=position_parameters,
                     scan_parameters=scan_parameters,
-                    input_mapping=['ai0'],
+                    input_mapping=['ai0', 'ai1'],
                     )
     instruments.append(daq)
 
@@ -92,12 +92,12 @@ if __name__ == '__main__':
     #                 )
     # instruments.append(sim_instr)
 
-    rotator = inst_driver.RotationStage(
-                    position_parameters=position_parameters,
-                    scan_parameters=scan_parameters,
-                    **{'angle':150},
-                    )
-    instruments.append(rotator)
+    # rotator = inst_driver.RotationStage(
+    #                 position_parameters=position_parameters,
+    #                 scan_parameters=scan_parameters,
+    #                 **{'angle':150},
+    #                 )
+    # instruments.append(rotator)
 
     
 

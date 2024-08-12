@@ -2,11 +2,12 @@ import sys
 import os
 import time
 from PySide6.QtWidgets import QApplication, QMainWindow, QLabel, QVBoxLayout, QWidget, QLabel
-from PySide6.QtGui import QGuiApplication, QFontDatabase, QFont, QColor
-from PySide6.QtCore import Qt
+from PySide6.QtGui import QGuiApplication, QFontDatabase, QFont, QColor, QPixmap
+from PySide6.QtCore import Qt, QByteArray, QBuffer
 import pyqtgraph as pg
 import numpy as np
 from decimal import Decimal
+import base64
 
 
 class CustomAxisItem(pg.AxisItem):
@@ -258,22 +259,27 @@ class QPlot:
 
         # self.setWindowTitle(f'{self.channel_num} Channel Scan: Frame {self.counter}, Est time {self.remaining_time} s')
         QApplication.processEvents()
-    
-    def save_results(self, filepath=None, fileformat='png'):
-        for channel_id in range(self.channel_num):
-            img = self.windows[channel_id].grab(self.windows[channel_id].rect())
-            img.save(filepath + f'screenshot_channel_{channel_id}.' + fileformat, fileformat)
 
-        # final_data = np.flip(np.array([self.data, self.retrace_data]), axis=(2,3))
-        np.save(filepath + 'data/trace_data', self.data)
-        np.save(filepath + 'data/retrace_data', self.retrace_data)
-        for channel_id in range(self.channel_num):
-            np.savetxt(filepath + f'data_text/trace_data_chanel_{channel_id}.csv', 
-                       self.data[channel_id], delimiter=',')
-            np.savetxt(filepath + f'data_text/retrace_data_chanel_{channel_id}.csv', 
-                       self.retrace_data[channel_id], delimiter=',')
+    def turn_image_to_base64(self, img):
+        # Save QImage to a QByteArray
+        byte_array = QByteArray()
+        buffer = QBuffer(byte_array)
+        buffer.open(QBuffer.WriteOnly)
+        img.save(buffer, "PNG")
 
-           
+        # Convert QByteArray to base64 string
+        image_base64 = base64.b64encode(byte_array.data()).decode('utf-8')
+
+        return image_base64
+
+    def save_screenshot(self, filepath=None, fileformat='png'):
+        self.screenshots = []
+        for channel_id in range(self.channel_num):
+            img = self.windows[channel_id].grab(self.windows[channel_id].rect()).toImage()
+            image_base64 = self.turn_image_to_base64(img)
+            self.screenshots.append(image_base64)
+
+
 
 
 

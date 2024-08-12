@@ -69,7 +69,13 @@ class Data_receiver(mp.Process):
             if counter >= self.scan_num:
                 break
 
-        if self.display_parameters.save_data:
-            self.app.save_results(
-                filepath=self.display_parameters.save_destination)
+        # if self.display_parameters.save_data:
+        #     self.app.save_results(
+        #         filepath=self.display_parameters.save_destination)
+            
+        self.pipe.send([self.app.data, self.app.retrace_data])
+
+        self.app.save_screenshot()
+        self.pipe.send(self.app.screenshots)
+
 
