@@ -69,8 +69,8 @@ if __name__ == '__main__':
     #     'time_constant_level':9,
     #     'volt_input_range':2,
     #     'signal_sensitivity':6,
-    #     'ref_frequency':[1000,100000],
-    #     'sine_amplitude':0.1,}
+    #     'ref_frequency':20170,
+    #     'sine_amplitude':1,}
     
     # lockin = inst_driver.Lockin(
     #                 position_parameters=position_parameters,
