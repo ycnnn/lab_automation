@@ -40,7 +40,8 @@ if __name__ == '__main__':
     # such that the light shining on the sample is linearly polarized.
     # All angles in degrees
 
-    angle_correction_file = np.load('utilities/mgo_calibration_zerohwp_pol_qwp_hwp.npy')
+    current_file_directory = str(os.path.dirname(os.path.dirname(os.path.abspath(__file__))) ) + '/'
+    angle_correction_file = np.load(current_file_directory + 'utilities/mgo_calibration_zerohwp_pol_qwp_hwp.npy')
 
     angle_correction = angle_correction_file[0]
     hwp_before_bd_angle, pol_angle, correction_qwp_angle, correction_hwp_angle = angle_correction
@@ -110,6 +111,7 @@ if __name__ == '__main__':
                     position_parameters=position_parameters,
                     scan_parameters=scan_parameters,
                     name='HWP_for_correction',
+                    address=55422054,
                     **{'angle':correction_hwp_angle},
                     )
     instruments.append(correction_hwp)
@@ -118,6 +120,7 @@ if __name__ == '__main__':
                     position_parameters=position_parameters,
                     scan_parameters=scan_parameters,
                     name='QWP_for_correction',
+                    address=55425654,
                     **{'angle':correction_qwp_angle},
                     )
     instruments.append(correction_qwp)
@@ -126,6 +129,7 @@ if __name__ == '__main__':
                     position_parameters=position_parameters,
                     scan_parameters=scan_parameters,
                     name='HWP_for_zeroing_BD_output',
+                    address=55425494,
                     **{'angle':hwp_before_bd_angle},
                     )
     instruments.append(hwp_before_bd)

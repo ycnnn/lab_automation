@@ -92,12 +92,32 @@ if __name__ == '__main__':
     #                 )
     # instruments.append(sim_instr)
 
-    # rotator = inst_driver.RotationStage(
+    # correction_hwp = inst_driver.RotationStage(
     #                 position_parameters=position_parameters,
     #                 scan_parameters=scan_parameters,
-    #                 **{'angle':150},
+    #                 name='HWP_for_correction',
+    #                 address=55422054,
+    #                 **{'angle':0},
     #                 )
-    # instruments.append(rotator)
+    # instruments.append(correction_hwp)
+
+    # correction_qwp = inst_driver.RotationStage(
+    #                 position_parameters=position_parameters,
+    #                 scan_parameters=scan_parameters,
+    #                 name='QWP_for_correction',
+    #                 address=55425654,
+    #                 **{'angle':0},
+    #                 )
+    # instruments.append(correction_qwp)
+
+    # hwp_before_bd = inst_driver.RotationStage(
+    #                 position_parameters=position_parameters,
+    #                 scan_parameters=scan_parameters,
+    #                 name='HWP_for_zeroing_BD_output',
+    #                 address=55425494,
+    #                 **{'angle':0},
+    #                 )
+    # instruments.append(hwp_before_bd)
 
     
 

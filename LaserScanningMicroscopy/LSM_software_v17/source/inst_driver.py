@@ -473,7 +473,7 @@ class LaserDiode(Instrument):
 
 class RotationStage(Instrument):
     def __init__(self, address=55425494, position_parameters=None, name=None,**kwargs):
-        super().__init__(address=55425494, channel_num=0, 
+        super().__init__(address=address, channel_num=0, 
                          reading_num=position_parameters.x_pixels, 
                          scan_num=position_parameters.y_pixels, 
                          **kwargs)
