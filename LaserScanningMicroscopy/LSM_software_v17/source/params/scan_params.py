@@ -7,6 +7,7 @@ class Scan_parameters:
                  point_time_constant=0.001,
                  retrace_point_time_constant=None,
                  DAQ_name='Dev2',
+                 additional_info='',
                  return_to_zero=False):
        
         self.point_time_constant = point_time_constant
@@ -16,6 +17,8 @@ class Scan_parameters:
         
         self.DAQ_name = DAQ_name
         self.return_to_zero = return_to_zero
+
+        self.additional_info = additional_info
         # self.instrument = instrument
 
         # self.save_params()
@@ -25,6 +28,7 @@ class Scan_parameters:
         self.dict = dict()
         self.dict['point_time_constant'] = [self.point_time_constant, self.retrace_point_time_constant]
         self.dict['return_to_zero_after_scan'] = self.return_to_zero
+        self.dict['additional_info'] = self.additional_info
  
         # self.record = json.dumps(self.dict)
         scan_params_filepath = filepath + 'parameters/scan_params.json'

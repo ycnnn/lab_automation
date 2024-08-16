@@ -82,13 +82,13 @@ class K10CR1_stage:
 def main():
     """The main entry point for the application"""
     pass
-    stage = K10CR1_stage()
-    stage.initialize_instrument()
-    stage.home_device()
-    time.sleep(1)
-    stage.move(150)
-    time.sleep(1)
-    stage.quit()
+    # stage = K10CR1_stage()
+    # stage.initialize_instrument()
+    # stage.home_device()
+    # time.sleep(1)
+    # stage.move(150)
+    # time.sleep(1)
+    # stage.quit()
 
         
 
