@@ -276,7 +276,7 @@ class SMU(Instrument):
     # By default, ramp Keithley 2450 SMU from current voltage level to the target voltage level (end_volt).
         ramp_steps=self.ramp_steps
         self.smu.write('reading = smu.measure.read()')
-        volt_reading = np.array(self.smu.query_ascii_values('self.logger.info(reading)'))[0]
+        volt_reading = np.array(self.smu.query_ascii_values('print(reading)'))[0]
         self.logger.info(f'Current VOLT reading is {volt_reading} V.')
         start_volt = volt_reading
         end_volt = param_val
@@ -286,7 +286,7 @@ class SMU(Instrument):
         for volt in voltages:
             self.smu.write(f"smu.source.level = {volt}")
             self.smu.write('reading = smu.measure.read()')
-            volt_reading = self.smu.query_ascii_values('self.logger.info(reading)')
+            volt_reading = self.smu.query_ascii_values('print(reading)')
             self.smu.write('waitcomplete()')
             volt_readings.append(volt_reading)
 
@@ -486,6 +486,7 @@ class RotationStage(Instrument):
         
     def initialize(self, **kwargs):
         super().initialize(**kwargs)
+        self.logger.info('Important: make sure you are not running Kinesis software in the meantime. \nOtherwise the initialization will fail.')
         self.instrument = K10CR1.K10CR1_stage(serial_no=self.address)
         self.instrument.initialize_instrument()
         self.instrument.home_device()
@@ -500,6 +501,7 @@ class RotationStage(Instrument):
             self.logger.info('Writing ' + param + f' at level {param_val} skipped, because there is no change in the set value.' )
             return
         self.instrument.move(param_val)
+        self.logger.info('Moved ' + self.name + f' to {param_val}.')
 
     def data_acquisition_start(self, **kwargs):
         super().data_acquisition_start(**kwargs)

@@ -23,7 +23,7 @@ from System import Decimal
 
 class K10CR1_stage:
     def __init__(self, serial_no=55425494) -> None:
-        print('Important: make sure you are not running Kinesis software in the meantime. \nOtherwise the initialization will fail.')
+        # print('Important: make sure you are not running Kinesis software in the meantime. \nOtherwise the initialization will fail.')
         self.address = str(serial_no)
 
     def initialize_instrument(self):
@@ -50,9 +50,9 @@ class K10CR1_stage:
 
     def home_device(self, timeout=60000):
         # Call device methods.
-        print("Homing the rotation stage of SN:  " + self.address)
+        # print("Homing the rotation stage of SN:  " + self.address)
         self.device.Home(timeout)  # 60 second timeout.
-        print("The system is at home position. This position will be referred as 0 degree.")
+        # print("The system is at home position. This position will be referred as 0 degree.")
 
     def move(self, angle=0):
         while True:
@@ -66,16 +66,16 @@ class K10CR1_stage:
             else:
                 break
         new_pos = Decimal(angle)  # Must be a .NET decimal.
-        print("Moving the rotation stage of SN: " + self.address + f' to {new_pos} degrees')
+        # print("Moving the rotation stage of SN: " + self.address + f' to {new_pos} degrees')
         self.device.MoveTo(new_pos, 60000)  # 60 second timeout.
-        print("Movement finished.")
+        # print("Movement finished.")
 
     def quit(self):
         self.home_device()
         # Stop polling loop and disconnect device before program finishes. 
         self.device.StopPolling()
         self.device.Disconnect()
-        print("Disconnectd the rotation stage of SN: " + self.address)
+        # print("Disconnectd the rotation stage of SN: " + self.address)
 
     
 
