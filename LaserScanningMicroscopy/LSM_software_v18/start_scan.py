@@ -65,8 +65,8 @@ if __name__ == '__main__':
 
     # lockin_prop = {
     #     'time_constant_level':9,
-    #     'volt_input_range':2,
-    #     'signal_sensitivity':6,
+    #     'volt_input_range':3,
+    #     'signal_sensitivity':12,
     #     'ref_frequency':20170,
     #     'sine_amplitude':1,}
     

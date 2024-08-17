@@ -313,8 +313,8 @@ class Lockin(Instrument):
         self.name = self.name if not name else name
 
         self.params = {'time_constant_level':9, 
-                        'volt_input_range':2, 
-                        'signal_sensitivity':6,
+                        'volt_input_range':3, 
+                        'signal_sensitivity':12,
                         'ref_frequency':20170,
                         'sine_amplitude':1,
                                   }
