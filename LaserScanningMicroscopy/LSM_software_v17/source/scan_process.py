@@ -15,7 +15,7 @@ import base64
 from source.daq_driver import reset_daq
 import source.inst_driver as inst_driver
 from source.plot_process import Data_receiver
-
+from source.log_config import setup_logging
 
 class LSM_scan:
     
@@ -25,7 +25,7 @@ class LSM_scan:
                   display_parameters,
                   instruments=[]):
         
-    
+
           
         self.scan_parameters = scan_parameters
         self.position_parameters = position_parameters
@@ -72,11 +72,17 @@ class LSM_scan:
         for instrument in self.instruments:
             self.channel_num += instrument.channel_num
 
+        # Set up the logging process
+        self.logger = setup_logging(self.display_parameters.save_destination)
+
         self.start_scan()
         self.save_parameters()
         self.save_data()
 
     def start_scan(self):
+
+
+        self.logger.info('Scan started.\n\n')
 
         # mp.freeze_support()
         self.out_pipe, self.in_pipe = mp.Pipe(duplex=True)
@@ -95,8 +101,11 @@ class LSM_scan:
         
         scan_manager = [instrument.scan for instrument in self.instruments]
 
+        auxiliary_init_info = {'logger': self.logger}
         with ExitStack() as init_stack:
-            _ = [init_stack.enter_context(instr()) for instr in instrument_manager]
+            _ = [init_stack.enter_context(
+                    instr(**auxiliary_init_info)
+                    ) for instr in instrument_manager]
 
             for total_scan_index in range(self.total_scan_num):
                     auxiliary_scan_info = {'total_scan_index': total_scan_index}
@@ -122,6 +131,9 @@ class LSM_scan:
 
        
         self.data_receiver.join()
+
+
+        self.logger.info('\n\nScan finished.\n\n')
 
         
     def save_parameters(self):

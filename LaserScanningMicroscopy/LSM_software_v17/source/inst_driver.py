@@ -72,8 +72,8 @@ class Instrument:
             self.params_state[param] = None
             if param in self.customized_params:
                 # Customization
-                print(self.name + ': default parameter overridden: ' + param)
-                print(self.name + ': ' + param + ' set to ' + str(
+                self.logger.info(self.name + ': default parameter overridden: ' + param)
+                self.logger.info(self.name + ': ' + param + ' set to ' + str(
                     self.customized_params[param]) + '\n')
                 self.params_config_save[param]= self.customized_params[param]    
                 param_sweep_list = self.sweep_parameter_generator(
@@ -82,8 +82,8 @@ class Instrument:
                 
             else:
                 # Using default value
-                print(self.name + ': default parameter used: ' + param)
-                print(self.name + ': ' + param + ' set to ' + str(
+                self.logger.info(self.name + ': default parameter used: ' + param)
+                self.logger.info(self.name + ': ' + param + ' set to ' + str(
                     self.params[param]))
                 self.params_config_save[param]= self.params[param]
                 param_sweep_list = self.sweep_parameter_generator(param, self.params[param])
@@ -94,6 +94,7 @@ class Instrument:
     @contextmanager
     def initialize_and_quit(self, **kwargs):
         try:
+            self.logger = kwargs['logger']
             self.initialize(**kwargs)
             yield None
         finally:
@@ -125,7 +126,7 @@ class Instrument:
             # Second array defines the sweep list of the reverse scan.
             if (not isinstance(param_val, np.ndarray)) or param_val.shape!= (2, self.scan_num):
                 error_message = '\n\nError when setting up ' + param + ' for ' +  self.name + ': the user either enetered the wrong parameter format, or indicated customized paramter sweep list, but does not supply a list of correct shape. Acceptable formats: a number, or a tuple of (start_val, end_val), or a numpy array of shape (2, scan_num).'
-                print(error_message)
+                self.logger.info(error_message)
                 raise TypeError(error_message)
             param_sweep_list = param_val
         
@@ -140,11 +141,11 @@ class Instrument:
 
     def initialize(self, **kwargs):
         self.set_up_parameter_list()
-        print('Initialized ' + self.name)
+        self.logger.info('Initialized ' + self.name)
    
 
     def quit(self, **kwargs):
-        print('Quitted ' + self.name)
+        self.logger.info('Quitted ' + self.name)
         # os.remove(self.log_file_path)
 
     def write_param_to_instrument(self, param, target_val):
@@ -156,14 +157,14 @@ class Instrument:
         self.trace_flag = True if self.total_scan_index % 2 == 0 else False
         self.trace_id = 0 if self.total_scan_index % 2 == 0 else 1
         trace_sign = 'Trace' if self.trace_flag else 'Retrace'
-        print(trace_sign + ': ' + self.name + f' Scanning at scan_index {self.scan_index}')
+        self.logger.info(trace_sign + ': ' + self.name + f' Scanning at scan_index {self.scan_index}')
         ramp_data = {}
 
         for param, param_sweep_list in self.params_sweep_lists.items():
             target_val = param_sweep_list[self.trace_id,self.scan_index]
 
             ramp_data[param] = self.write_param_to_instrument(param, target_val)
-            print(f'At ' + trace_sign + f' scan {self.scan_index}, ' + param + ' for ' + self.name + f' set to {target_val}.')
+            self.logger.info(f'At ' + trace_sign + f' scan {self.scan_index}, ' + param + ' for ' + self.name + f' set to {target_val}.')
      
             self.params_state[param] = target_val
 
@@ -178,9 +179,9 @@ class Instrument:
         #     target_val = param_sweep_list[self.trace_id,self.scan_index]
         #     if target_val != self.params_state[param]:
         #         self.write_param_to_instrument(param, target_val)
-        #         print(f'At ' + trace_sign + f' scan {self.scan_index}, ' + param + ' for ' + self.name + f' set to {target_val}.')
+        #         self.logger.info(f'At ' + trace_sign + f' scan {self.scan_index}, ' + param + ' for ' + self.name + f' set to {target_val}.')
         #     else:
-        #         print(f'At ' + trace_sign + f' scan {self.scan_index}, writing ' + param + ' for ' + self.name +' skipped because no change in its set value.')
+        #         self.logger.info(f'At ' + trace_sign + f' scan {self.scan_index}, writing ' + param + ' for ' + self.name +' skipped because no change in its set value.')
         #     self.params_state[param] = target_val
 
 class EmptyInstrument(Instrument):
@@ -191,10 +192,12 @@ class EmptyInstrument(Instrument):
                          **kwargs)
 
     def initialize(self, **kwargs):
-        pass
+        super().initialize(**kwargs)
+  
 
     def quit(self, **kwargs):
-        pass
+        super().quit(**kwargs)
+
 
     def data_acquisition_start(self, **kwargs):
         # scan_index = kwargs['total_scan_index']
@@ -250,7 +253,7 @@ class SMU(Instrument):
     def initialize(self, **kwargs):
         super().initialize(**kwargs)
         rm = pyvisa.ResourceManager()
-        print('\n\nIntializing...\n\n')
+        self.logger.info('\n\nIntializing...\n\n')
         self.smu = rm.open_resource(self.address)
         self.smu.timeout = 500
         self.smu.write('reset()')
@@ -273,8 +276,8 @@ class SMU(Instrument):
     # By default, ramp Keithley 2450 SMU from current voltage level to the target voltage level (end_volt).
         ramp_steps=self.ramp_steps
         self.smu.write('reading = smu.measure.read()')
-        volt_reading = np.array(self.smu.query_ascii_values('print(reading)'))[0]
-        print(f'Current VOLT reading is {volt_reading} V.')
+        volt_reading = np.array(self.smu.query_ascii_values('self.logger.info(reading)'))[0]
+        self.logger.info(f'Current VOLT reading is {volt_reading} V.')
         start_volt = volt_reading
         end_volt = param_val
         voltages = np.linspace(start_volt, end_volt, ramp_steps)
@@ -283,7 +286,7 @@ class SMU(Instrument):
         for volt in voltages:
             self.smu.write(f"smu.source.level = {volt}")
             self.smu.write('reading = smu.measure.read()')
-            volt_reading = self.smu.query_ascii_values('print(reading)')
+            volt_reading = self.smu.query_ascii_values('self.logger.info(reading)')
             self.smu.write('waitcomplete()')
             volt_readings.append(volt_reading)
 
@@ -325,7 +328,7 @@ class Lockin(Instrument):
 
         # Reset
         self.instrument.write('*rst')
-        # print(self.instrument.query('*idn?'))
+        # self.logger.info(self.instrument.query('*idn?'))
 
         # build buffer
         self.instrument.write('capturelen 256')
@@ -338,44 +341,44 @@ class Lockin(Instrument):
 
         # Set the input source as VOLTAGE
         self.instrument.write('ivmd volt')
-        # print(self.instrument.query('ivmd?'))
+        # self.logger.info(self.instrument.query('ivmd?'))
 
         # Set the input mode as A
         self.instrument.write('isrc 0')
-        # print(self.instrument.query('isrc?'))
+        # self.logger.info(self.instrument.query('isrc?'))
 
         # Set the input coupling. Always use AC coupling unless signal frequency <= 0.16 Hz (unlikely)
         self.instrument.write('icpl 0')
-        # print(self.instrument.query('icpl?'))
+        # self.logger.info(self.instrument.query('icpl?'))
 
         # Set the voltage input shield as float
         self.instrument.write('ignd 0')
-        # print(self.instrument.query('ignd?'))
+        # self.logger.info(self.instrument.query('ignd?'))
 
         # Set the voltage input range
         # Levels and range: 0->1V, 1->300mV, 2->100mV 3->30mV, 4->10mV
         self.instrument.write(f"irng {self.params_sweep_lists['volt_input_range'][0,0]}")
-        # print(self.instrument.query('irng?'))
+        # self.logger.info(self.instrument.query('irng?'))
 
         # Set the signal sensitivity
         # Levels and range: 0->1V, 1->500mV, 2->200mV 3->100mV, 4->50mV, 5->20mV, 6->10mV, 7->5mV, 8->2mV, 
         # 9->1mV, 10->500uV, 11->200uV, 12->100uV, 13->50uV, 14->20uV
         self.instrument.write(f"scal {self.params_sweep_lists['signal_sensitivity'][0,0]}")
-        # print(self.instrument.query('scal?'))
+        # self.logger.info(self.instrument.query('scal?'))
 
         # Set the time constant
         # Levels and range: 0->1us, 1->3us, 2->10us 3->30us, 4->100us, 5->300us, 6->1ms, 7->3ms, 8->10ms, 
         # 9->30ms, 10->100ms, 11->300ms, 12->1s, 13->3s, 14->10s, 15->30s, 16->100s, 17->300s, 18->1000s, 19->3000s, 20->10000s
         self.instrument.write(f"oflt {self.params_sweep_lists['time_constant_level'][0,0]}")
-        # print(self.instrument.query('oflt?'))
+        # self.logger.info(self.instrument.query('oflt?'))
 
         # Set the reference frequency of the sine output signal as 20.17 kHz
         self.instrument.write(f"freq {self.params_sweep_lists['ref_frequency'][0,0]}")
-        # print(self.instrument.query('freq?'))
+        # self.logger.info(self.instrument.query('freq?'))
 
         # Set the amplitude of the sine output signal 
         self.instrument.write(f"slvl {self.params_sweep_lists['sine_amplitude'][0,0]}")
-        # print(self.instrument.query('slvl?'))
+        # self.logger.info(self.instrument.query('slvl?'))
 
     def quit(self, **kwargs):
         super().quit(**kwargs)
@@ -389,7 +392,7 @@ class Lockin(Instrument):
         super().write_param_to_instrument(param, param_val)
 
         if self.params_state[param] == param_val:
-            print('Writing ' + param + f' at level {param_val} skipped, because there is no change in the set value.' )
+            self.logger.info('Writing ' + param + f' at level {param_val} skipped, because there is no change in the set value.' )
             return None
 
         if param == 'time_constant_level':
@@ -450,7 +453,7 @@ class LaserDiode(Instrument):
             ) < 0 or np.max(
             self.params_sweep_lists['current']
             ) >= 0.101:
-            print('Warning: the laser current setpoint is outside the allowed range.\nFor your safety, the laser power has been set to 10 mA.')
+            self.logger.info('Warning: the laser current setpoint is outside the allowed range.\nFor your safety, the laser power has been set to 10 mA.')
             self.current_levels = 0.01 * np.ones(self.params_sweep_lists['current'].shape)
 
         self.instrument.write(f"source1:current:level:amplitude {self.params_sweep_lists['current'][0,0]}")
@@ -465,7 +468,7 @@ class LaserDiode(Instrument):
     def write_param_to_instrument(self, param, param_val):
         super().write_param_to_instrument(param, param_val)
         if param_val == self.params_state[param]:
-            print('Writing ' + param + ' for ' + self.name + ' skipped, because there is no change in the set value.')
+            self.logger.info('Writing ' + param + ' for ' + self.name + ' skipped, because there is no change in the set value.')
         self.instrument.write(f"source1:current:level:amplitude {param_val}")
 
     def data_acquisition_start(self, **kwargs):
@@ -494,7 +497,7 @@ class RotationStage(Instrument):
     def write_param_to_instrument(self, param, param_val):
         super().write_param_to_instrument(param, param_val)
         if param_val == self.params_state[param]:
-            print('Writing ' + param + f' at level {param_val} skipped, because there is no change in the set value.' )
+            self.logger.info('Writing ' + param + f' at level {param_val} skipped, because there is no change in the set value.' )
             return
         self.instrument.move(param_val)
 
