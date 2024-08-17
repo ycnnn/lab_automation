@@ -41,11 +41,21 @@ class LSM_scan:
                     )
         self.instruments.append(empty_instr)
 
+        laser_exists = any(
+            isinstance(instrument, inst_driver.LaserDiode) for instrument in self.instruments)
+        if laser_exists:
+            for instr_index, instr in enumerate(self.instruments):
+                if isinstance(instr, inst_driver.DAQ):
+                    break
+            laser = self.instruments[instr_index]
+            self.instruments.pop(instr_index)
+            self.instruments.append(laser)
+        
         daq_exists = any(
             isinstance(instrument, inst_driver.DAQ) for instrument in self.instruments)
+        
         if not daq_exists:
             raise RuntimeError('DAQ not added to instrument list.')
-        
 
         for instr_index, instr in enumerate(self.instruments):
             if isinstance(instr, inst_driver.DAQ):
