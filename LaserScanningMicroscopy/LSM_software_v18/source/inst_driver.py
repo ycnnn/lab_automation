@@ -457,7 +457,7 @@ class LaserDiode(Instrument):
             self.current_levels = 0.01 * np.ones(self.params_sweep_lists['current'].shape)
 
         self.instrument.write(f"source1:current:level:amplitude {self.params_sweep_lists['current'][0,0]}")
-        self.instrument.write('output:state 1')
+        # self.instrument.write('output:state 1')
 
     def quit(self, **kwargs):
         super().quit(**kwargs)
@@ -473,6 +473,13 @@ class LaserDiode(Instrument):
 
     def data_acquisition_start(self, **kwargs):
         super().data_acquisition_start(**kwargs)
+        if self.total_scan_index == 0:
+            self.instrument.write('output:state 1')
+
+    def data_acquisition_finish(self, **kwargs):
+        super().data_acquisition_finish(**kwargs)
+        if self.total_scan_index >= 2 * self.scan_num - 1:
+            self.instrument.write('output:state 0')
 
 class RotationStage(Instrument):
     def __init__(self, address=55425494, position_parameters=None, name=None,**kwargs):
