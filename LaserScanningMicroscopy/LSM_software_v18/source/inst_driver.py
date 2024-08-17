@@ -253,7 +253,7 @@ class SMU(Instrument):
     def initialize(self, **kwargs):
         super().initialize(**kwargs)
         rm = pyvisa.ResourceManager()
-        self.logger.info('\n\nIntializing...\n\n')
+        self.logger.info('\n\nInitializing...\n\n')
         self.smu = rm.open_resource(self.address)
         self.smu.timeout = 500
         self.smu.write('reset()')
