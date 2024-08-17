@@ -3,12 +3,13 @@ import os
 import time
 from PySide6.QtWidgets import QApplication, QMainWindow, QLabel, QVBoxLayout, QWidget, QLabel
 from PySide6.QtGui import QGuiApplication, QFontDatabase, QFont, QColor, QPixmap
-from PySide6.QtCore import Qt, QByteArray, QBuffer
+from PySide6.QtCore import Qt, QByteArray, QBuffer, QLoggingCategory
 import pyqtgraph as pg
 import numpy as np
 from decimal import Decimal
 import base64
 
+QLoggingCategory.setFilterRules('*.debug=false\n*.warning=false')
 
 class CustomAxisItem(pg.AxisItem):
     def __init__(self, axis_label_ticks_distance, *args, **kwargs):
