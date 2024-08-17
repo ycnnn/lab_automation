@@ -45,7 +45,7 @@ class LSM_scan:
             isinstance(instrument, inst_driver.LaserDiode) for instrument in self.instruments)
         if laser_exists:
             for instr_index, instr in enumerate(self.instruments):
-                if isinstance(instr, inst_driver.DAQ):
+                if isinstance(instr, inst_driver.LaserDiode):
                     break
             laser = self.instruments[instr_index]
             self.instruments.pop(instr_index)
@@ -84,10 +84,14 @@ class LSM_scan:
 
         # Set up the logging process
         self.logger = setup_logging(self.display_parameters.save_destination)
+   
+        
 
         self.start_scan()
         self.save_parameters()
         self.save_data()
+
+       
 
     def start_scan(self):
 
