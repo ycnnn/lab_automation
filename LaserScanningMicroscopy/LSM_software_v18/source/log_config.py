@@ -9,7 +9,7 @@ def setup_logging(log_file_path):
     
     # Create handlers
     console_handler = logging.StreamHandler()  # Console output
-    file_handler = logging.FileHandler(log_file_path + '/log.txt')  # File output# Set level for handlers
+    file_handler = logging.FileHandler(log_file_path + '/log.log')  # File output# Set level for handlers
     console_handler.setLevel(logging.INFO)
     file_handler.setLevel(logging.INFO)
     
