@@ -29,16 +29,14 @@ if __name__ == '__main__':
     position_parameters = Position_parameters(
                                             x_size=0,
                                             y_size=0,
-                                            x_center=0,
-                                            y_center=0,
-                                            x_pixels=10,
-                                            y_pixels=200,
+                                            x_pixels=100,
+                                            y_pixels=100,
                                             z_center=0,
                                             angle=-35)
   
     
-    scan_parameters = Scan_parameters(point_time_constant=0.01,
-                                    #   retrace_point_time_constant=0.01,
+    scan_parameters = Scan_parameters(point_time_constant=0.02,
+                                    #   retrace_point_time_constant=0.02,
                                       return_to_zero=True)
 
     instruments = []
