@@ -33,14 +33,14 @@ if __name__ == '__main__':
     position_parameters = Position_parameters(
                                             x_size=50,
                                             y_size=50,
-                                            x_pixels=10,
-                                            y_pixels=200,
+                                            x_pixels=100,
+                                            y_pixels=100,
                                             z_center=0,
                                             angle=-35)
   
     
     scan_parameters = Scan_parameters(point_time_constant=0.01,
-                                      return_to_zero=True)
+                                      return_to_zero=False)
 
     instruments = []
 

@@ -37,7 +37,7 @@ if __name__ == '__main__':
     
     scan_parameters = Scan_parameters(point_time_constant=0.02,
                                     #   retrace_point_time_constant=0.02,
-                                      return_to_zero=True)
+                                      return_to_zero=False)
 
     instruments = []
 
