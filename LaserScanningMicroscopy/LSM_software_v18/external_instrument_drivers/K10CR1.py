@@ -71,7 +71,7 @@ class K10CR1_stage:
         # print("Movement finished.")
 
     def quit(self):
-        self.home_device()
+        # self.home_device()
         # Stop polling loop and disconnect device before program finishes. 
         self.device.StopPolling()
         self.device.Disconnect()
