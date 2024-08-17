@@ -8,8 +8,10 @@ import pyqtgraph as pg
 import numpy as np
 from decimal import Decimal
 import base64
+import warnings
 
-QLoggingCategory.setFilterRules('*.debug=false\n*.warning=false')
+warnings.filterwarnings("ignore", module="pyqtgraph")
+warnings.filterwarnings("ignore", module="PySide6")
 
 class CustomAxisItem(pg.AxisItem):
     def __init__(self, axis_label_ticks_distance, *args, **kwargs):
