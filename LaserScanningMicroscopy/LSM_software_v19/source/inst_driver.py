@@ -555,7 +555,7 @@ class DAQ(Instrument):
 
     def write_data(self, ao_data, frequency):
 
-        num_samples = len(ao_data)
+        num_samples = ao_data.shape[1]
         DAQ_name = self.address
         # print(f'Pixels:{pixels}')
         # print(f'Shape:{ao_data.shape}')
@@ -674,12 +674,6 @@ class DAQ_simulated(Instrument):
 
     def write_data(self, ao_data, frequency):
 
-        num_samples = len(ao_data)
-        DAQ_name = self.address
-       
-        input_mapping_full_path = [
-            DAQ_name + '/'+ channel_name for channel_name in self.input_mapping]
-
         ai_data = np.random.normal(size=(len(input_mapping_full_path), num_samples))
         return ai_data
 
@@ -687,9 +681,7 @@ class DAQ_simulated(Instrument):
         return np.random.normal(size=3)
 
     def reset(self,destination=np.array([0,0,0]), ramp_steps=50):
-
-        result = self.read_current_output()
-        ramp_output_data = np.linspace(result, destination,num=ramp_steps).T
+        pass
 
 
     def initialize(self, **kwargs):
