@@ -589,7 +589,7 @@ class DAQ(Instrument):
             pulse_task.triggers.start_trigger.cfg_dig_edge_start_trig(trigger_source='/Dev2/ao/StartTrigger')
 
             ao_writer = AnalogMultiChannelWriter(ao_task.out_stream)
-            ao_writer.write_many_sample(ao_data)
+            ao_writer.write_many_sample(np.ascontiguousarray(ao_data))
 
             ai_task.start()
             pulse_task.start()
@@ -615,7 +615,8 @@ class DAQ(Instrument):
     def reset(self,destination=np.array([0,0,0]), ramp_steps=50):
 
         result = self.read_current_output()
-        ramp_output_data = np.linspace(result, destination,num=ramp_steps).T
+        
+        ramp_output_data = np.ascontiguousarray(np.linspace(result, destination,num=ramp_steps).T)
         with ni.Task() as write_task:
             for channel in [0,1,2]:
                 write_task.ao_channels.add_ao_voltage_chan(self.address + "/ao" + str(channel), min_val=-10, max_val=10)
@@ -635,7 +636,7 @@ class DAQ(Instrument):
     def data_acquisition_start(self, **kwargs):
         super().data_acquisition_start(**kwargs)
         frequency = self.frequency if self.trace_flag else self.retrace_frequency
-        DAQ_output_data = self.DAQ_output_data[:,self.total_scan_index,:].T
+        DAQ_output_data = self.DAQ_output_data[:,self.total_scan_index,:]
         DAQ_input_data = self.write_data(ao_data=DAQ_output_data, 
                                        frequency=frequency)
         
