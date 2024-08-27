@@ -52,11 +52,10 @@ class Position_parameters:
         
     def create_reverse_scan(self, input_data):
 
-        data = np.repeat(input_data[:,:,np.newaxis],axis=2,repeats=2).reshape(self.y_pixels,-1)
-        height, length = data.shape
+        height, length = input_data.shape
         new_data = np.zeros((height*2,length))
-        new_data[::2,:] = data
-        new_data[1::2,:] = np.flip(data, axis=1)
+        new_data[::2,:] = input_data
+        new_data[1::2,:] = np.flip(input_data, axis=1)
 
         return new_data
                 
@@ -146,5 +145,4 @@ class Position_parameters:
             json.dump(self.dict, file, indent=4)
         
    
-
 
