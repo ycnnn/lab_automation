@@ -81,7 +81,10 @@ class Instrument:
                 self.logger.info(self.name + ': default parameter overridden: ' + param)
                 self.logger.info(self.name + ': ' + param + ' set to ' + str(
                     self.customized_params[param]) + '\n')
-                self.params_config_save[param]= self.customized_params[param]    
+                if isinstance(self.customized_params[param], np.ndarray):
+                    self.params_config_save[param]= self.customized_params[param].tolist()   
+                else: 
+                    self.params_config_save[param]= self.customized_params[param]    
                 param_sweep_list = self.sweep_parameter_generator(
                     param, self.customized_params[param])
                 
@@ -119,11 +122,21 @@ class Instrument:
         if isinstance(param_val, numbers.Number):
             # Single input value, the parameter is fixed throughout the scan
             param_sweep_list = param_val * np.ones(shape=(2, self.scan_num))
-        elif (isinstance(param_val, tuple) or isinstance(param_val, list)) and len(param_val) == 2:
-            # Double input value, the parameter is sweeped from left_val to right_val
-            param_sweep_list = np.linspace(
-                [param_val[0],param_val[0]],
-                [param_val[1],param_val[1]], 
+        elif isinstance(param_val, list) and len(param_val) == 2:
+            # Double input value, 
+            # If input is of format (start, end), the parameter is sweeped from left_val to right_val
+            # If input is of format ((trace_val), (retrace_val)), the trace scan will use trace_val, and the retrace scan will use retrace_val
+            param_val_in_ndarray = np.array(param_val)
+
+            if param_val_in_ndarray.shape == (2,):
+                param_sweep_list = np.linspace(
+                [param_val_in_ndarray[0],param_val_in_ndarray[0]],
+                [param_val_in_ndarray[1],param_val_in_ndarray[1]], 
+                num=self.scan_num).T
+            elif param_val_in_ndarray.shape == (2,1):
+                param_sweep_list = np.linspace(
+                [param_val_in_ndarray[0,0],param_val_in_ndarray[1,0]],
+                [param_val_in_ndarray[0,0],param_val_in_ndarray[1,0]], 
                 num=self.scan_num).T
         else:
             # Customizable paraeter sweep list. Must be a np.ndarray
@@ -643,9 +656,10 @@ class DAQ(Instrument):
         if len(DAQ_input_data) == 0:
             return
         
-        self.data = np.mean(
-            DAQ_input_data[:,:,np.newaxis].reshape(len(self.input_mapping),-1,2), 
-            axis=2)
+        # self.data = np.mean(
+        #     DAQ_input_data[:,:,np.newaxis].reshape(len(self.input_mapping),-1,2), 
+        #     axis=2)
+        self.data = DAQ_input_data
 
 class DAQ_simulated(Instrument):
     def __init__(self, 
@@ -674,6 +688,10 @@ class DAQ_simulated(Instrument):
         self.pulse_terminal='PFI0'
 
     def write_data(self, ao_data, frequency):
+        num_samples = ao_data.shape[1]
+        DAQ_name = self.address
+        input_mapping_full_path = [
+            DAQ_name + '/'+ channel_name for channel_name in self.input_mapping]
 
         ai_data = np.random.normal(size=(len(input_mapping_full_path), num_samples))
         return ai_data
@@ -697,13 +715,12 @@ class DAQ_simulated(Instrument):
     def data_acquisition_start(self, **kwargs):
         super().data_acquisition_start(**kwargs)
         frequency = self.frequency if self.trace_flag else self.retrace_frequency
-        DAQ_output_data = self.DAQ_output_data[:,self.total_scan_index,:].T
+        DAQ_output_data = self.DAQ_output_data[:,self.total_scan_index,:]
         DAQ_input_data = self.write_data(ao_data=DAQ_output_data, 
                                        frequency=frequency)
         
         if len(DAQ_input_data) == 0:
             return
         
-        self.data = np.mean(
-            DAQ_input_data[:,:,np.newaxis].reshape(len(self.input_mapping),-1,2), 
-            axis=2)
+
+        self.data = DAQ_input_data
