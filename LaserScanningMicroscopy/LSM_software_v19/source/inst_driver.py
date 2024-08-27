@@ -124,8 +124,8 @@ class Instrument:
             param_sweep_list = param_val * np.ones(shape=(2, self.scan_num))
         elif isinstance(param_val, list) and len(param_val) == 2:
             # Double input value, 
-            # If input is of format (start, end), the parameter is sweeped from left_val to right_val
-            # If input is of format ((trace_val), (retrace_val)), the trace scan will use trace_val, and the retrace scan will use retrace_val
+            # If input is of format [start, end], the parameter is sweeped from left_val to right_val
+            # If input is of format [[trace_val], [retrace_val]], the trace scan will use trace_val, and the retrace scan will use retrace_val
             param_val_in_ndarray = np.array(param_val)
 
             if param_val_in_ndarray.shape == (2,):
