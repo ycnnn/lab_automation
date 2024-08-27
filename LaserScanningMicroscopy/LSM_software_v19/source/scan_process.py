@@ -93,8 +93,9 @@ class LSM_scan:
         
 
         self.start_scan()
-        self.save_parameters()
         self.save_data()
+        self.save_parameters()
+        
 
        
 
