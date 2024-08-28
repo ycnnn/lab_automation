@@ -452,8 +452,7 @@ class LaserDiode(Instrument):
                  position_parameters=None, 
                  name=None, 
                  **kwargs):
-        from external_instrument_drivers import K10CR1 as K10CR1
-
+        
         super().__init__(address, channel_num=0, 
                          reading_num=position_parameters.x_pixels, 
                          scan_num=position_parameters.y_pixels, 
