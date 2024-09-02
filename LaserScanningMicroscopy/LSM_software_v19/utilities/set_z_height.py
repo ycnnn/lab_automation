@@ -1,5 +1,6 @@
 import os
 import itertools
+import numbers
 parentdir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 os.sys.path.insert(0,parentdir) 
 from source.params.position_params import Position_parameters
@@ -17,17 +18,17 @@ def set_z_height(DAQ_name, position_parameters):
         print('Error: input z height is beyond the piezo stage travel range.')
         return
     with ni.Task() as write_task:
-        for channel in [0,1,2,3]:
+        for channel in [0,1,2]:
             write_task.ao_channels.add_ao_voltage_chan(DAQ_name + "/ao" + str(channel),
                                         min_val=-10, max_val=10)
-        write_task.write(position_parameters.center_output)
+        write_task.write(np.ascontiguousarray(position_parameters.center_output))
     print(f'Stage Z height has been moved to {position_parameters.z_center}.\n')
     return
 
 def read_daq_output(DAQ_name='Dev2'):
 
     with ni.Task() as read_task:
-        for channel_id in [0,1,2,3]:
+        for channel_id in [0,1,2]:
             read_task.ai_channels.add_ai_voltage_chan(DAQ_name + f"/_ao{channel_id}_vs_aognd",
                                     min_val=-10, max_val=10)
         result = np.array(read_task.read())
@@ -43,7 +44,7 @@ def reset_daq(destination=np.array([0,0,0]), ramp_steps=50, DAQ_name='Dev2'):
             write_task.ao_channels.add_ao_voltage_chan(DAQ_name + "/ao" + str(channel), min_val=-10, max_val=10)
         write_task.timing.cfg_samp_clk_timing(ramp_steps, sample_mode=AcquisitionType.FINITE, samps_per_chan=ramp_steps)
         ao_writer = AnalogMultiChannelWriter(write_task.out_stream)
-        ao_writer.write_many_sample(ramp_output_data)
+        ao_writer.write_many_sample(np.ascontiguousarray(ramp_output_data))
 
 
 if __name__=='__main__':
@@ -54,7 +55,9 @@ if __name__=='__main__':
     heights = [0,0]
     alter_index = 1
 
+
     while True:
+
 
         try:
             z_height = float(command)
@@ -67,7 +70,10 @@ if __name__=='__main__':
             print('\n')
             heights.pop(0)
             heights.append(z_height)
-        except:
+
+        except ValueError:
+
+            
             if command == 'R':
                 reset_daq(DAQ_name=DAQ_name)
                 daq_output = read_daq_output(DAQ_name=DAQ_name)
@@ -88,5 +94,6 @@ if __name__=='__main__':
             else:
                 break
         command = input(message).capitalize()
+
 
                     
