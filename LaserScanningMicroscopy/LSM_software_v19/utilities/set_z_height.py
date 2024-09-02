@@ -42,13 +42,13 @@ def reset_daq(destination=np.array([0,0,0]), ramp_steps=50, DAQ_name='Dev2'):
     with ni.Task() as write_task:
         for channel in [0,1,2]:
             write_task.ao_channels.add_ao_voltage_chan(DAQ_name + "/ao" + str(channel), min_val=-10, max_val=10)
-        write_task.timing.cfg_samp_clk_timing(ramp_steps, sample_mode=AcquisitionType.FINITE, samps_per_chan=ramp_steps)
-        ao_writer = AnalogMultiChannelWriter(write_task.out_stream)
+        # write_task.timing.cfg_samp_clk_timing(ramp_steps, sample_mode=AcquisitionType.FINITE, samps_per_chan=ramp_steps)
+        ao_writer = AnalogMultiChannelWriter(write_task.out_stream, auto_start=True)
         ao_writer.write_many_sample(np.ascontiguousarray(ramp_output_data))
 
 
 if __name__=='__main__':
-    message = 'Enter command.\nEnter a number to move the stage height;\nEnter R for resetting the DAQ;\nPress enter to switch the stage height between the last two values you entered.\nEnter anything else to quit the code.\n\n'
+    message = 'Enter command.\nEnter a number to move the stage height;\nEnter R or r for resetting the DAQ;\nEnter anything else to quit the code.\n\n'
 
     command = input(message).capitalize()
     DAQ_name = 'Dev2'
@@ -80,17 +80,7 @@ if __name__=='__main__':
                 print('DAQ output has been reset to: ')
                 print(daq_output)
                 print('\n')
-            elif len(command) == 0:
-                print('Start alternating between the last two Z heights you entered. To switch, press Enter. To quit, press Q.\n')
-                while True:
-                    # Move
-                    new_command = input('Switch the height by press Enter, press any other key to quit\n')
-                    alter_index += 1
-                    if new_command != "":
-                        break
-                    z_height = heights[int(alter_index % 2)]
-                    position_parameters = Position_parameters(z_center=float(z_height))
-                    set_z_height(DAQ_name=DAQ_name, position_parameters=position_parameters)
+
             else:
                 break
         command = input(message).capitalize()
