@@ -632,8 +632,8 @@ class DAQ(Instrument):
         with ni.Task() as write_task:
             for channel in [0,1,2]:
                 write_task.ao_channels.add_ao_voltage_chan(self.address + "/ao" + str(channel), min_val=-10, max_val=10)
-            write_task.timing.cfg_samp_clk_timing(ramp_steps, sample_mode=AcquisitionType.FINITE, samps_per_chan=ramp_steps)
-            ao_writer = AnalogMultiChannelWriter(write_task.out_stream)
+            # write_task.timing.cfg_samp_clk_timing(ramp_steps, sample_mode=AcquisitionType.FINITE, samps_per_chan=ramp_steps)
+            ao_writer = AnalogMultiChannelWriter(write_task.out_stream, auto_start=True)
             ao_writer.write_many_sample(ramp_output_data)
 
     def initialize(self, **kwargs):
