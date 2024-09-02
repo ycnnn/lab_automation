@@ -609,7 +609,7 @@ class DAQ(Instrument):
 
             ai_reader = AnalogMultiChannelReader(ai_task.in_stream)
             ai_data = np.zeros((len(input_mapping_full_path), num_samples))
-            ai_reader.read_many_sample(ai_data, num_samples)
+            ai_reader.read_many_sample(ai_data, num_samples, timeout=600)
 
             ao_task.wait_until_done()
             ai_task.wait_until_done()
