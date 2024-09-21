@@ -17,7 +17,7 @@ def open_layout(layout_name):
 
     return app, main_window, cv
 
-def setup_image(cv, image_path, rotation, x_center, y_center, micron_conversion_factor=0.28990):
+def setup_image(cv, image_path, rotation, x_center, y_center, micron_conversion_factor=0.29072):
     
     image_raw = pya.Image().new(image_path)
     t = pya.CplxTrans.new(micron_conversion_factor, rotation, False, x_center, y_center)
