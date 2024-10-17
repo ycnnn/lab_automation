@@ -448,7 +448,7 @@ class Lockin(Instrument):
   
 
 class LaserDiode(Instrument):
-    def __init__(self, address='USB0::0x1313::0x804F::M00332686::INSTR', 
+    def __init__(self, address='USB0::0x1313::0x804F::M00423181::INSTR', 
                  position_parameters=None, 
                  name=None, 
                  **kwargs):
