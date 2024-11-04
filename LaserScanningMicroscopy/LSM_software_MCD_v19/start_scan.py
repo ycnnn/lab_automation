@@ -71,11 +71,9 @@ if __name__ == '__main__':
 
 
     # lockin_prop = {
-    #     'time_constant_level':9,
+    #     'time_constant_level':8,
     #     'volt_input_range':3,
-    #     'signal_sensitivity':12,
-    #     'ref_frequency':20170,
-    #     'sine_amplitude':1,}
+    #     'signal_sensitivity':12,}
     
     # lockin = inst_driver.Lockin(
     #                 position_parameters=position_parameters,

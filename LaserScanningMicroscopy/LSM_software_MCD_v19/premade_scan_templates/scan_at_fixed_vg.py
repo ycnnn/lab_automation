@@ -57,8 +57,8 @@ if __name__ == '__main__':
                                             angle=-35)
   
     
-    scan_parameters = Scan_parameters(point_time_constant=0.12,
-                                      retrace_point_time_constant=0.02,
+    scan_parameters = Scan_parameters(point_time_constant=0.012,
+                                      retrace_point_time_constant=0.012,
                                       return_to_zero=False,
                                       additional_info=f'Polarization angle = {pol_angle}')
 
@@ -81,7 +81,7 @@ if __name__ == '__main__':
     laser = inst_driver.LaserDiode(
                     position_parameters=position_parameters,
                     scan_parameters=scan_parameters,
-                    **{'current':0.08},
+                    **{'current':0.04},
                     )
     instruments.append(laser)
 
@@ -91,11 +91,9 @@ if __name__ == '__main__':
         # Levels and range: 0->1us, 1->3us, 2->10us 3->30us, 4->100us, 5->300us, 6->1ms, 7->3ms, 8->10ms, 
         # 9->30ms, 10->100ms, 11->300ms, 12->1s, 13->3s, 14->10s, 15->30s, 16->100s, 17->300s, 18->1000s, 19->3000s, 20->10000s
 
-        'time_constant_level':10,
+        'time_constant_level':8,
         'volt_input_range':3,
-        'signal_sensitivity':12,
-        'ref_frequency':20170,
-        'sine_amplitude':1,}
+        'signal_sensitivity':12,}
     
     lockin = inst_driver.Lockin(
                     position_parameters=position_parameters,
@@ -104,34 +102,6 @@ if __name__ == '__main__':
                     )
     instruments.append(lockin)
 
-
-
-    correction_hwp = inst_driver.RotationStage(
-                    position_parameters=position_parameters,
-                    scan_parameters=scan_parameters,
-                    name='HWP_for_correction',
-                    address=55422054,
-                    **{'angle':correction_hwp_angle},
-                    )
-    instruments.append(correction_hwp)
-
-    correction_qwp = inst_driver.RotationStage(
-                    position_parameters=position_parameters,
-                    scan_parameters=scan_parameters,
-                    name='QWP_for_correction',
-                    address=55425654,
-                    **{'angle':correction_qwp_angle},
-                    )
-    instruments.append(correction_qwp)
-
-    hwp_before_bd = inst_driver.RotationStage(
-                    position_parameters=position_parameters,
-                    scan_parameters=scan_parameters,
-                    name='HWP_for_zeroing_BD_output',
-                    address=55425494,
-                    **{'angle':hwp_before_bd_angle},
-                    )
-    instruments.append(hwp_before_bd)
 
     
 

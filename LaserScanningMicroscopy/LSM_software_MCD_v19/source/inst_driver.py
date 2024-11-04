@@ -331,11 +331,9 @@ class Lockin(Instrument):
         
         self.name = self.name if not name else name
 
-        self.params = {'time_constant_level':9, 
+        self.params = {'time_constant_level':8, 
                         'volt_input_range':3, 
                         'signal_sensitivity':12,
-                        'ref_frequency':20170,
-                        'sine_amplitude':1,
                                   }
         
         
@@ -391,12 +389,16 @@ class Lockin(Instrument):
         self.instrument.write(f"oflt {self.params_sweep_lists['time_constant_level'][0,0]}")
         # self.logger.info(self.instrument.query('oflt?'))
 
-        # Set the reference frequency of the sine output signal as 20.17 kHz
-        self.instrument.write(f"freq {self.params_sweep_lists['ref_frequency'][0,0]}")
-        # self.logger.info(self.instrument.query('freq?'))
+        # Set the reference mode as external reference
+        self.instrument.write(f"rsrc 1")
+        # Set the external reference trigger mode as positive TTL
+        self.instrument.write(f"rtrg 1")
+        # Set the external reference trigger input to 1 MOhm
+        self.instrument.write(f"refz 1")
+
 
         # Set the amplitude of the sine output signal 
-        self.instrument.write(f"slvl {self.params_sweep_lists['sine_amplitude'][0,0]}")
+        # self.instrument.write(f"slvl {self.params_sweep_lists['sine_amplitude'][0,0]}")
         # self.logger.info(self.instrument.query('slvl?'))
 
     def quit(self, **kwargs):
@@ -482,7 +484,7 @@ class LaserDiode(Instrument):
     def quit(self, **kwargs):
         super().quit(**kwargs)
         self.instrument.write('output:state 0')
-        self.instrument.write(f"source1:current:level:amplitude 0.01")
+        # self.instrument.write(f"source1:current:level:amplitude 0.01")
         self.instrument.close()
 
     def write_param_to_instrument(self, param, param_val):
