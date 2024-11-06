@@ -44,6 +44,7 @@ if __name__ == '__main__':
 
     instruments = []
 
+
     daq = inst_driver.DAQ(
                     position_parameters=position_parameters,
                     scan_parameters=scan_parameters,
@@ -54,7 +55,7 @@ if __name__ == '__main__':
     laser = inst_driver.LaserDiode(
                     position_parameters=position_parameters,
                     scan_parameters=scan_parameters,
-                    **{'current':0.065},
+                    **{'current':0.04},
                     )
     instruments.append(laser)
 
