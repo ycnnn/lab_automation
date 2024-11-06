@@ -1,14 +1,13 @@
 import sys, os
+import numpy as np
 import random
-from PySide6 import QtWidgets, QtCore
-from PySide6.QtCore import QTimer,Qt
+import time
+from PySide6 import QtWidgets
+from pyqtgraph import PlotWidget, plot
 import pyqtgraph as pg
+from PySide6.QtCore import QTimer,Qt
 from PySide6.QtGui import QFontDatabase, QFont
 from decimal import Decimal
-from pyqtgraph import PlotWidget
-import numpy as np
-import time
-
 
 class CustomAxisItem(pg.AxisItem):
     def __init__(self, axis_label_ticks_distance, *args, **kwargs):
@@ -33,7 +32,6 @@ def load_font(font_path):
     return font_families[0]
 
 class LSMLivePlot(QtWidgets.QMainWindow):
-
     def __init__(self, 
                 channel_num=3, 
                 x_steps=500, 
@@ -115,35 +113,46 @@ class LSMLivePlot(QtWidgets.QMainWindow):
             if self.show_zero_level:
                 self.plots[chanel_id].addItem(zero_line)
 
-    def update_data(self, count, y_data):
-        self.y = y_data
-        self.count = count
+
+        self.timer = QTimer()
+        self.timer.timeout.connect(self.update_data)
+        self.data_acquision()
+
+    def data_acquision(self):
+
+
+        
+        # Real data acquision function happens here
+        time.sleep(0.025)
+        for chanel_id in range(self.channel_num):
+            self.y[chanel_id] = np.arange(self.x_steps) ** 0.75 + np.random.normal(scale=4, size=self.x_steps) - 40
+
+        self.count += 1
+        self.timer.start(0)
+
+        if self.count >= self.x_steps:
+            self.timer.stop()
+            QtWidgets.QApplication.quit()
+            self.save()
+
+    def update_data(self):
         for chanel_id in range(self.channel_num):
             self.curves[chanel_id].setData(self.x[:self.count], self.y[chanel_id][:self.count])
+        self.data_acquision()
+
+    def save(self):
+        # Capture the window as a QPixmap
+        pixmap = self.grab(self.rect()).toImage()
+
+        # Save the QPixmap to a PNG file
+        dir_path = os.path.dirname(os.path.realpath(__file__)) + '/'
+        file_path = dir_path + "window_capture.png"
+        pixmap.save(file_path)
+        print(type(pixmap))
 
 
-
-def main():
-
-    channel_num, x_steps = (2, 200)
-    app = QtWidgets.QApplication(sys.argv)
-    main_window = LSMLivePlot(channel_num=channel_num, x_steps=x_steps)
-    main_window.show()
     
-    for count in range(x_steps):
-
-        # Random delay between 0.5 and 2 seconds
-        time.sleep(random.uniform(0.005, 0.010))
-        # Generate new random y-data for the chart
-        y = np.random.normal(size=(channel_num, x_steps))
-        
-
-        # Update
-        main_window.update_data(count, y)
-        app.processEvents()
-
-    app.exit()
-
-
-if __name__ == "__main__":
-    main()
+app = QtWidgets.QApplication(sys.argv)
+window = LSMLivePlot()
+window.show()
+sys.exit(app.exec())
