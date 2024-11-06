@@ -280,7 +280,7 @@ class SMU(Instrument):
         self.smu.write("smu.measure.func = smu.FUNC_DC_VOLTAGE")
         self.smu.write("smu.measure.autorange = smu.ON")
         self.smu.write("smu.measure.terminals = smu.TERMINALS_FRONT")
-        self.smu.write("smu.measure.func = smu.FUNC_DC_VOLTAGE")
+        self.smu.write("smu.source.func = smu.FUNC_DC_VOLTAGE")
         self.smu.write("smu.source.level = 0")
         self.smu.write('smu.source.output = smu.ON')
 
