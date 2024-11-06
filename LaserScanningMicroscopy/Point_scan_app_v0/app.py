@@ -1,12 +1,14 @@
 import sys, os
-import numpy as np
-import time
-from PySide6 import QtWidgets
-from pyqtgraph import PlotWidget
-import pyqtgraph as pg
+import random
+from PySide6 import QtWidgets, QtCore
 from PySide6.QtCore import QTimer,Qt
+import pyqtgraph as pg
 from PySide6.QtGui import QFontDatabase, QFont
 from decimal import Decimal
+from pyqtgraph import PlotWidget
+import numpy as np
+import time
+
 
 class CustomAxisItem(pg.AxisItem):
     def __init__(self, axis_label_ticks_distance, *args, **kwargs):
@@ -31,16 +33,17 @@ def load_font(font_path):
     return font_families[0]
 
 class LSMLivePlot(QtWidgets.QMainWindow):
+
     def __init__(self, 
                 channel_num=3, 
-                x_steps=500, 
+                steps=500, 
                 font_size=12, 
                 chart_wdith=400,
                 show_zero_level=True):
         super().__init__()
 
         self.channel_num = channel_num
-        self.x_steps = x_steps
+        self.steps = steps
         self.count = 0
         self.chart_wdith = chart_wdith
         self.font_size = font_size
@@ -65,8 +68,8 @@ class LSMLivePlot(QtWidgets.QMainWindow):
 
 
         # Initialize data containers for each chart
-        self.x = np.arange(self.x_steps)
-        self.y  = np.zeros((self.channel_num, self.x_steps))
+        self.x = np.arange(self.steps)
+        self.y  = np.zeros((self.channel_num, self.steps))
 
         # Create PlotWidgets 
         # Plot the initial data
@@ -94,7 +97,7 @@ class LSMLivePlot(QtWidgets.QMainWindow):
             self.plots[chanel_id].setLabel('left', "")
             self.plots[chanel_id].getAxis('bottom').label.setFont(global_font)
             self.plots[chanel_id].getAxis('left').label.setFont(global_font)
-            # self.plots[chanel_id].setXRange(0, self.x_steps, padding=0)
+            # self.plots[chanel_id].setXRange(0, self.steps, padding=0)
             self.plots[chanel_id].setDefaultPadding(0)
 
 
@@ -112,45 +115,35 @@ class LSMLivePlot(QtWidgets.QMainWindow):
             if self.show_zero_level:
                 self.plots[chanel_id].addItem(zero_line)
 
-
-        self.timer = QTimer()
-        self.timer.timeout.connect(self.update_data)
-        self.data_acquision()
-
-    def data_acquision(self):
-
-
-        
-        # Real data acquision function happens here
-        time.sleep(0.025)
-        for chanel_id in range(self.channel_num):
-            self.y[chanel_id] = np.arange(self.x_steps) ** 0.75 + np.random.normal(scale=4, size=self.x_steps) - 40
-
-        self.count += 1
-        self.timer.start(0)
-
-        if self.count >= self.x_steps:
-            self.timer.stop()
-            QtWidgets.QApplication.quit()
-            self.save()
-
-    def update_data(self):
+    def update_data(self, count, y_data):
+        self.y = y_data
+        self.count = count
         for chanel_id in range(self.channel_num):
             self.curves[chanel_id].setData(self.x[:self.count], self.y[chanel_id][:self.count])
-        self.data_acquision()
-
-    def save(self):
-        # Capture the window as a QPixmap
-        pixmap = self.grab(self.rect()).toImage()
-
-        # Save the QPixmap to a PNG file
-        dir_path = os.path.dirname(os.path.realpath(__file__)) + '/'
-        pixmap.save(dir_path + "window_capture.png")
-        np.save(dir_path + "all_channel_data", self.y)
 
 
+
+def main():
+
+    channel_num, steps = (2, 200)
+    app = QtWidgets.QApplication(sys.argv)
+    main_window = LSMLivePlot(channel_num=channel_num, steps=steps)
+    main_window.show()
     
-app = QtWidgets.QApplication(sys.argv)
-window = LSMLivePlot()
-window.show()
-sys.exit(app.exec())
+    for count in range(steps):
+
+        # Random delay between 0.5 and 2 seconds
+        time.sleep(random.uniform(0.005, 0.010))
+        # Generate new random y-data for the chart
+        y = np.random.normal(size=(channel_num, steps))
+        
+
+        # Update
+        main_window.update_data(count, y)
+        app.processEvents()
+
+    app.exit()
+
+
+if __name__ == "__main__":
+    main()
