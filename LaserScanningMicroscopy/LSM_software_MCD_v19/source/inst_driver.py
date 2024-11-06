@@ -397,15 +397,9 @@ class Lockin(Instrument):
         self.instrument.write(f"refz 1")
 
 
-        # Set the amplitude of the sine output signal 
-        # self.instrument.write(f"slvl {self.params_sweep_lists['sine_amplitude'][0,0]}")
-        # self.logger.info(self.instrument.query('slvl?'))
-
     def quit(self, **kwargs):
         super().quit(**kwargs)
         # Turn off sine output
-        self.instrument.write(f"slvl 0")
-        self.instrument.query('slvl?')
         # Disconnect 
         self.instrument.close()
 
@@ -422,11 +416,7 @@ class Lockin(Instrument):
             self.instrument.write(f"irng {param_val}")
         elif param == 'signal_sensitivity':
             self.instrument.write(f"scal {param_val}")
-        elif param == 'ref_frequency':
-            self.instrument.write(f"freq {param_val}")
-        elif param == 'sine_amplitude':
-            self.instrument.write(f"slvl {param_val}")
- 
+
         return None
 
     def data_acquisition_start(self, **kwargs):
@@ -695,6 +685,7 @@ class DAQ_simulated(Instrument):
             DAQ_name + '/'+ channel_name for channel_name in self.input_mapping]
 
         ai_data = np.random.normal(size=(len(input_mapping_full_path), num_samples))
+        time.sleep(1/frequency)
         return ai_data
 
     def read_current_output(self):
