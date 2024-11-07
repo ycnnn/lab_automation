@@ -224,11 +224,22 @@ class SMU(Instrument):
         self.smu.timeout = 500
         self.smu.write('reset()')
         self.smu.write("smu.source.autorange = smu.ON")
+        self.smu.write("smu.source.func = smu.FUNC_DC_VOLTAGE")
+
+        self.smu.write("smu.measure.func = smu.FUNC_DC_VOLTAGE")
+        self.smu.write('reading = smu.measure.read()')
+        volt_reading = np.array(self.smu.query_ascii_values('print(reading)'))[0]
+        initial_ramp = np.linspace(volt_reading, self.params_sweep_lists['Force'][0])
+        
+        for volt in initial_ramp:
+            self.smu.write(f"smu.source.level = {volt}")
+            self.smu.write('reading = smu.measure.read()')
+            self.smu.write('waitcomplete()')
+
+
         if self.mode == 'Force_V_Sense_V':
-            self.smu.write("smu.source.func = smu.FUNC_DC_VOLTAGE")
             self.smu.write("smu.measure.func = smu.FUNC_DC_VOLTAGE")
         elif self.mode == 'Force_V_Sense_I':
-            self.smu.write("smu.source.func = smu.FUNC_DC_VOLTAGE")
             self.smu.write("smu.measure.func = smu.FUNC_DC_CURRENT")
         elif self.mode == 'Force_I_Sense_V':
             raise RuntimeError('Measurement mode incorrect: Source is restricted to supply a voltage')
@@ -239,8 +250,18 @@ class SMU(Instrument):
         self.smu.write('smu.source.output = smu.ON')
 
     def quit(self, **kwargs):
+
+        self.smu.write("smu.measure.func = smu.FUNC_DC_VOLTAGE")
+        self.smu.write('reading = smu.measure.read()')
+        volt_reading = np.array(self.smu.query_ascii_values('print(reading)'))[0]
+        quit_ramp = np.linspace(volt_reading,0)
+        
+        for volt in quit_ramp:
+            self.smu.write(f"smu.source.level = {volt}")
+            self.smu.write('reading = smu.measure.read()')
+            self.smu.write('waitcomplete()')
+
         super().quit(**kwargs)
-        self.write_param_to_instrument('Force', 0)
         self.smu.write('smu.source.output = smu.OFF')
 
     def write_param_to_instrument(self, param, param_val):
