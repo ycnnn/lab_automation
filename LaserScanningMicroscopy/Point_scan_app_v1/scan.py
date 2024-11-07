@@ -61,6 +61,9 @@ class LSM_single_scan:
                     ) for instr in instrument_manager]
 
             for scan_index in range(self.scan_parameters.steps):
+                    
+                    # time.sleep(0.01)
+
                     auxiliary_scan_info = {'scan_index': scan_index}
                         
                     with ExitStack() as scan_stack:
@@ -68,9 +71,6 @@ class LSM_single_scan:
                                 instr_scan(**auxiliary_scan_info)
                                 ) for instr_scan in scan_manager]
                         
-                    print([
-                            resource.data.shape for resource in self.instruments
-                            ])
                  
                     instr_data = np.concatenate([
                             resource.data for resource in self.instruments
@@ -122,20 +122,41 @@ class Scan_paramters:
 def main():
 
     instruments = []
-    steps = 5000
+    steps = 100
     position_parameters = Position_parameters(steps=steps)
     scan_parameters = Scan_paramters(steps=steps, position_parameters=position_parameters)
     
 
-    daq = inst_driver.DAQ_simulated(
+    daq = inst_driver.DAQ(
                     scan_parameters=scan_parameters,
                     input_mapping=['ai0', 'ai1'],
                     )
     instruments.append(daq)
 
+    smu1 = inst_driver.SMU(scan_parameters=scan_parameters,
+                 address="USB0::0x05E6::0x2450::04096331::INSTR",
+                 mode='Force_V_Sense_I',
+                 **{'Force':[-20,20]})
+    instruments.append(smu1)
+
+
+
     sim_instr = inst_driver.SimulatedInstrument(
         address='', scan_parameters=scan_parameters)
     instruments.append(sim_instr)
+
+
+
+    # lockin = inst_driver.Lockin(scan_parameters=scan_parameters,
+    #                             **{
+    #                                 'time_constant_level':0, 
+    #                                 'volt_input_range':0, 
+    #                                 'signal_sensitivity':0,
+    #                 })
+    # instruments.append(lockin)
+
+    # laser = inst_driver.LaserDiode(scan_parameters=scan_parameters, **{'current':[0,0.01]})
+    # instruments.append(laser)
 
 
     LSM_single_scan(

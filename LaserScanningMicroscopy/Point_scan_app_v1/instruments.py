@@ -202,19 +202,19 @@ class SMU(Instrument):
     def __init__(self, scan_parameters, 
                  address="USB0::0x05E6::0x2450::04096331::INSTR",
                  name=None,
-                 ramp_steps=10,
+                 ramp_steps=5,
                  mode='Force_V_Sense_V',
                  **kwargs):
         
         super().__init__(address, channel_num=1, 
                          steps=scan_parameters.steps, 
-                         channel_name_list=['Voltage'],
+                         channel_name_list=['Force'],
                          **kwargs)
         
         self.name = self.name if not name else name
         self.ramp_steps = ramp_steps
         self.mode = mode
-        self.params = {'voltage':0}
+        self.params = {'Force':0}
         
     def initialize(self, **kwargs):
         super().initialize(**kwargs)
@@ -231,11 +231,8 @@ class SMU(Instrument):
             self.smu.write("smu.source.func = smu.FUNC_DC_VOLTAGE")
             self.smu.write("smu.measure.func = smu.FUNC_DC_CURRENT")
         elif self.mode == 'Force_I_Sense_V':
-            self.smu.write("smu.source.func = smu.FUNC_DC_CURRENT")
-            self.smu.write("smu.measure.func = smu.FUNC_DC_VOLTAGE")
-        elif self.mode == 'Force_I_Sense_I':
-            self.smu.write("smu.source.func = smu.FUNC_DC_CURRENT")
-            self.smu.write("smu.measure.func = smu.FUNC_DC_CURRENT")
+            raise RuntimeError('Measurement mode incorrect: Source is restricted to supply a voltage')
+        
         self.smu.write("smu.measure.autorange = smu.ON")
         self.smu.write("smu.measure.terminals = smu.TERMINALS_FRONT")
         self.smu.write("smu.source.level = 0")
@@ -243,48 +240,45 @@ class SMU(Instrument):
 
     def quit(self, **kwargs):
         super().quit(**kwargs)
-        self.write_param_to_instrument('voltage', 0)
+        self.write_param_to_instrument('Force', 0)
         self.smu.write('smu.source.output = smu.OFF')
 
     def write_param_to_instrument(self, param, param_val):
-        super().write_param_to_instrument(param, param_val)
-        # By default, ramp Keithley 2450 SMU from current voltage level 
-        # to the target voltage level (end_volt).
-        ramp_steps = self.ramp_steps
+        self.smu.write(f"smu.source.level = {param_val}")
         self.smu.write('reading = smu.measure.read()')
+        self.smu.write('waitcomplete()')
 
-        if self.mode == 'Force_V_Sense_V' or self.mode == 'Force_V_Sense_I':
-            volt_reading = np.array(self.smu.query_ascii_values('print(reading)'))[0]
-            self.logger.info(f'Current VOLT reading is {volt_reading} V.')
-            start_volt = volt_reading
-            end_volt = param_val
-            voltages = np.linspace(start_volt, end_volt, ramp_steps)
-            readings = []
-            # return start_volt
-            for volt in voltages:
-                self.smu.write(f"smu.source.level = {volt}")
-                self.smu.write('reading = smu.measure.read()')
-                reading = self.smu.query_ascii_values('print(reading)')
-                self.smu.write('waitcomplete()')
-                readings.append(reading)
-            return np.array(readings).reshape(-1)[-1]
+        reading = self.smu.query_ascii_values('print(reading)')
+
+        # self.smu.write("smu.source.func = smu.FUNC_DC_VOLTAGE")
+        # self.smu.write("smu.measure.func = smu.FUNC_DC_VOLTAGE")
+        # super().write_param_to_instrument(param, param_val)
+        # # By default, ramp Keithley 2450 SMU from current voltage level 
+        # # to the target voltage level (end_volt).
         
-        elif self.mode == 'Force_I_Sense_V' or self.mode == 'Force_I_Sense_I':
-            curr_reading = np.array(self.smu.query_ascii_values('print(reading)'))[0]
-            self.logger.info(f'Current CURR reading is {curr_reading} A.')
-            start_curr = curr_reading
-            end_curr = param_val
-            currents = np.linspace(start_curr, end_curr, ramp_steps)
-            readings = []
+        # ramp_steps = self.ramp_steps
+        # self.smu.write('reading = smu.measure.read()')
 
-            for curr in currents:
-                self.smu.write(f"smu.source.level = {curr}")
-                self.smu.write('reading = smu.measure.read()')
-                reading = self.smu.query_ascii_values('print(reading)')
-                self.smu.write('waitcomplete()')
-                readings.append(readings)
-            return np.array(readings).reshape(-1)[-1]
+        # volt_reading = np.array(self.smu.query_ascii_values('print(reading)'))[0]
+        # # print(f'\n\n\n\nCurrent volt: {volt_reading}\n\n\n\n')
+        # self.logger.info(f'Current VOLT reading is {volt_reading} V.')
+        # start_volt = volt_reading
+        # end_volt = param_val
+        # voltages = np.linspace(start_volt, end_volt, ramp_steps)
+        # # return start_volt
+        # for volt in voltages:
+        #     self.smu.write(f"smu.source.level = {volt}")
+        #     self.smu.write('reading = smu.measure.read()')
+        #     self.smu.write('waitcomplete()')
 
+        # reading = self.smu.query_ascii_values('print(reading)')
+
+        # if self.mode == 'Force_V_Sense_I':
+        #     self.smu.write("smu.measure.func = smu.FUNC_DC_CURRENT")
+        
+        return reading
+
+  
     def data_acquisition_start(self, **kwargs):
         super().data_acquisition_start(**kwargs)
         self.smu.write('reading = smu.measure.read()')
@@ -298,9 +292,9 @@ class Lockin(Instrument):
                  scan_parameters=None, 
                  name=None, 
                  **kwargs):
-        super().__init__(address, channel_num=2, 
+        super().__init__(address, channel_num=4, 
                          steps=scan_parameters.steps, 
-                         channel_name_list = ['X', 'Y'],
+                         channel_name_list = ['X', 'Y', 'X_noise', 'Y_noise'],
                          **kwargs)
         
         self.name = self.name if not name else name
@@ -318,10 +312,14 @@ class Lockin(Instrument):
         # Reset
         self.instrument.write('*rst')
         # self.logger.info(self.instrument.query('*idn?'))
-        # build buffer
-        self.instrument.write('capturelen 256')
-        # record XY signals
-        self.instrument.write('capturecfg xy')
+
+
+        # # build buffer
+        # self.instrument.write('capturelen 256')
+        # # record XY signals
+        # self.instrument.write('capturecfg xy')
+
+
         # Set the capture mode as external trigger
         self.instrument.write('rtrg posttl')
         # Set the input source as VOLTAGE
@@ -339,19 +337,19 @@ class Lockin(Instrument):
 
         # Set the voltage input range
         # Levels and range: 0->1V, 1->300mV, 2->100mV 3->30mV, 4->10mV
-        self.instrument.write(f"irng {self.params_sweep_lists['volt_input_range'][0,0]}")
+        self.instrument.write(f"irng {self.params_sweep_lists['volt_input_range'][0]}")
         # self.logger.info(self.instrument.query('irng?'))
 
         # Set the signal sensitivity
         # Levels and range: 0->1V, 1->500mV, 2->200mV 3->100mV, 4->50mV, 5->20mV, 6->10mV, 7->5mV, 8->2mV, 
         # 9->1mV, 10->500uV, 11->200uV, 12->100uV, 13->50uV, 14->20uV
-        self.instrument.write(f"scal {self.params_sweep_lists['signal_sensitivity'][0,0]}")
+        self.instrument.write(f"scal {self.params_sweep_lists['signal_sensitivity'][0]}")
         # self.logger.info(self.instrument.query('scal?'))
 
         # Set the time constant
         # Levels and range: 0->1us, 1->3us, 2->10us 3->30us, 4->100us, 5->300us, 6->1ms, 7->3ms, 8->10ms, 
         # 9->30ms, 10->100ms, 11->300ms, 12->1s, 13->3s, 14->10s, 15->30s, 16->100s, 17->300s, 18->1000s, 19->3000s, 20->10000s
-        self.instrument.write(f"oflt {self.params_sweep_lists['time_constant_level'][0,0]}")
+        self.instrument.write(f"oflt {self.params_sweep_lists['time_constant_level'][0]}")
         # self.logger.info(self.instrument.query('oflt?'))
 
         # Set the reference mode as external reference
@@ -379,11 +377,11 @@ class Lockin(Instrument):
             return None
 
         if param == 'time_constant_level':
-            self.instrument.write(f"oflt {param_val}")
+            self.instrument.write(f"oflt {int(param_val)}")
         elif param == 'volt_input_range':
-            self.instrument.write(f"irng {param_val}")
+            self.instrument.write(f"irng {int(param_val)}")
         elif param == 'signal_sensitivity':
-            self.instrument.write(f"scal {param_val}")
+            self.instrument.write(f"scal {int(param_val)}")
         
         return None
 
@@ -393,17 +391,10 @@ class Lockin(Instrument):
     def data_acquisition_finish(self, **kwargs):
         super().data_acquisition_finish(**kwargs)
 
-        # self.instrument.write('capturestop')
-        # buffer_len = int(self.instrument.query('captureprog?')[:-1])
-        # input_data = np.array(
-        #     self.instrument.query_binary_values(f'captureget? 0, {buffer_len}')
-        #     ).reshape(-1,2)[:self.reading_num,:].T
+        x_data, y_data = self.instrument.query_ascii_values('snap? 1,2')
+        x_noise, y_noise = self.instrument.query_ascii_values('snap? 8,9')
 
-        '''
-        To be implemented
-        '''
-
-        # self.data = input_data      
+        self.data = np.array([x_data, y_data, x_noise, y_noise])      
   
 
 class LaserDiode(Instrument):
@@ -491,12 +482,21 @@ class DAQ(Instrument):
             DAQ_name + '/'+ channel_name for channel_name in self.input_mapping]
         output_mapping_full_path = [
             DAQ_name + '/'+ channel_name for channel_name in self.output_mapping]
+        
+        with ni.Task() as ao_task, ni.Task() as ai_task:
+            for ao_channel in output_mapping_full_path:
+                ao_task.ao_channels.add_ao_voltage_chan(ao_channel)
+            for ai_channel in input_mapping_full_path:
+                ai_task.ai_channels.add_ai_voltage_chan(ai_channel)
+            ao_task.write(np.ascontiguousarray(ao_data))
+            ai_data = ai_task.read(number_of_samples_per_channel=1)
+
+        # print('\n\n\n\nDAQ data:\n\n\n\n')
+        # print(ai_data)
+        # print('\n\n\n\n\n\n\n\n')
+        return np.array(ai_data).reshape(-1)
 
       
-        '''
-        To be implemented
-        '''
-        # return ai_data
 
     def read_current_output(self):
         with ni.Task() as read_task:
