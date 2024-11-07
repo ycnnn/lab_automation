@@ -1,4 +1,4 @@
-import sys, os
+import sys, os, shutil
 from source.app import LSMLivePlot
 from PySide6 import QtWidgets
 import numpy as np
@@ -92,6 +92,10 @@ class LSM_single_scan:
         self.app.exit()
 
     def save(self):
+
+        source_python_file = str(Path(__file__).resolve().parent) + '/start_scan.py'
+        shutil.copy(source_python_file, 
+        self.scan_parameters.save_destination + 'scan_settings.py')
         screenshot = self.main_window.grab()
         screenshot.save(self.scan_parameters.save_destination + 'screenshot.png')
         np.save(self.scan_parameters.save_destination + 'data', self.data)
