@@ -36,6 +36,7 @@ class LSMLivePlot(QtWidgets.QMainWindow):
 
     def __init__(self, 
                 channel_num=3, 
+                channel_names=[],
                 steps=500, 
                 font_size=12, 
                 chart_wdith=400,
@@ -43,6 +44,9 @@ class LSMLivePlot(QtWidgets.QMainWindow):
         super().__init__()
 
         self.channel_num = channel_num
+        self.channel_names = channel_names
+        if len(self.channel_names) != self.channel_num:
+            raise RuntimeError(f'\nChannel number {self.channel_num} and channel names: ' + str(self.channel_names) +' do not match. Check.\n')
         self.steps = steps
         self.count = 0
         self.chart_wdith = chart_wdith
@@ -75,51 +79,51 @@ class LSMLivePlot(QtWidgets.QMainWindow):
         # Plot the initial data
         self.plots = []
         self.curves = []
-        for chanel_id in range(self.channel_num):
-            self.plots.append(PlotWidget(title=f"Chart {chanel_id}"))
+        for channel_id in range(self.channel_num):
+            self.plots.append(PlotWidget(title=self.channel_names[channel_id]))
         
-        for chanel_id in range(self.channel_num):
-            self.plots[chanel_id].setMinimumWidth(self.chart_wdith)
-            self.plots[chanel_id].setMaximumWidth(self.chart_wdith)
+        for channel_id in range(self.channel_num):
+            self.plots[channel_id].setMinimumWidth(self.chart_wdith)
+            self.plots[channel_id].setMaximumWidth(self.chart_wdith)
             
             y_axis = CustomAxisItem(orientation='left',
                                      axis_label_ticks_distance=12)
-            self.plots[chanel_id].setAxisItems({'left': y_axis})
+            self.plots[channel_id].setAxisItems({'left': y_axis})
 
             for axis_label in [
                        'left','right', 'bottom', 'top']:
-                self.plots[chanel_id].showAxis(axis_label)
-                self.plots[chanel_id].getAxis(axis_label).setStyle(tickLength=2,showValues=True)
-                self.plots[chanel_id].getAxis(axis_label).setStyle(tickFont=global_font)
-            self.plots[chanel_id].getAxis('top').setStyle(tickLength=2,showValues=False)   
-            self.plots[chanel_id].getAxis('right').setStyle(tickLength=2,showValues=False)   
-            self.plots[chanel_id].setLabel('bottom', "Time steps")
-            self.plots[chanel_id].setLabel('left', "")
-            self.plots[chanel_id].getAxis('bottom').label.setFont(global_font)
-            self.plots[chanel_id].getAxis('left').label.setFont(global_font)
-            # self.plots[chanel_id].setXRange(0, self.steps, padding=0)
-            self.plots[chanel_id].setDefaultPadding(0)
+                self.plots[channel_id].showAxis(axis_label)
+                self.plots[channel_id].getAxis(axis_label).setStyle(tickLength=2,showValues=True)
+                self.plots[channel_id].getAxis(axis_label).setStyle(tickFont=global_font)
+            self.plots[channel_id].getAxis('top').setStyle(tickLength=2,showValues=False)   
+            self.plots[channel_id].getAxis('right').setStyle(tickLength=2,showValues=False)   
+            self.plots[channel_id].setLabel('bottom', "Time steps")
+            self.plots[channel_id].setLabel('left', "")
+            self.plots[channel_id].getAxis('bottom').label.setFont(global_font)
+            self.plots[channel_id].getAxis('left').label.setFont(global_font)
+            # self.plots[channel_id].setXRange(0, self.steps, padding=0)
+            self.plots[channel_id].setDefaultPadding(0)
 
 
-            item = self.plots[chanel_id].getPlotItem()
+            item = self.plots[channel_id].getPlotItem()
             item.titleLabel.item.setFont(global_font)
             
 
-        for chanel_id in range(self.channel_num):
-            self.layout.addWidget(self.plots[chanel_id])
-        for chanel_id in range(self.channel_num):
+        for channel_id in range(self.channel_num):
+            self.layout.addWidget(self.plots[channel_id])
+        for channel_id in range(self.channel_num):
             zero_line = pg.InfiniteLine(
                 pos=0, angle=0, 
                 pen=pg.mkPen('r', width=2, style=Qt.DashLine))
-            self.curves.append(self.plots[chanel_id].plot( (0,0),(0,0) ))
+            self.curves.append(self.plots[channel_id].plot( (0,0),(0,0) ))
             if self.show_zero_level:
-                self.plots[chanel_id].addItem(zero_line)
+                self.plots[channel_id].addItem(zero_line)
 
     def update_data(self, count, y_data):
         self.y = y_data
         self.count = count
-        for chanel_id in range(self.channel_num):
-            self.curves[chanel_id].setData(self.x[:self.count], self.y[chanel_id][:self.count])
+        for channel_id in range(self.channel_num):
+            self.curves[channel_id].setData(self.x[:self.count], self.y[channel_id][:self.count])
 
 
 

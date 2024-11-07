@@ -4,6 +4,7 @@ from PySide6 import QtWidgets
 import numpy as np
 import time, random
 from contextlib import ExitStack
+from pathlib import Path
 import instruments as inst_driver
 from log_config import setup_logging
 
@@ -24,9 +25,13 @@ class LSM_single_scan:
         self.instruments.append(empty_instr)
 
         self.channel_num = 0
+        self.channel_names = []
 
         for instrument in self.instruments:
             self.channel_num += instrument.channel_num
+            for name in instrument.channel_name_list:
+                self.channel_names.append(name)
+      
 
         self.data = np.zeros(shape=(self.channel_num, self.scan_parameters.steps))
         # Set up the logging process
@@ -39,6 +44,7 @@ class LSM_single_scan:
     def start_ui(self):
         self.app = QtWidgets.QApplication(sys.argv)
         self.main_window = LSMLivePlot(channel_num=self.channel_num, 
+                                       channel_names=self.channel_names,
                                        steps=self.scan_parameters.steps)
         self.main_window.show()
     
@@ -86,7 +92,10 @@ class LSM_single_scan:
         self.app.exit()
 
     def save(self):
-        pass
+        screenshot = self.main_window.grab()
+        screenshot.save(self.scan_parameters.save_destination + 'screenshot.png')
+        np.save(self.scan_parameters.save_destination + 'data', self.data)
+        np.savetxt(self.scan_parameters.save_destination + 'data.csv', self.data.T)
 
 class Position_parameters:
     def __init__(self, center=(0,0,0), angle=0, length=0, steps=10, return_to_zero=False):
@@ -112,34 +121,76 @@ class Position_parameters:
 
 class Scan_paramters:
     def __init__(self, 
+                 scan_id='scan_',
                  steps=500, 
                  save_destination=None,
                  position_parameters=None):
         self.steps = steps
-        self.save_destination = save_destination if save_destination else os.path.dirname(os.path.realpath(__file__))
+        self.scan_id = scan_id
+        self.save_destination = save_destination
+        # self.save_destination = save_destination if save_destination else os.path.dirname(os.path.realpath(__file__))
+        self.create_path()
         self.position_parameters = position_parameters
 
+    def create_path(self):
+        full_path = os.path.realpath(__file__)
+        path = str(Path(os.path.dirname(full_path)).parents[0].absolute()) + '/results/' + self.scan_id + '/'
+    
+        self.save_destination = path if not self.save_destination else self.save_destination
+       
+        # The following code save the data.
+        # In case there is already a filder that hav the same name as the save desitnation,
+        # The code will rename the old folder by adding a suffix of "_backup".
+        # In cases there is alreay a backup folder, the code will add a number to suffix to identify each backup.
+        # For example: if "test" alreay exist, the code will try to move the old data to "text_backup_1"; if "text_backup_1" is also there, the code will try change the identifier to "text_backup_2", "text_backup_3", "text_backup_4" etc.
+        # In short, the code NEVER overwrites nor DELETES your data!
+
+        if os.path.exists(self.save_destination):
+            # If the directory does not exist, create it
+
+            uniq = 1
+            backup_path = path[:-1] + '_backup_' + str(uniq) + '/'
+            while os.path.exists(backup_path):
+                uniq += 1
+                backup_path = path[:-1] + '_backup_' + str(uniq) + '/'
+        
+            os.rename(self.save_destination, backup_path)
+
+        os.makedirs(self.save_destination)
+        
 def main():
 
     instruments = []
-    steps = 100
+    steps = 200
     position_parameters = Position_parameters(steps=steps)
     scan_parameters = Scan_paramters(steps=steps, position_parameters=position_parameters)
     
 
-    daq = inst_driver.DAQ(
+    daq = inst_driver.DAQ_simulated(
                     scan_parameters=scan_parameters,
                     input_mapping=['ai0', 'ai1'],
                     )
     instruments.append(daq)
 
-    smu1 = inst_driver.SMU(scan_parameters=scan_parameters,
-                 address="USB0::0x05E6::0x2450::04096331::INSTR",
-                 mode='Force_V_Sense_I',
-                 **{'Force':[-20,20]})
-    instruments.append(smu1)
+    # smu1 = inst_driver.SMU(scan_parameters=scan_parameters,
+    #              address="USB0::0x05E6::0x2450::04096331::INSTR",
+    #              mode='Force_V_Sense_I',
+    #              **{'Force':[-20,20]})
+    # instruments.append(smu1)
 
 
+
+    sim_instr = inst_driver.SimulatedInstrument(
+        address='', scan_parameters=scan_parameters)
+    instruments.append(sim_instr)
+
+    sim_instr = inst_driver.SimulatedInstrument(
+        address='', scan_parameters=scan_parameters)
+    instruments.append(sim_instr)
+
+    sim_instr = inst_driver.SimulatedInstrument(
+        address='', scan_parameters=scan_parameters)
+    instruments.append(sim_instr)
 
     sim_instr = inst_driver.SimulatedInstrument(
         address='', scan_parameters=scan_parameters)
@@ -163,6 +214,7 @@ def main():
              scan_parameters=scan_parameters,
              instruments=instruments,
              simulate=True)
+   
 
 
 
