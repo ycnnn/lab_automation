@@ -247,8 +247,9 @@ class SMU(Instrument):
         self.smu.write(f"smu.source.level = {param_val}")
         self.smu.write('reading = smu.measure.read()')
         self.smu.write('waitcomplete()')
-
+        
         reading = self.smu.query_ascii_values('print(reading)')
+        print(f'Planning to write {param_val}, measured {reading}')
 
         # self.smu.write("smu.source.func = smu.FUNC_DC_VOLTAGE")
         # self.smu.write("smu.measure.func = smu.FUNC_DC_VOLTAGE")
@@ -278,7 +279,6 @@ class SMU(Instrument):
         
         return reading
 
-  
     def data_acquisition_start(self, **kwargs):
         super().data_acquisition_start(**kwargs)
         self.smu.write('reading = smu.measure.read()')
