@@ -303,6 +303,50 @@ class Lockin(Instrument):
                     }
         
         
+    def time_constant_conversion(self, input_value, code_to_analog=False):
+        # Conversion table (time code -> time duration)
+        time_table = {
+            0: 1e-6,    # 1us
+            1: 3e-6,    # 3us
+            2: 10e-6,   # 10us
+            3: 30e-6,   # 30us
+            4: 100e-6,  # 100us
+            5: 300e-6,  # 300us
+            6: 1e-3,    # 1ms
+            7: 3e-3,    # 3ms
+            8: 10e-3,   # 10ms
+            9: 30e-3,   # 30ms
+            10: 100e-3, # 100ms
+            11: 300e-3, # 300ms
+            12: 1,      # 1s
+            13: 3,      # 3s
+            14: 10,     # 10s
+            15: 30,     # 30s
+            16: 100,    # 100s
+            17: 300,    # 300s
+            18: 1000,   # 1000s
+            19: 3000,   # 3000s
+            20: 10000,  # 10000s
+        }
+
+        # Convert from time code to time (seconds)
+        if code_to_analog:
+            if isinstance(input_value, int) and 0 <= input_value <= 20:
+                return time_table[input_value]
+            else:
+                raise ValueError("Invalid time code. Must be an integer between 0 and 20.")
+
+        # Convert from time to time code
+        else:
+            if isinstance(input_value, (int, float)) and input_value > 0:
+                # Find the closest time code that fits
+                for code in range(20, -1, -1):  # Start from the largest value
+                    if input_value >= time_table[code] * 0.9998:
+                        return code
+                return 0  # If input_value is less than the smallest time code (1us)
+            else:
+                raise ValueError("Invalid time value. Must be a positive number.")
+
     def initialize(self, **kwargs):
         super().initialize(**kwargs)
         rm = pyvisa.ResourceManager()
@@ -385,10 +429,14 @@ class Lockin(Instrument):
 
     def data_acquisition_start(self, **kwargs):
         super().data_acquisition_start(**kwargs)
+        # Wait one cycle of time constant
+        wait_time = 1.05 * self.time_constant_conversion(self.params_sweep_lists['time_constant_level'][self.scan_index])
+        time.sleep(wait_time)
 
     def data_acquisition_finish(self, **kwargs):
         super().data_acquisition_finish(**kwargs)
 
+        # time.sleep(1)
         x_data, y_data = self.instrument.query_ascii_values('snap? 1,2')
         x_noise, y_noise = self.instrument.query_ascii_values('snap? 8,9')
 

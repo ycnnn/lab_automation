@@ -1,6 +1,7 @@
 import os
 import numpy as np
 from pathlib import Path
+from datetime import datetime
 
 class Position_parameters:
     def __init__(self, center=(0,0,0), angle=0, length=0, steps=10, return_to_zero=False):
@@ -26,12 +27,15 @@ class Position_parameters:
 
 class Scan_paramters:
     def __init__(self, 
-                 scan_id='scan_',
+                 scan_id=None,
                  steps=500, 
                  save_destination=None,
                  position_parameters=None):
+        now = datetime.now()
+        default_scan_id = f"scan_{now.strftime('%H')}_HH_{now.strftime('%M')}_MM_{now.strftime('%S')}_SS"
+
         self.steps = steps
-        self.scan_id = scan_id
+        self.scan_id = scan_id if scan_id else default_scan_id
         self.save_destination = save_destination
         # self.save_destination = save_destination if save_destination else os.path.dirname(os.path.realpath(__file__))
         self.create_path()
