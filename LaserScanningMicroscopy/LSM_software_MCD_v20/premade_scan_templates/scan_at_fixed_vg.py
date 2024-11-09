@@ -53,8 +53,8 @@ if __name__ == '__main__':
                                             angle=110)
   
     
-    scan_parameters = Scan_parameters(point_time_constant=0.012,
-                                      retrace_point_time_constant=0.012,
+    scan_parameters = Scan_parameters(point_time_constant=0.011,
+                                      retrace_point_time_constant=0.011,
                                       return_to_zero=False,
                                       additional_info=f'')
 
