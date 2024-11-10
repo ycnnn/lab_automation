@@ -403,6 +403,11 @@ class Lockin(Instrument):
         # Set the external reference trigger input to 1 MOhm
         self.instrument.write(f"refz 1")
 
+        wait_time = 1.025 * self.time_constant_conversion(self.params_sweep_lists['time_constant_level'][0],
+                                                         code_to_analog=True)
+        self.logger.info(f'Lockin wait initial {wait_time} s for signal acquisition')
+        time.sleep(wait_time)
+
 
         # Set the amplitude of the sine output signal 
         # self.instrument.write(f"slvl {self.params_sweep_lists['sine_amplitude'][0,0]}")
@@ -434,7 +439,7 @@ class Lockin(Instrument):
         # Wait one cycle of time constant
         wait_time = 1.025 * self.time_constant_conversion(self.params_sweep_lists['time_constant_level'][self.scan_index],
                                                          code_to_analog=True)
-        self.logger.info(f'Lockin wait {wait_time} for signal acquisition')
+        self.logger.info(f'Lockin wait {wait_time} s for signal acquisition')
         time.sleep(wait_time)
 
     def data_acquisition_finish(self, **kwargs):
