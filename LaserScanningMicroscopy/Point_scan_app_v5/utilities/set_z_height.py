@@ -3,7 +3,7 @@ import itertools
 import numbers
 parentdir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 os.sys.path.insert(0,parentdir) 
-from source.params.position_params import Position_parameters
+from source.parameters import Position_parameters
 # from source.params.scan_params import Scan_parameters
 # from source.daq_driver_simulated import reset_daq, set_z_height, read_daq_output
 import nidaqmx as ni
