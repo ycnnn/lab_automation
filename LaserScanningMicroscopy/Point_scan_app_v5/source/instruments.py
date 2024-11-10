@@ -449,7 +449,7 @@ class Lockin(Instrument):
         super().data_acquisition_finish(**kwargs)
 
         # time.sleep(1)
-        x_data, y_data = self.instrument.query_ascii_values('snap? 1,2')
+        x_data, y_data = self.instrument.query_ascii_values('snap? x,y')
         x_noise, y_noise = self.instrument.query_ascii_values('snap? 8,9')
 
         self.data = np.array([x_data, y_data, x_noise, y_noise])      
