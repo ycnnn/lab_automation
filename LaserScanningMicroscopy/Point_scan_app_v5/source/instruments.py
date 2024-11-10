@@ -291,6 +291,7 @@ class Lockin(Instrument):
                  address="USB0::0xB506::0x2000::002765::INSTR", 
                  scan_parameters=None, 
                  name=None, 
+                 initial_wait=1,
                  **kwargs):
         super().__init__(address, channel_num=4, 
                          steps=scan_parameters.steps, 
@@ -303,6 +304,7 @@ class Lockin(Instrument):
                         'volt_input_range':3, 
                         'signal_sensitivity':12,
                     }
+        self.initial_wait = initial_wait
         
         
     def time_constant_conversion(self, input_value, code_to_analog=False):
@@ -405,8 +407,10 @@ class Lockin(Instrument):
 
         wait_time = 1.025 * self.time_constant_conversion(self.params_sweep_lists['time_constant_level'][0],
                                                          code_to_analog=True)
-        self.logger.info(f'Lockin wait initial {wait_time} s for signal acquisition')
-        time.sleep(wait_time)
+        
+        initial_wait = max(self.initial_wait, wait_time)
+        self.logger.info(f'Lockin wait initial {initial_wait} s for signal acquisition')
+        time.sleep(initial_wait)
 
 
         # Set the amplitude of the sine output signal 
