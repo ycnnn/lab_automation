@@ -432,9 +432,9 @@ class Lockin(Instrument):
     def data_acquisition_start(self, **kwargs):
         super().data_acquisition_start(**kwargs)
         # Wait one cycle of time constant
-        wait_time = 1.05 * self.time_constant_conversion(self.params_sweep_lists['time_constant_level'][self.scan_index],
+        wait_time = 1.025 * self.time_constant_conversion(self.params_sweep_lists['time_constant_level'][self.scan_index],
                                                          code_to_analog=True)
-        print(f'\n\n\nWait {wait_time}\n\n\n')
+        self.logger.info(f'Lockin wait {wait_time} for signal acquisition')
         time.sleep(wait_time)
 
     def data_acquisition_finish(self, **kwargs):

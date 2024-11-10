@@ -27,6 +27,18 @@ class LSM_single_scan:
         self.channel_num = 0
         self.channel_names = []
 
+        lockin_exists = any(
+            isinstance(instrument, inst_driver.Lockin) for instrument in self.instruments)
+
+        
+        if lockin_exists:
+            for instr_index, instr in enumerate(self.instruments):
+                if isinstance(instr, inst_driver.Lockin):
+                        break
+            lockin = self.instruments[instr_index]
+            self.instruments.pop(instr_index)
+            self.instruments.append(lockin)
+
         for instrument in self.instruments:
             self.channel_num += instrument.channel_num
             for name in instrument.channel_name_list:
