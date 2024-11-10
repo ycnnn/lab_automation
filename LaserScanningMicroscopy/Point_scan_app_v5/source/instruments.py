@@ -331,14 +331,14 @@ class Lockin(Instrument):
 
         # Convert from time code to time (seconds)
         if code_to_analog:
-            if isinstance(input_value, int) and 0 <= input_value <= 20:
+            if 0 <= input_value <= 20:
                 return time_table[input_value]
             else:
                 raise ValueError("Invalid time code. Must be an integer between 0 and 20.")
 
         # Convert from time to time code
         else:
-            if isinstance(input_value, (int, float)) and input_value > 0:
+            if input_value > 0:
                 # Find the closest time code that fits
                 for code in range(20, -1, -1):  # Start from the largest value
                     if input_value >= time_table[code] * 0.9998:
@@ -430,7 +430,9 @@ class Lockin(Instrument):
     def data_acquisition_start(self, **kwargs):
         super().data_acquisition_start(**kwargs)
         # Wait one cycle of time constant
-        wait_time = 1.05 * self.time_constant_conversion(self.params_sweep_lists['time_constant_level'][self.scan_index])
+        wait_time = 1.05 * self.time_constant_conversion(self.params_sweep_lists['time_constant_level'][self.scan_index],
+                                                         code_to_analog=True)
+        print(f'\n\n\nWait {wait_time}\n\n\n')
         time.sleep(wait_time)
 
     def data_acquisition_finish(self, **kwargs):

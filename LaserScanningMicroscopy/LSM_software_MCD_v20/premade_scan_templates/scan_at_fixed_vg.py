@@ -21,15 +21,16 @@ import source.inst_driver as inst_driver
 
 if __name__ == '__main__':
    
-    
+    vg = -35
+    vd = -0.25
+
     try:
         scan_id = sys.argv[1]
     except:
-        scan_id = 'TS_Vg_0_vd_0'
+        scan_id = f'TS_Vg_{vg}_vd_{vd}'
     
     # Fixed gate bias Vg, in volt
-    vg = 0
-    vd = 0
+    
 
     # Load calibration data for rotating the waveplates in the system.
     # The data will have multiple rows, each row is data for a certain polarization angle of the light shining on the sample.
