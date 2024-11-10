@@ -291,7 +291,7 @@ class Lockin(Instrument):
                  address="USB0::0xB506::0x2000::002765::INSTR", 
                  scan_parameters=None, 
                  name=None, 
-                 initial_wait=1,
+                 initial_wait_cycles=20,
                  **kwargs):
         super().__init__(address, channel_num=4, 
                          steps=scan_parameters.steps, 
@@ -304,7 +304,7 @@ class Lockin(Instrument):
                         'volt_input_range':3, 
                         'signal_sensitivity':12,
                     }
-        self.initial_wait = initial_wait
+        self.initial_wait_cycles = initial_wait_cycles
         
         
     def time_constant_conversion(self, input_value, code_to_analog=False):
@@ -405,12 +405,11 @@ class Lockin(Instrument):
         # Set the external reference trigger input to 1 MOhm
         self.instrument.write(f"refz 1")
 
-        wait_time = 1.025 * self.time_constant_conversion(self.params_sweep_lists['time_constant_level'][0],
+        wait_time = self.initial_wait_cycles * self.time_constant_conversion(self.params_sweep_lists['time_constant_level'][0],
                                                          code_to_analog=True)
-        
-        initial_wait = max(self.initial_wait, wait_time)
-        self.logger.info(f'Lockin wait initial {initial_wait} s for signal acquisition')
-        time.sleep(initial_wait)
+    
+        self.logger.info(f'Lockin wait initial {wait_time} s for signal acquisition')
+        time.sleep(wait_time)
 
 
         # Set the amplitude of the sine output signal 
@@ -441,7 +440,7 @@ class Lockin(Instrument):
     def data_acquisition_start(self, **kwargs):
         super().data_acquisition_start(**kwargs)
         # Wait one cycle of time constant
-        wait_time = 1.025 * self.time_constant_conversion(self.params_sweep_lists['time_constant_level'][self.scan_index],
+        wait_time = 1.10 * self.time_constant_conversion(self.params_sweep_lists['time_constant_level'][self.scan_index],
                                                          code_to_analog=True)
         self.logger.info(f'Lockin wait {wait_time} s for signal acquisition')
         time.sleep(wait_time)
@@ -486,7 +485,7 @@ class LaserDiode(Instrument):
             self.current_levels = 0.01 * np.ones(self.params_sweep_lists['current'].shape)
 
         self.instrument.write(f"source1:current:level:amplitude {self.params_sweep_lists['current'][0]}")
-        # self.instrument.write('output:state 1')
+        self.instrument.write('output:state 1')
 
     def quit(self, **kwargs):
         super().quit(**kwargs)
@@ -501,8 +500,8 @@ class LaserDiode(Instrument):
 
     def data_acquisition_start(self, **kwargs):
         super().data_acquisition_start(**kwargs)
-        if self.scan_index == 0:
-            self.instrument.write('output:state 1')
+        # if self.scan_index == 0:
+        #     self.instrument.write('output:state 1')
 
     def data_acquisition_finish(self, **kwargs):
         super().data_acquisition_finish(**kwargs)
