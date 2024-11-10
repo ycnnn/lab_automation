@@ -173,7 +173,7 @@ class EmptyInstrument(Instrument):
 
 
 class SimulatedInstrument(Instrument):
-    def __init__(self, address, scan_parameters, name=None,**kwargs):
+    def __init__(self, address, scan_parameters, wait=0.1, name=None,**kwargs):
         super().__init__(address, channel_num=1, 
                          steps=scan_parameters.steps, 
                          channel_name_list=['Sim_instr'],
@@ -181,6 +181,7 @@ class SimulatedInstrument(Instrument):
         # self.steps = scan_parameters.steps
         self.name = self.name if not name else name
         self.params = {'param1':20, 'param2':[0,1], 'param3':0}
+        self.wait = wait
         
     def initialize(self, **kwargs):
         super().initialize(**kwargs)
@@ -192,11 +193,12 @@ class SimulatedInstrument(Instrument):
         super().write_param_to_instrument(param, param_val)
 
     def data_acquisition_start(self, **kwargs):
+        time.sleep(self.wait)
         ramp_data = super().data_acquisition_start(**kwargs)
 
-        self.data = np.random.normal(
-                loc=self.params_sweep_lists['param2'][self.scan_index],
-                size=(self.channel_num))
+        self.data = np.cos(np.ones(
+                shape=(self.channel_num)) * self.scan_index)
+        # self.data = np.cos(self.params_sweep_lists['param2'][self.scan_index])
   
 class SMU(Instrument):
     def __init__(self, scan_parameters, 

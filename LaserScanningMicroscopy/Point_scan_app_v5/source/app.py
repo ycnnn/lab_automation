@@ -40,7 +40,8 @@ class LSMLivePlot(QtWidgets.QMainWindow):
                 steps=500, 
                 font_size=12, 
                 chart_wdith=400,
-                show_zero_level=True):
+                show_zero_level=True,
+                min_plot_range=10):
         super().__init__()
 
         self.channel_num = channel_num
@@ -52,6 +53,7 @@ class LSMLivePlot(QtWidgets.QMainWindow):
         self.chart_wdith = chart_wdith
         self.font_size = font_size
         self.show_zero_level = show_zero_level
+        self.min_plot_range = min_plot_range
 
 
         self.setWindowTitle("LSM Live Plot")
@@ -120,33 +122,45 @@ class LSMLivePlot(QtWidgets.QMainWindow):
                 self.plots[channel_id].addItem(zero_line)
 
     def update_data(self, count, y_data):
+
+        
+
         self.y = y_data
-        self.count = count
+        self.count = count 
+        # print(f'\n\n\nCount={self.count}, show data {self.x[:self.count].shape[0]}\n\n]n')
+        self.setWindowTitle(f"LSM Live Plot: Count {count} of {self.steps}")
+
+        # plot_range = max(0, self.count)
         for channel_id in range(self.channel_num):
-            self.curves[channel_id].setData(self.x[:self.count], self.y[channel_id][:self.count])
+            # self.curves[channel_id].setData(self.x[:self.count + 1], self.y[channel_id][:self.count + 1])
+            self.curves[channel_id].setData(self.x, self.y[channel_id])
+            self.plots[channel_id].setRange(xRange=[0,max(self.min_plot_range, self.count)])
+
+            
 
 
 
 def main():
 
-    channel_num, steps = (2, 200)
-    app = QtWidgets.QApplication(sys.argv)
-    main_window = LSMLivePlot(channel_num=channel_num, steps=steps)
-    main_window.show()
+    # channel_num, steps = (2, 200)
+    # app = QtWidgets.QApplication(sys.argv)
+    # main_window = LSMLivePlot(channel_num=channel_num, steps=steps)
+    # main_window.show()
     
-    for count in range(steps):
+    # for count in range(steps):
 
-        # Random delay between 0.5 and 2 seconds
-        time.sleep(random.uniform(0.005, 0.010))
-        # Generate new random y-data for the chart
-        y = np.random.normal(size=(channel_num, steps))
+    #     # Random delay between 0.5 and 2 seconds
+    #     time.sleep(random.uniform(0.005, 0.010))
+    #     # Generate new random y-data for the chart
+    #     y = np.random.normal(size=(channel_num, steps))
         
 
-        # Update
-        main_window.update_data(count, y)
-        app.processEvents()
+    #     # Update
+    #     main_window.update_data(count, y)
+    #     app.processEvents()
 
-    app.exit()
+    # app.exit()
+    pass
 
 
 if __name__ == "__main__":
