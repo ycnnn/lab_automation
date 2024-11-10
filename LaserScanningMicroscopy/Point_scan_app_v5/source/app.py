@@ -1,4 +1,4 @@
-import sys, os
+import sys, os, math
 import random
 from PySide6 import QtWidgets, QtCore
 from PySide6.QtCore import QTimer,Qt
@@ -54,6 +54,7 @@ class LSMLivePlot(QtWidgets.QMainWindow):
         self.font_size = font_size
         self.show_zero_level = show_zero_level
         self.min_plot_range = min_plot_range
+        self.start_time = time.time()
 
 
         self.setWindowTitle("LSM Live Plot")
@@ -127,15 +128,24 @@ class LSMLivePlot(QtWidgets.QMainWindow):
 
         self.y = y_data
         self.count = count 
+
         # print(f'\n\n\nCount={self.count}, show data {self.x[:self.count].shape[0]}\n\n]n')
-        self.setWindowTitle(f"LSM Live Plot: Count {count} of {self.steps}")
+
+        mean_time_per_step = (time.time() - self.start_time)/(self.count + 1)
+        self.setWindowTitle(f"LSM Live Plot: Count {count} of {self.steps}, remaining {math.ceil(int(mean_time_per_step * (self.steps - self.count - 1)))} s")
 
         # plot_range = max(0, self.count)
+        plot_range = max(self.min_plot_range, self.count)
         for channel_id in range(self.channel_num):
-            # self.curves[channel_id].setData(self.x[:self.count + 1], self.y[channel_id][:self.count + 1])
-            self.curves[channel_id].setData(self.x, self.y[channel_id])
-            self.plots[channel_id].setRange(xRange=[0,max(self.min_plot_range, self.count)])
+   
+            self.curves[channel_id].setData(self.x[:self.count + 1], self.y[channel_id][:self.count + 1])
+            
+            # if self.count <=3:
+            #     time.sleep(5)
+            # else: 
+            #     time.sleep(1)
 
+    
             
 
 
