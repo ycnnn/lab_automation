@@ -197,8 +197,8 @@ def scatter_format(scatter,
     
 def line_format(lines, 
                    color='red',
-                   linewidth=0.5,
-                   linestyle='dashed'):
+                   linewidth=1,
+                   linestyle='solid'):
     for line in lines:
         line.set_color(color)
         line.set_linewidth(linewidth)
