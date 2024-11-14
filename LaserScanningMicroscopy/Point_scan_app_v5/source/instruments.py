@@ -301,9 +301,9 @@ class Lockin(Instrument):
                  name=None, 
                  initial_wait_cycles=20,
                  **kwargs):
-        super().__init__(address, channel_num=4, 
+        super().__init__(address, channel_num=2, 
                          steps=scan_parameters.steps, 
-                         channel_name_list = ['X', 'Y', 'X_noise', 'Y_noise'],
+                         channel_name_list = ['X', 'Y'],
                          **kwargs)
         
         self.name = self.name if not name else name
@@ -456,11 +456,8 @@ class Lockin(Instrument):
     def data_acquisition_finish(self, **kwargs):
         super().data_acquisition_finish(**kwargs)
 
-        # time.sleep(1)
         x_data, y_data = self.instrument.query_ascii_values('snap? x,y')
-        x_noise, y_noise = self.instrument.query_ascii_values('snap? 8,9')
-
-        self.data = np.array([x_data, y_data, x_noise, y_noise])      
+        self.data = np.array([x_data, y_data])      
   
 
 class LaserDiode(Instrument):
