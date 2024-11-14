@@ -12,7 +12,7 @@ class LSM_single_scan:
     def __init__(self,
                  instruments=[],
                  scan_parameters=None,
-                 simulate=True
+                 simulate=False,
                  ):
         self.scan_parameters = scan_parameters
         self.instruments = instruments

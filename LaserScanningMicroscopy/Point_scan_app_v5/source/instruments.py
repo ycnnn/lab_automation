@@ -65,7 +65,7 @@ class Instrument:
                 # Customization
                 self.logger.info(self.name + ': default parameter overridden: ' + param)
                 self.logger.info(self.name + ': ' + param + ' set to ' + str(
-                    self.customized_params[param]) + '\n')
+                    self.customized_params[param]))
                 if isinstance(self.customized_params[param], np.ndarray):
                     self.params_config_save[param]= self.customized_params[param].tolist()   
                 else: 
