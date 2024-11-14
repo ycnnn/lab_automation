@@ -206,6 +206,7 @@ class SMU(Instrument):
                  name=None,
                  ramp_steps=5,
                  mode='Force_V_Sense_V',
+                 return_to_zero=True,
                  **kwargs):
         
         super().__init__(address, channel_num=1, 
@@ -216,6 +217,7 @@ class SMU(Instrument):
         self.name = self.name if not name else name
         self.ramp_steps = ramp_steps
         self.mode = mode
+        self.return_to_zero = return_to_zero
         self.params = {'Source':0}
 
         if self.mode =='Force_V_Sense_V' or self.mode =='Force_V_Sense_I':
@@ -234,8 +236,12 @@ class SMU(Instrument):
         self.smu.write("smu.measure.func = smu.FUNC_DC_VOLTAGE")
         self.smu.write('smu.source.output = smu.ON')
 
+        
+
+        self.smu.write('reading = smu.measure.read()')
+        measured_data = self.smu.query_ascii_values('print(reading)')[0]
         source_target = self.params_sweep_lists['Source'][0]
-        source_ramp = np.linspace(0, source_target, num=self.ramp_steps)
+        source_ramp = np.linspace(measured_data, source_target, num=self.ramp_steps)
 
         for source_val in source_ramp:
             self.smu.write(f'smu.source.level = {source_val}')
@@ -258,18 +264,20 @@ class SMU(Instrument):
         else:
             pass
 
-        # self.smu.write("smu.measure.func = smu.FUNC_DC_VOLTAGE")
-        self.smu.write('reading = smu.measure.read()')
-        measured_data = self.smu.query_ascii_values('print(reading)')[0]
-       
-        source_quit = np.linspace(measured_data, 0, num=self.ramp_steps)
-       
-        for source_val in source_quit:
-            self.smu.write(f'smu.source.level = {source_val}')
-            self.smu.write('smu.measure.read()')
+        if self.return_to_zero:
 
-        self.smu.write('smu.source.output = smu.OFF')
+            self.smu.write('reading = smu.measure.read()')
+            measured_data = self.smu.query_ascii_values('print(reading)')[0]
+        
+            source_quit = np.linspace(measured_data, 0, num=self.ramp_steps)
+        
+            for source_val in source_quit:
+                self.smu.write(f'smu.source.level = {source_val}')
+                self.smu.write('smu.measure.read()')
 
+            self.smu.write('smu.source.output = smu.OFF')
+
+        self.smu.close()
         super().quit(**kwargs)
 
     def write_param_to_instrument(self, param, param_val):
