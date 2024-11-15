@@ -187,9 +187,9 @@ class LSM_scan:
         for instrument in self.instruments:
             for param in instrument.params:
                 np.save(
-                (filepath + f'data/instrument_trace_params'), instrument.params_sweep_lists[param][0])
+                (filepath + f'data/' + instrument.name + '_trace_params'), instrument.params_sweep_lists[param][0])
                 np.save(
-                (filepath + f'data/instrument_retrace_params'), instrument.params_sweep_lists[param][1])
+                (filepath + f'data/' + instrument.name + '_retrace_params'), instrument.params_sweep_lists[param][1])
         
 
 
