@@ -684,7 +684,10 @@ class DAQ_simulated(Instrument):
         input_mapping_full_path = [
             DAQ_name + '/'+ channel_name for channel_name in self.input_mapping]
 
-        ai_data = np.random.normal(size=(len(input_mapping_full_path), num_samples))
+        # ai_data = np.random.normal(size=(len(input_mapping_full_path), num_samples))
+        ai_data = np.linspace(np.zeros(len(input_mapping_full_path)),
+                              np.ones(len(input_mapping_full_path)), 
+                              num=num_samples).T
         time.sleep(1/frequency)
         return ai_data
 

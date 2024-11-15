@@ -21,14 +21,16 @@ import source.inst_driver as inst_driver
 
 if __name__ == '__main__':
    
-    
+    vg = -35
+    vd = -0.25
+
     try:
         scan_id = sys.argv[1]
     except:
-        scan_id = 'scan'
+        scan_id = f'TS_Vg_{vg}_vd_{vd}'
     
     # Fixed gate bias Vg, in volt
-    vg = -40
+    
 
     # Load calibration data for rotating the waveplates in the system.
     # The data will have multiple rows, each row is data for a certain polarization angle of the light shining on the sample.
@@ -40,11 +42,6 @@ if __name__ == '__main__':
     # such that the light shining on the sample is linearly polarized.
     # All angles in degrees
 
-    current_file_directory = str(os.path.dirname(os.path.dirname(os.path.abspath(__file__))) ) + '/'
-    angle_correction_file = np.load(current_file_directory + 'utilities/mgo_calibration_zerohwp_pol_qwp_hwp.npy')
-
-    angle_correction = angle_correction_file[0]
-    hwp_before_bd_angle, pol_angle, correction_qwp_angle, correction_hwp_angle = angle_correction
     
     display_parameters = Display_parameters(scan_id=scan_id)
 
@@ -53,30 +50,38 @@ if __name__ == '__main__':
                                             y_size=50,
                                             x_pixels=100,
                                             y_pixels=100,
-                                            z_center=0,
-                                            angle=-35)
+                                            z_center=11,
+                                            angle=110)
   
     
-    scan_parameters = Scan_parameters(point_time_constant=0.012,
-                                      retrace_point_time_constant=0.012,
+    scan_parameters = Scan_parameters(point_time_constant=0.011,
+                                      retrace_point_time_constant=0.011,
                                       return_to_zero=False,
-                                      additional_info=f'Polarization angle = {pol_angle}')
+                                      additional_info=f'')
 
     instruments = []
 
     daq = inst_driver.DAQ(
                     position_parameters=position_parameters,
                     scan_parameters=scan_parameters,
-                    input_mapping=['ai0', 'ai1'],
+                    input_mapping=['ai0'],
                     )
     instruments.append(daq)
 
-    smu = inst_driver.SMU(
+    smu_gate = inst_driver.SMU(
                     position_parameters=position_parameters,
                     scan_parameters=scan_parameters,
                     **{'voltage':vg},
                     )
-    instruments.append(smu)
+    instruments.append(smu_gate)
+
+    smu_drain = inst_driver.SMU(
+                    address="USB0::0x05E6::0x2450::04096333::INSTR",
+                    position_parameters=position_parameters,
+                    scan_parameters=scan_parameters,
+                    **{'voltage':vd},
+                    )
+    instruments.append(smu_drain)
 
     laser = inst_driver.LaserDiode(
                     position_parameters=position_parameters,
@@ -92,8 +97,8 @@ if __name__ == '__main__':
         # 9->30ms, 10->100ms, 11->300ms, 12->1s, 13->3s, 14->10s, 15->30s, 16->100s, 17->300s, 18->1000s, 19->3000s, 20->10000s
 
         'time_constant_level':8,
-        'volt_input_range':3,
-        'signal_sensitivity':12,}
+        'volt_input_range':0,
+        'signal_sensitivity':9,}
     
     lockin = inst_driver.Lockin(
                     position_parameters=position_parameters,

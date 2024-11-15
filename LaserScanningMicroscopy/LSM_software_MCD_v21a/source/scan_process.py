@@ -90,7 +90,10 @@ class LSM_scan:
         # Set up the logging process
         self.logger = setup_logging(self.display_parameters.save_destination)
    
-        
+        self.channel_names = []
+        for instrument in self.instruments:
+            for channel_name in instrument.channel_name_list:
+                self.channel_names.append(channel_name)
 
         self.start_scan()
         self.save_data()
@@ -111,6 +114,7 @@ class LSM_scan:
                                     scan_parameters=self.scan_parameters, 
                                     display_parameters=self.display_parameters,
                                     channel_num=self.channel_num,
+                                    channel_names=self.channel_names,
                                     pipe=self.in_pipe)
         
         self.data_receiver.start()

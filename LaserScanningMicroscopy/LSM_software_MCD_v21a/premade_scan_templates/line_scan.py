@@ -21,14 +21,16 @@ import source.inst_driver as inst_driver
 
 if __name__ == '__main__':
    
-    
+    vg_min, vg_max = (-40,40)
+    vd = -0.25
+
     try:
         scan_id = sys.argv[1]
     except:
-        scan_id = 'scan'
+        scan_id = f'TS_Linescan_Vg_{vg_min}_to_Vg_{vg_max}_vd_{vd}'
     
     # Fixed gate bias Vg, in volt
-    vg = -40
+    
 
     # Load calibration data for rotating the waveplates in the system.
     # The data will have multiple rows, each row is data for a certain polarization angle of the light shining on the sample.
@@ -45,31 +47,41 @@ if __name__ == '__main__':
 
     position_parameters = Position_parameters(
                                             x_size=50,
-                                            y_size=50,
-                                            x_pixels=200,
-                                            y_pixels=200,
-                                            z_center=9,
-                                            angle=0)
+                                            y_size=0,
+                                            x_pixels=100,
+                                            y_pixels=100,
+                                            z_center=11,
+                                            angle=110)
   
     
-    scan_parameters = Scan_parameters(point_time_constant=0.012,
-                                      return_to_zero=False)
+    scan_parameters = Scan_parameters(point_time_constant=0.011,
+                                      retrace_point_time_constant=0.011,
+                                      return_to_zero=False,
+                                      additional_info=f'')
 
     instruments = []
 
     daq = inst_driver.DAQ(
                     position_parameters=position_parameters,
                     scan_parameters=scan_parameters,
-                    input_mapping=['ai0',],
+                    input_mapping=['ai0'],
                     )
     instruments.append(daq)
 
-    # smu = inst_driver.SMU(
-    #                 position_parameters=position_parameters,
-    #                 scan_parameters=scan_parameters,
-    #                 **{'voltage':vg},
-    #                 )
-    # instruments.append(smu)
+    smu_gate = inst_driver.SMU(
+                    position_parameters=position_parameters,
+                    scan_parameters=scan_parameters,
+                    **{'voltage':[vg_min, vg_max]},
+                    )
+    instruments.append(smu_gate)
+
+    smu_drain = inst_driver.SMU(
+                    address="USB0::0x05E6::0x2450::04096333::INSTR",
+                    position_parameters=position_parameters,
+                    scan_parameters=scan_parameters,
+                    **{'voltage':vd},
+                    )
+    instruments.append(smu_drain)
 
     laser = inst_driver.LaserDiode(
                     position_parameters=position_parameters,
@@ -85,7 +97,7 @@ if __name__ == '__main__':
         # 9->30ms, 10->100ms, 11->300ms, 12->1s, 13->3s, 14->10s, 15->30s, 16->100s, 17->300s, 18->1000s, 19->3000s, 20->10000s
 
         'time_constant_level':8,
-        'volt_input_range':2,
+        'volt_input_range':0,
         'signal_sensitivity':9,}
     
     lockin = inst_driver.Lockin(

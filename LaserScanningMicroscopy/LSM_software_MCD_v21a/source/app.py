@@ -61,6 +61,10 @@ class SubWindow(QMainWindow):
         super().__init__()
         
         self.setWindowTitle(title)
+
+        self.linewidth = 0
+        self.scan_num = 0
+        self.x_offset = 0
         
         # Create a central widget
         self.central_widget = QWidget(self)
@@ -74,9 +78,10 @@ class SubWindow(QMainWindow):
         self.central_widget.setStyleSheet("background-color: black;")
 
        
-        self.chart = pg.PlotWidget()
-        self.img = pg.PlotWidget()
+        self.chart_widget = pg.PlotWidget()
+        self.img_widget = pg.PlotWidget()
         self.info_label = QLabel('Currently scanning line 0')
+        self.xy_label = QLabel('X position = 0, Y position = 0')
         
 
         
@@ -86,11 +91,58 @@ class SubWindow(QMainWindow):
         
 
         self.layout.addWidget(self.info_label)
-        self.layout.addWidget(self.chart)
-        self.layout.addWidget(self.img)
+        self.layout.addWidget(self.xy_label)
+        self.layout.addWidget(self.chart_widget)
+        self.layout.addWidget(self.img_widget)
 
-        widget_format(self.chart)
-        widget_format(self.img)
+        widget_format(self.chart_widget)
+        widget_format(self.img_widget)
+
+        self.img_widget.mousePressEvent = self.on_click
+
+        # self.img.getPlotItem().getViewBox().boundingRect()
+        # self.img.getPlotItem().getAxis('bottom').geometry()
+        # self.img.getPlotItem().getAxis('bottom').geometry()
+        # self.img.getPlotItem().getViewBox().map
+
+        
+
+    def on_click(self, event):
+        # Get the coordinates of the click inside the image
+        pos = event.pos()
+        scene_pos = self.img_widget.getPlotItem().getViewBox().mapToView(pos)
+        # scene_pos = self.img.getPlotItem().getAxis('top').mapToView(pos)
+        x, y = scene_pos.x(), scene_pos.y()
+        self.location = (x, y)
+        # getCoords: Extracts the position of the rectangle’s top-left corner to *``x1`` and *``y1``, and the position of the bottom-right corner to *``x2`` and *``y2``
+        # The detailed info about the box coordinates helps us to calculate the position of mouse click
+        # view_box_coords = self.img_widget.getPlotItem().getViewBox().boundingRect().getCoords()
+        top_axis_coords = self.img_widget.getPlotItem().getAxis('top').geometry().getCoords()
+        # left_axis_coords = self.img_widget.getPlotItem().getAxis('left').geometry().getCoords()
+        if self.x_offset == 0:
+            self.x_offset = self.linewidth *  top_axis_coords[0] / (top_axis_coords[2] - top_axis_coords[0])
+
+        x_label = int(x - self.x_offset)
+        y_label = int(self.scan_num - y)
+
+        # Update the textbox with the coordinates
+        self.xy_label.setText(f"X position = {x_label}, Y position = {y_label}")
+
+        # print('\n\n\n\n\n\n\n\n')
+        # print('Viewbox size: ')
+        # print(self.img.getPlotItem().getViewBox().boundingRect().getCoords())
+        # print('\n\n')
+        # print('Top axis:')
+        # print(self.img.getPlotItem().getAxis('top').geometry().getCoords())
+        # print('\n\n')
+        # print('Bottom axis:')
+        # print(self.img.getPlotItem().getAxis('bottom').geometry().getCoords())
+        # print('Left axis:')
+        # print(self.img.getPlotItem().getAxis('left').geometry().getCoords())
+        # print('\n\n')
+        # print('Right axis:')
+        # print(self.img.getPlotItem().getAxis('right').geometry().getCoords())
+        # print('\n\n\n\n\n\n\n\n')
 
 
 class QPlot:
@@ -103,6 +155,7 @@ class QPlot:
                  window_width_max,
                  show_zero_level,
                  font_size,
+                 channel_names,
                  axis_label_ticks_distance=10,
                  text_bar_height=20) -> None:
 
@@ -128,6 +181,7 @@ class QPlot:
         self.imgs = []
         self.info_labels = []
         self.channel_num = channel_num
+        self.channel_names = channel_names
         self.axis_label_ticks_distance = axis_label_ticks_distance
 
 
@@ -176,15 +230,18 @@ class QPlot:
         for channel_id in range(self.channel_num):
             
             temp_window = SubWindow(title=f'Channel {channel_id}')
+
+            temp_window.scan_num = self.scan_num
+            temp_window.linewidth = self.line_width
            
             temp_window.show()
             self.windows.append(temp_window)
 
-            chart = temp_window.chart.plot(self.data[channel_id,:,0])
+            chart = temp_window.chart_widget.plot(self.data[channel_id,:,0])
 
 
-            temp_window.chart.getViewBox().setDefaultPadding(padding=0.1)
-            temp_window.chart.getViewBox().enableAutoRange(pg.ViewBox.XAxis, False)
+            temp_window.chart_widget.getViewBox().setDefaultPadding(padding=0.1)
+            temp_window.chart_widget.getViewBox().enableAutoRange(pg.ViewBox.XAxis, False)
 
             
             zero_line = pg.InfiniteLine(pos=0, angle=0, pen=pg.mkPen('r', width=2, style=Qt.DashLine))
@@ -195,21 +252,21 @@ class QPlot:
                                         axis_label_ticks_distance=self.axis_label_ticks_distance)
 
             # Replace the default y-axis with the custom axis for both the cart and the image
-            temp_window.chart.setAxisItems({'left': y_axis})
-            temp_window.img.setAxisItems({'left': img_y_axis})
+            temp_window.chart_widget.setAxisItems({'left': y_axis})
+            temp_window.img_widget.setAxisItems({'left': img_y_axis})
 
             # Set the color of y tick labels in the chart 
             # color_for_chart_axis_tick_label = QColor(0, 0, 0, 0)
-            temp_window.chart.getAxis('left').setTextPen('white')
+            temp_window.chart_widget.getAxis('left').setTextPen('white')
 
             # Hide the y axis of the image 
             transparent_color_for_img_axis_tick_label = QColor(0, 0, 0, 0)
-            temp_window.img.getAxis('left').setTextPen(transparent_color_for_img_axis_tick_label)
+            temp_window.img_widget.getAxis('left').setTextPen(transparent_color_for_img_axis_tick_label)
             if self.show_zero_level:
-                temp_window.chart.addItem(zero_line)
+                temp_window.chart_widget.addItem(zero_line)
 
             img = pg.ImageItem(self.data[channel_id])
-            temp_window.img.addItem(img)
+            temp_window.img_widget.addItem(img)
 
             self.charts.append(chart)
             self.imgs.append(img)
@@ -221,16 +278,16 @@ class QPlot:
         for channel_id in range(self.channel_num):
             self.windows[channel_id].info_label.setFixedHeight(self.label_height)
 
-            self.windows[channel_id].chart.setFixedSize(self.window_width, self.chart_height)
+            self.windows[channel_id].chart_widget.setFixedSize(self.window_width, self.chart_height)
             
-            self.windows[channel_id].img.setFixedSize(self.window_width, self.img_height)
+            self.windows[channel_id].img_widget.setFixedSize(self.window_width, self.img_height)
 
             self.windows[channel_id].setFixedSize(self.total_width, self.total_height)
             self.windows[channel_id].move(self.window_distance*channel_id, 0)
 
     def update(self, fetched_data):
         
-
+        
         self.data[:,:,self.scan_num - self.counter - 1] = fetched_data
         self.counter += 1
         elapse_time = time.time() - self.time
@@ -238,18 +295,12 @@ class QPlot:
         self.remaining_time = int(elapse_time*(self.scan_num - self.counter))
 
         for row_id in range(self.channel_num):
-            self.windows[row_id].setWindowTitle(f'Channel {row_id}, estimated time {self.remaining_time} s')
+            self.windows[row_id].setWindowTitle(self.channel_names[row_id])
 
             self.charts[row_id].setData(fetched_data[row_id])
 
-
-            
-            
-            
-
-
             self.imgs[row_id].setImage(self.data[row_id])
-            self.info_labels[row_id].setText(f'Scanning line {self.counter}/{self.scan_num}')
+            self.info_labels[row_id].setText(f'Scanning line {self.counter}/{self.scan_num}' + f', {self.remaining_time} s remaining')
             
         
         QApplication.processEvents()

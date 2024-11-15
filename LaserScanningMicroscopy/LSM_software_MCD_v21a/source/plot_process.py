@@ -15,6 +15,7 @@ class Data_receiver(mp.Process):
                  scan_parameters,
                  display_parameters,
                  channel_num,
+                 channel_names,
                  pipe) -> None:
         mp.Process.__init__(self)
         self.position_parameters = position_parameters
@@ -23,6 +24,7 @@ class Data_receiver(mp.Process):
         self.line_width = self.position_parameters.x_pixels
         self.scan_num = 2 * self.position_parameters.y_pixels
         self.channel_num = channel_num
+        self.channel_names = channel_names
         self.pipe = pipe
        
 
@@ -38,6 +40,7 @@ class Data_receiver(mp.Process):
         self.app = QPlot(line_width=self.line_width, 
                          scan_num=self.scan_num, 
                          channel_num=self.channel_num,
+                         channel_names=self.channel_names,
                          text_bar_height=self.display_parameters.text_bar_height,
                          window_width_min=self.display_parameters.window_width_min,
                          window_width_max=self.display_parameters.window_width_max,
