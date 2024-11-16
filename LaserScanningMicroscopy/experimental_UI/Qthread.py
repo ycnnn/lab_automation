@@ -16,14 +16,16 @@ class DataThread(QThread):
 
     data_ready = Signal(list)
     
-    def __init__(self, **kwargs):
+    def __init__(self, scan_num, line_width, **kwargs):
         super().__init__()
         self.kwargs = kwargs
         self.count = 0
+        self.scan_num = scan_num
+        self.line_width = line_width
 
     def run(self):
-        while True:
-            data = np.random.normal(size=(99))  # Simulate new data
+        while self.count < self.scan_num:
+            data = np.random.normal(size=(self.line_width))  # Simulate new data
             self.data_ready.emit([self.count, data])
             self.count += 1
             time.sleep(0.01)  # Simulate processing delay
@@ -69,7 +71,7 @@ def widget_format(widget):
       
 
 class SubWindow(QMainWindow):
-    def __init__(self, title, scan_num=100, line_width=99):
+    def __init__(self, title, scan_num, line_width):
         super().__init__()
 
         self.setWindowTitle(title)
@@ -125,6 +127,9 @@ class SubWindow(QMainWindow):
         self.chart_widget.getAxis('left').setTextPen('white')
         self.img_widget.getAxis('left').setTextPen(transparent_color_for_img_axis_tick_label)
         self.img.getViewBox().invertY(True)
+
+        self.img_widget.setAspectLocked(True)
+        
         
 
     def on_click(self, event):
@@ -159,11 +164,16 @@ class SubWindow(QMainWindow):
         self.curve.setData(self.data[self.count])
         self.img.setImage(self.data.T)
         self.info_label.setText(f'Currently scanning line {int(self.count)}')
+
+        # self.img_widget.setRange(xRange=(0, self.scan_num), yRange=(0, self.line_width), padding=0)
+
         
 
 
 
 if __name__ == "__main__":
+
+    scan_num, line_width = (120,150)
 
     app = QApplication([])
     font_family = load_font('font/SourceCodePro-Medium.ttf')
@@ -175,11 +185,11 @@ if __name__ == "__main__":
 
 
     # Create the shared data thread
-    data_thread = DataThread(name="hello")
+    data_thread = DataThread(scan_num=scan_num, line_width=line_width)
 
     # Create two main windows
-    window1 = SubWindow("Window 1")
-    window2 = SubWindow("Window 2")
+    window1 = SubWindow("Window 1", scan_num=scan_num, line_width=line_width)
+    window2 = SubWindow("Window 2", scan_num=scan_num, line_width=line_width)
 
     # Connect both windows to the data signal
     data_thread.data_ready.connect(window1.update_plot)
