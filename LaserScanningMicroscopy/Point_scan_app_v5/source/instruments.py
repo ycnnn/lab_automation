@@ -281,7 +281,7 @@ class SMU(Instrument):
         super().quit(**kwargs)
 
     def write_param_to_instrument(self, param, param_val):
-        super().write_param_to_instrument(None, None)
+        super().write_param_to_instrument(param, param_val)
         self.smu.write(f'smu.source.level = {param_val}')
        
         return param_val

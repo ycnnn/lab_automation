@@ -98,6 +98,7 @@ class Instrument:
                 param_sweep_list = self.sweep_parameter_generator(param, self.params[param])
             
             self.params_sweep_lists[param] = param_sweep_list
+            
 
 
     @contextmanager
@@ -152,11 +153,18 @@ class Instrument:
         # os.remove(self.log_file_path)
 
     def write_param_to_instrument(self, param, target_val):
+        # print('\n\nwrite_param_to_instrument repeated:')
+        # print(self.params_state[param] == target_val)
+
+        # # print('\n\ntarget =')
+        # # print(target_val)
+        # print('\n\n')
+
         if self.params_state[param] == target_val:
             if self.verbose or (self.point_index == 0 and not self.verbose):
                 self.logger.info('Writing ' + param + f' at level {target_val} skipped, because there is no change in the set value.' )
-            return False
-        return True
+            return True
+        return False
 
     def data_acquisition_start(self, **kwargs):
         self.total_scan_index = kwargs['total_scan_index']
@@ -218,6 +226,7 @@ class SimulatedInstrument(Instrument):
                          reading_num=position_parameters.x_pixels, 
                          scan_num=position_parameters.y_pixels, 
                          channel_name_list=['Sim_instr'],
+                         verbose=verbose,
                          **kwargs)
         
         self.name = self.name if not name else name
@@ -254,6 +263,7 @@ class DAQ_simulated(Instrument):
                          reading_num=position_parameters.x_pixels, 
                          scan_num=position_parameters.y_pixels, 
                          channel_name_list=input_mapping,
+                         verbose=verbose,
                          **kwargs)
         
         self.name = self.name if not name else name
@@ -305,82 +315,105 @@ class DAQ_simulated(Instrument):
         self.data = DAQ_input_data
 
 
-################################################################
-################################################################
-################################################################
-################################################################
-################################################################
-################################################################
-################################################################
-################################################################
+
 
 class SMU(Instrument):
     def __init__(self, position_parameters, 
                  address="USB0::0x05E6::0x2450::04096331::INSTR",
                  name=None,
-                 ramp_steps=10,
+                 ramp_steps=5,
+                 mode='Force_V_Sense_V',
                  verbose=False, 
+                 return_to_zero=True,
                  **kwargs):
         
         super().__init__(address, channel_num=1, 
                          reading_num=position_parameters.x_pixels, 
                          scan_num=position_parameters.y_pixels, 
-                         channel_name_list=['Voltage'],
+                         channel_name_list=['source'],
+                         verbose=verbose,
                          **kwargs)
         
         self.name = self.name if not name else name
         self.ramp_steps = ramp_steps
-        self.params = {'voltage':0}
+        self.mode = mode
+        self.return_to_zero = return_to_zero
+        self.params = {'source':0}
+
+        if self.mode =='Force_V_Sense_V' or self.mode =='Force_V_Sense_I':
+            pass
+        else:
+            raise RuntimeError('\n\n mode: ' + self.mode + ' not supoorted. Either Force_V_Sense_V or Force_V_Sense_I.\n\n')
+    
 
         
     def initialize(self, **kwargs):
         super().initialize(**kwargs)
         rm = pyvisa.ResourceManager()
-        self.logger.info('\n\nInitializing...\n\n')
         self.smu = rm.open_resource(self.address)
-        self.smu.timeout = 500
-        self.smu.write('reset()')
-        self.smu.write("smu.source.autorange = smu.ON")
+
+        self.smu.write("smu.source.func = smu.FUNC_DC_VOLTAGE")
         self.smu.write("smu.measure.func = smu.FUNC_DC_VOLTAGE")
-        self.smu.write("smu.measure.autorange = smu.ON")
-        self.smu.write("smu.measure.terminals = smu.TERMINALS_FRONT")
-        self.smu.write("smu.measure.func = smu.FUNC_DC_VOLTAGE")
-        self.smu.write("smu.source.level = 0")
         self.smu.write('smu.source.output = smu.ON')
 
+        
+
+        self.smu.write('reading = smu.measure.read()')
+        measured_data = self.smu.query_ascii_values('print(reading)')[0]
+        print(str([key for key in self.params_sweep_lists]))
+        source_target = self.params_sweep_lists['source'][0,0,0]
+        source_ramp = np.linspace(measured_data, source_target, num=self.ramp_steps)
+
+        for source_val in source_ramp:
+            self.smu.write(f'smu.source.level = {source_val}')
+            self.smu.write('smu.measure.read()')
+
+        if self.mode =='Force_V_Sense_V':
+            pass
+        elif self.mode =='Force_V_Sense_I':
+            self.smu.write("smu.measure.func = smu.FUNC_DC_CURRENT")
+        else:
+            pass
 
     def quit(self, **kwargs):
         super().quit(**kwargs)
-        self.write_param_to_instrument('voltage', 0)
-        self.smu.write('smu.source.output = smu.OFF')
+        if self.mode =='Force_V_Sense_V':
+            pass
+        elif self.mode =='Force_V_Sense_I':
+            self.smu.write("smu.measure.func = smu.FUNC_DC_VOLTAGE")
+        else:
+            pass
+
+        if self.return_to_zero:
+
+            self.smu.write('reading = smu.measure.read()')
+            measured_data = self.smu.query_ascii_values('print(reading)')[0]
+        
+            source_quit = np.linspace(measured_data, 0, num=self.ramp_steps)
+        
+            for source_val in source_quit:
+                self.smu.write(f'smu.source.level = {source_val}')
+                self.smu.write('smu.measure.read()')
+
+            self.smu.write('smu.source.output = smu.OFF')
+
+        self.smu.close()
+        super().quit(**kwargs)
 
     def write_param_to_instrument(self, param, param_val):
         repeated_val = super().write_param_to_instrument(param, param_val)
-    #     super().write_param_to_instrument(param, param_val)
-    # # By default, ramp Keithley 2450 SMU from current voltage level to the target voltage level (end_volt).
-    #     ramp_steps=self.ramp_steps
-    #     self.smu.write('reading = smu.measure.read()')
-    #     volt_reading = np.array(self.smu.query_ascii_values('print(reading)'))[0]
-    #     self.logger.info(f'Current VOLT reading is {volt_reading} V.')
-    #     start_volt = volt_reading
-    #     end_volt = param_val
-    #     voltages = np.linspace(start_volt, end_volt, ramp_steps)
-    #     volt_readings = []
-    #     # return start_volt
-    #     for volt in voltages:
-    #         self.smu.write(f"smu.source.level = {volt}")
-    #         self.smu.write('reading = smu.measure.read()')
-    #         volt_reading = self.smu.query_ascii_values('print(reading)')
-    #         self.smu.write('waitcomplete()')
-    #         volt_readings.append(volt_reading)
-
-        return repeated_val
+        if not repeated_val:
+            self.smu.write(f'smu.source.level = {param_val}')
+            self.smu.write(f'smu.measure.read()')
+            
 
     def data_acquisition_start(self, **kwargs):
-        ramp_data = super().data_acquisition_start(**kwargs)
-        measured_voltage = ramp_data['voltage']
-        self.data = np.array([measured_voltage])
-        
+        super().data_acquisition_start(**kwargs)
+        self.smu.write('reading = smu.measure.read()')
+        measured_data = self.smu.query_ascii_values('print(reading)')[0]
+        self.data = np.ones(shape=(self.channel_num)) * measured_data
+
+
 
 class Lockin(Instrument):
     def __init__(self, 
@@ -393,6 +426,7 @@ class Lockin(Instrument):
                          reading_num=position_parameters.x_pixels, 
                          scan_num=position_parameters.y_pixels, 
                          channel_name_list = ['X', 'Y'],
+                         verbose=verbose,
                          **kwargs)
         
         self.name = self.name if not name else name
@@ -401,7 +435,49 @@ class Lockin(Instrument):
                         'volt_input_range':3, 
                         'signal_sensitivity':12,
                                   }
-        
+    def time_constant_conversion(self, input_value, code_to_analog=False):
+        # Conversion table (time code -> time duration)
+        time_table = {
+            0: 1e-6,    # 1us
+            1: 3e-6,    # 3us
+            2: 10e-6,   # 10us
+            3: 30e-6,   # 30us
+            4: 100e-6,  # 100us
+            5: 300e-6,  # 300us
+            6: 1e-3,    # 1ms
+            7: 3e-3,    # 3ms
+            8: 10e-3,   # 10ms
+            9: 30e-3,   # 30ms
+            10: 100e-3, # 100ms
+            11: 300e-3, # 300ms
+            12: 1,      # 1s
+            13: 3,      # 3s
+            14: 10,     # 10s
+            15: 30,     # 30s
+            16: 100,    # 100s
+            17: 300,    # 300s
+            18: 1000,   # 1000s
+            19: 3000,   # 3000s
+            20: 10000,  # 10000s
+        }
+
+        # Convert from time code to time (seconds)
+        if code_to_analog:
+            if 0 <= input_value <= 20:
+                return time_table[input_value]
+            else:
+                raise ValueError("Invalid time code. Must be an integer between 0 and 20.")
+
+        # Convert from time to time code
+        else:
+            if input_value > 0:
+                # Find the closest time code that fits
+                for code in range(20, -1, -1):  # Start from the largest value
+                    if input_value >= time_table[code] * 0.9998:
+                        return code
+                return 0  # If input_value is less than the smallest time code (1us)
+            else:
+                raise ValueError("Invalid time value. Must be a positive number.")
         
     def initialize(self, **kwargs):
         super().initialize(**kwargs)
@@ -413,11 +489,6 @@ class Lockin(Instrument):
         self.instrument.write('*rst')
         # self.logger.info(self.instrument.query('*idn?'))
 
-        # build buffer
-        self.instrument.write('capturelen 256')
-
-        # record XY signals
-        self.instrument.write('capturecfg xy')
 
         # Set the capture mode as external trigger
         self.instrument.write('rtrg posttl')
@@ -470,6 +541,7 @@ class Lockin(Instrument):
         self.instrument.close()
 
     def write_param_to_instrument(self, param, param_val):
+        param_val = int(param_val)
         repeated_val = super().write_param_to_instrument(param, param_val)
 
         if not repeated_val:
@@ -485,7 +557,17 @@ class Lockin(Instrument):
     def data_acquisition_start(self, **kwargs):
         super().data_acquisition_start(**kwargs)
 
-        self.instrument.write('capturestart one, samp')
+        # print('\n\n\nTime constant: ')
+        # print(self.params_sweep_lists['time_constant_level'][self.trace_id,
+        #                                                                                                 self.scan_index,
+        #                                                                                                 self.point_index])
+        wait_time = 1.10 * self.time_constant_conversion(self.params_sweep_lists['time_constant_level'][self.trace_id,
+                                                                                                        self.scan_index,
+                                                                                                        self.point_index],
+                                                         code_to_analog=True)
+        self.logger.info(f'Lockin wait {wait_time} s for signal acquisition')
+        time.sleep(wait_time)
+
 
 
   
@@ -493,12 +575,13 @@ class Lockin(Instrument):
     def data_acquisition_finish(self, **kwargs):
         super().data_acquisition_finish(**kwargs)
 
-        self.instrument.write('capturestop')
-        buffer_len = int(self.instrument.query('captureprog?')[:-1])
-        input_data = np.array([0,0])
+        super().data_acquisition_finish(**kwargs)
 
-        self.data = input_data      
+        x_data, y_data = self.instrument.query_ascii_values('snap? x,y')
+        self.data = np.array([x_data, y_data])      
   
+
+
 
 class LaserDiode(Instrument):
     def __init__(self, address='USB0::0x1313::0x804F::M00423181::INSTR', 
@@ -510,6 +593,7 @@ class LaserDiode(Instrument):
         super().__init__(address, channel_num=0, 
                          reading_num=position_parameters.x_pixels, 
                          scan_num=position_parameters.y_pixels, 
+                         verbose=verbose,
                          **kwargs)
         
         self.name = self.name if not name else name
@@ -526,8 +610,10 @@ class LaserDiode(Instrument):
             ) < 0 or np.max(
             self.params_sweep_lists['current']
             ) >= 0.101:
-            self.logger.info('Warning: the laser current setpoint is outside the allowed range.\nFor your safety, the laser power has been set to 10 mA.')
-            self.current_levels = 0.01 * np.ones(self.params_sweep_lists['current'].shape)
+ 
+            error_message = 'Input current incorrect or unsafe. Check.'
+            self.logger.info(error_message)
+            raise RuntimeError(error_message)
 
         self.instrument.write(f"source1:current:level:amplitude {self.params_sweep_lists['current'][0,0,0]}")
         # self.instrument.write('output:state 1')
@@ -540,8 +626,8 @@ class LaserDiode(Instrument):
 
     def write_param_to_instrument(self, param, param_val):
         repeated_val = super().write_param_to_instrument(param, param_val)
-        if not repeated_val:
-            self.instrument.write(f"source1:current:level:amplitude {param_val}")
+        # if not repeated_val:
+        self.instrument.write(f"source1:current:level:amplitude {param_val}")
 
     def data_acquisition_start(self, **kwargs):
         super().data_acquisition_start(**kwargs)
@@ -553,6 +639,7 @@ class LaserDiode(Instrument):
         if (self.total_scan_index >= 2 * self.scan_num - 1) and (
             self.point_index >= self.reading_num - 1):
             self.instrument.write('output:state 0')
+        time.sleep(0.5)
 
 class RotationStage(Instrument):
     _driver_module = None
@@ -562,6 +649,7 @@ class RotationStage(Instrument):
         super().__init__(address=address, channel_num=0, 
                          reading_num=position_parameters.x_pixels, 
                          scan_num=position_parameters.y_pixels, 
+                         verbose=verbose,
                          **kwargs)
         
         if RotationStage._driver_module is None:
@@ -591,6 +679,17 @@ class RotationStage(Instrument):
     def data_acquisition_start(self, **kwargs):
         super().data_acquisition_start(**kwargs)
 
+
+################################################################
+################################################################
+################################################################
+################################################################
+################################################################
+################################################################
+################################################################
+################################################################
+
+
 class DAQ(Instrument):
     def __init__(self, 
                  address='Dev2', 
@@ -600,10 +699,12 @@ class DAQ(Instrument):
                  scan_parameters=None,
                  verbose=False, 
                  **kwargs):
+        
         super().__init__(address, channel_num=len(input_mapping), 
                          reading_num=position_parameters.x_pixels, 
                          scan_num=position_parameters.y_pixels, 
                          channel_name_list=input_mapping,
+                         verbose=verbose,
                          **kwargs)
         
         self.name = self.name if not name else name
@@ -613,62 +714,25 @@ class DAQ(Instrument):
         self.params = {}
 
         self.DAQ_output_data = self.position_parameters.DAQ_output_data
-        # self.frequency = 1/(self.scan_parameters.point_time_constant * self.position_parameters.x_pixels)
-        # self.retrace_frequency = 1/(self.scan_parameters.retrace_point_time_constant * self.position_parameters.x_pixels)
         self.output_mapping=['ao0', 'ao1', 'ao2']
-        self.pulse_terminal='PFI0'
+        # self.pulse_terminal='PFI0'
+
+        DAQ_name = self.address
+
+        self.input_mapping_full_path = [
+            DAQ_name + '/'+ channel_name for channel_name in self.input_mapping]
+        self.output_mapping_full_path = [
+            DAQ_name + '/'+ channel_name for channel_name in self.output_mapping]
+        
+        
+     
 
     def write_data(self, ao_data):
 
-        num_samples = ao_data.shape[1]
-        DAQ_name = self.address
-        # print(f'Pixels:{pixels}')
-        # print(f'Shape:{ao_data.shape}')
-        # Be careful. The input argument frequency is line scan frequency
-        # Total time for executing one line = 1/frequency
-        # Total time = nsamples / samplerate = pixels / samplerate
-        # -> samplerate = pixels * frequency
-        input_mapping_full_path = [
-            DAQ_name + '/'+ channel_name for channel_name in self.input_mapping]
-        output_mapping_full_path = [
-            DAQ_name + '/'+ channel_name for channel_name in self.output_mapping]
-        # sample_rate = num_samples * frequency
-
-        # with ni.Task() as ao_task, ni.Task() as ai_task, ni.Task() as pulse_task:
-
-        #     for output_channel in output_mapping_full_path:
-        #         ao_task.ao_channels.add_ao_voltage_chan(output_channel,
-        #                                                 min_val=-10, max_val=10)
-        #     ao_task.timing.cfg_samp_clk_timing(sample_rate, sample_mode=AcquisitionType.FINITE, samps_per_chan=num_samples)
-
-        #     for input_channel in input_mapping_full_path:
-        #         ai_task.ai_channels.add_ai_voltage_chan(input_channel,
-        #                                                 min_val=-10, max_val=10)    
-        #     ai_task.timing.cfg_samp_clk_timing(sample_rate, sample_mode=AcquisitionType.FINITE, samps_per_chan=num_samples)
-            
-        #     pulse_channel = pulse_task.co_channels.add_co_pulse_chan_freq('Dev2/ctr0', freq=sample_rate, duty_cycle=0.25)
-        #     pulse_channel.co_pulse_term = '/' + DAQ_name + '/' + self.pulse_terminal
-        #     pulse_task.timing.cfg_implicit_timing(sample_mode=AcquisitionType.FINITE, samps_per_chan=num_samples)
-
-        #     ai_task.triggers.start_trigger.cfg_dig_edge_start_trig(trigger_source='/Dev2/ao/StartTrigger')
-        #     pulse_task.triggers.start_trigger.cfg_dig_edge_start_trig(trigger_source='/Dev2/ao/StartTrigger')
-
-        #     ao_writer = AnalogMultiChannelWriter(ao_task.out_stream)
-        #     ao_writer.write_many_sample(np.ascontiguousarray(ao_data))
-
-        #     ai_task.start()
-        #     pulse_task.start()
-        #     ao_task.start()
-
-        #     ai_reader = AnalogMultiChannelReader(ai_task.in_stream)
-        #     ai_data = np.zeros((len(input_mapping_full_path), num_samples))
-        #     ai_reader.read_many_sample(ai_data, num_samples, timeout=600)
-
-        #     ao_task.wait_until_done()
-        #     ai_task.wait_until_done()
-        #     pulse_task.wait_until_done()
-
-        return np.zeros(self.channel_num)
+        self.ao_task.write(np.ascontiguousarray(ao_data))
+        ai_data = self.ai_task.read(number_of_samples_per_channel=1)
+    
+        return np.array(ai_data).reshape(-1)
 
     def read_current_output(self):
         with ni.Task() as read_task:
@@ -693,20 +757,33 @@ class DAQ(Instrument):
         super().initialize(**kwargs)
         self.reset(destination=self.position_parameters.center_output)
 
+        self.ao_task = ni.Task()
+        self.ai_task = ni.Task()
+
+        for output_channel in self.output_mapping_full_path:
+            self.ao_task.ao_channels.add_ao_voltage_chan(output_channel, min_val=-0.1, max_val=10)
+        for input_channel in self.input_mapping_full_path:
+            self.ai_task.ai_channels.add_ai_voltage_chan(input_channel, min_val=-10, max_val=10)
+
     def quit(self, **kwargs):
         super().quit(**kwargs)
+
+        self.ai_task.stop()
+        self.ao_task.stop()
+        self.ai_task.close()
+        self.ao_task.close()
         destination = np.array([0,0,0]) if self.scan_parameters.return_to_zero else self.position_parameters.center_output
         self.reset(destination=destination)
 
     def data_acquisition_start(self, **kwargs):
         super().data_acquisition_start(**kwargs)
         # frequency = self.frequency if self.trace_flag else self.retrace_frequency
-        DAQ_output_data = self.DAQ_output_data[:,self.total_scan_index,:]
-        DAQ_input_data = self.write_data(ao_data=DAQ_output_data, 
-                                    #    frequency=frequency
-                                       )
+        DAQ_output_data = self.DAQ_output_data[:,self.total_scan_index,self.point_index]
+        DAQ_input_data = self.write_data(ao_data=DAQ_output_data)
         
         if len(DAQ_input_data) == 0:
             return
         self.data = DAQ_input_data
+
+        # time.sleep(0.01)
 

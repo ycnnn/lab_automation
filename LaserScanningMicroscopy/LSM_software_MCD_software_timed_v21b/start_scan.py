@@ -26,13 +26,15 @@ if __name__ == '__main__':
     
     display_parameters = Display_parameters(scan_id=scan_id)
 
+    x_pixels, y_pixels = (100,100)
+
     position_parameters = Position_parameters(
-                                            x_size=0,
-                                            y_size=0,
-                                            x_pixels=200,
-                                            y_pixels=205,
-                                            z_center=0,
-                                            angle=-35)
+                                            x_size=20,
+                                            y_size=20,
+                                            x_pixels=x_pixels,
+                                            y_pixels=y_pixels,
+                                            z_center=10,
+                                            angle=0)
   
     
     scan_parameters = Scan_parameters(point_time_constant=0,
@@ -41,38 +43,39 @@ if __name__ == '__main__':
 
     instruments = []
 
-    # daq = inst_driver.DAQ(
-    #                 position_parameters=position_parameters,
-    #                 scan_parameters=scan_parameters,
-    #                 input_mapping=['ai0', 'ai1'],
-    #                 )
-    # instruments.append(daq)
-
-    daq = inst_driver.DAQ_simulated(
+    daq = inst_driver.DAQ(
                     position_parameters=position_parameters,
                     scan_parameters=scan_parameters,
                     input_mapping=['ai0', 'ai1'],
                     )
     instruments.append(daq)
 
+    # daq = inst_driver.DAQ_simulated(
+    #                 position_parameters=position_parameters,
+    #                 scan_parameters=scan_parameters,
+    #                 input_mapping=['ai0'],
+    #                 )
+    # instruments.append(daq)
+
     # smu = inst_driver.SMU(
     #                 position_parameters=position_parameters,
     #                 scan_parameters=scan_parameters,
-    #                 **{'voltage':1},
+    #                 **{'source':np.linspace(0,1,num=240).reshape(2,12,10)},
+    #                 verbose=True
     #                 )
     # instruments.append(smu)
 
     # laser = inst_driver.LaserDiode(
     #                 position_parameters=position_parameters,
     #                 scan_parameters=scan_parameters,
-    #                 **{'current':0.005},
+    #                 **{'current':0.005 +   0.005 * (np.arange(2*y_pixels*x_pixels)%2).reshape(2,y_pixels,x_pixels)},
     #                 )
     # instruments.append(laser)
 
 
     # lockin_prop = {
-    #     'time_constant_level':8,
-    #     'volt_input_range':3,
+    #     'time_constant_level':12,
+    #     'volt_input_range':(np.arange(2*y_pixels*x_pixels)%2).reshape(2,y_pixels,x_pixels),
     #     'signal_sensitivity':12,}
     
     # lockin = inst_driver.Lockin(
@@ -85,15 +88,15 @@ if __name__ == '__main__':
 
 
 
-    sim_instr_params = {'param1': np.random.normal(size=(2,205,200)), 'param2':0, 'param3':3}
-    sim_instr = inst_driver.SimulatedInstrument(
-                    address='',
-                    position_parameters=position_parameters,
+    # sim_instr_params = {'param1': np.random.normal(size=(2,12,10)), 'param2':0, 'param3':3}
+    # sim_instr = inst_driver.SimulatedInstrument(
+    #                 address='',
+    #                 position_parameters=position_parameters,
                 
-                    # name='Sim1',
-                    **sim_instr_params
-                    )
-    instruments.append(sim_instr)
+    #                 # name='Sim1',
+    #                 **sim_instr_params
+    #                 )
+    # instruments.append(sim_instr)
 
     # correction_hwp = inst_driver.RotationStage(
     #                 position_parameters=position_parameters,
@@ -131,6 +134,6 @@ if __name__ == '__main__':
              scan_parameters=scan_parameters,
              display_parameters=display_parameters,
              instruments=instruments,
-             simulate=True)
+             simulate=False)
     
     
