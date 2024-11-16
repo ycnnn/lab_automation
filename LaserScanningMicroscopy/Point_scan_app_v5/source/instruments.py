@@ -65,7 +65,7 @@ class Instrument:
                 # Customization
                 self.logger.info(self.name + ': default parameter overridden: ' + param)
                 self.logger.info(self.name + ': ' + param + ' set to ' + str(
-                    self.customized_params[param]))
+                    self.customized_params[param]) + '\n')
                 if isinstance(self.customized_params[param], np.ndarray):
                     self.params_config_save[param]= self.customized_params[param].tolist()   
                 else: 
@@ -206,7 +206,6 @@ class SMU(Instrument):
                  name=None,
                  ramp_steps=5,
                  mode='Force_V_Sense_V',
-                 return_to_zero=True,
                  **kwargs):
         
         super().__init__(address, channel_num=1, 
@@ -217,7 +216,6 @@ class SMU(Instrument):
         self.name = self.name if not name else name
         self.ramp_steps = ramp_steps
         self.mode = mode
-        self.return_to_zero = return_to_zero
         self.params = {'Source':0}
 
         if self.mode =='Force_V_Sense_V' or self.mode =='Force_V_Sense_I':
@@ -236,12 +234,8 @@ class SMU(Instrument):
         self.smu.write("smu.measure.func = smu.FUNC_DC_VOLTAGE")
         self.smu.write('smu.source.output = smu.ON')
 
-        
-
-        self.smu.write('reading = smu.measure.read()')
-        measured_data = self.smu.query_ascii_values('print(reading)')[0]
         source_target = self.params_sweep_lists['Source'][0]
-        source_ramp = np.linspace(measured_data, source_target, num=self.ramp_steps)
+        source_ramp = np.linspace(0, source_target, num=self.ramp_steps)
 
         for source_val in source_ramp:
             self.smu.write(f'smu.source.level = {source_val}')
@@ -264,24 +258,22 @@ class SMU(Instrument):
         else:
             pass
 
-        if self.return_to_zero:
+        # self.smu.write("smu.measure.func = smu.FUNC_DC_VOLTAGE")
+        self.smu.write('reading = smu.measure.read()')
+        measured_data = self.smu.query_ascii_values('print(reading)')[0]
+       
+        source_quit = np.linspace(measured_data, 0, num=self.ramp_steps)
+       
+        for source_val in source_quit:
+            self.smu.write(f'smu.source.level = {source_val}')
+            self.smu.write('smu.measure.read()')
 
-            self.smu.write('reading = smu.measure.read()')
-            measured_data = self.smu.query_ascii_values('print(reading)')[0]
-        
-            source_quit = np.linspace(measured_data, 0, num=self.ramp_steps)
-        
-            for source_val in source_quit:
-                self.smu.write(f'smu.source.level = {source_val}')
-                self.smu.write('smu.measure.read()')
+        self.smu.write('smu.source.output = smu.OFF')
 
-            self.smu.write('smu.source.output = smu.OFF')
-
-        self.smu.close()
         super().quit(**kwargs)
 
     def write_param_to_instrument(self, param, param_val):
-        super().write_param_to_instrument(param, param_val)
+        super().write_param_to_instrument(None, None)
         self.smu.write(f'smu.source.level = {param_val}')
        
         return param_val
@@ -301,9 +293,9 @@ class Lockin(Instrument):
                  name=None, 
                  initial_wait_cycles=20,
                  **kwargs):
-        super().__init__(address, channel_num=2, 
+        super().__init__(address, channel_num=4, 
                          steps=scan_parameters.steps, 
-                         channel_name_list = ['X', 'Y'],
+                         channel_name_list = ['X', 'Y', 'X_noise', 'Y_noise'],
                          **kwargs)
         
         self.name = self.name if not name else name
@@ -456,8 +448,11 @@ class Lockin(Instrument):
     def data_acquisition_finish(self, **kwargs):
         super().data_acquisition_finish(**kwargs)
 
+        # time.sleep(1)
         x_data, y_data = self.instrument.query_ascii_values('snap? x,y')
-        self.data = np.array([x_data, y_data])      
+        x_noise, y_noise = self.instrument.query_ascii_values('snap? 8,9')
+
+        self.data = np.array([x_data, y_data, x_noise, y_noise])      
   
 
 class LaserDiode(Instrument):
@@ -465,6 +460,7 @@ class LaserDiode(Instrument):
                  scan_parameters=None, 
                  always_on_during_scan=True,
                  name=None, 
+                 laser_off_after_finish=True,
                  **kwargs):
         
         super().__init__(address, channel_num=0, 
@@ -474,6 +470,7 @@ class LaserDiode(Instrument):
         self.name = self.name if not name else name
         self.params = {'current':0.01}
         self.always_on_during_scan = always_on_during_scan
+        self.laser_off_after_finish = laser_off_after_finish
         
         
     def initialize(self, **kwargs):
@@ -494,8 +491,9 @@ class LaserDiode(Instrument):
 
     def quit(self, **kwargs):
         super().quit(**kwargs)
-        self.instrument.write('output:state 0')
-        self.instrument.close()
+        if self.laser_off_after_finish:
+            self.instrument.write('output:state 0')
+            self.instrument.close()
 
     def write_param_to_instrument(self, param, param_val):
         super().write_param_to_instrument(param, param_val)
