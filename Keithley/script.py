@@ -340,7 +340,8 @@ def output(
     _ = set_smu_ready(gate_address)
     _ = set_smu_ready(drain_address)
 
-    return gate_readings[20:-20,:], drain_readings[20:-20,:]
+    return gate_readings, drain_readings
+    # return gate_readings[ramp_steps:-ramp_steps,:], drain_readings[ramp_steps:-ramp_steps,:]
 
 
 
