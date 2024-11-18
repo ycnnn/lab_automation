@@ -13,7 +13,7 @@ class Display_parameters:
                  window_width=None,
                  window_height=None,
                  darkmode=True,
-                 text_bar_height=20,
+                 text_bar_height=15,
                  window_width_min=300, 
                  window_width_max=500,
                  axis_label_ticks_distance=12,

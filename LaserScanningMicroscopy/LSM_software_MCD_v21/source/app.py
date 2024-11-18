@@ -57,7 +57,7 @@ def widget_format(widget):
 
 
 class SubWindow(QMainWindow):
-    def __init__(self, title):
+    def __init__(self, title, position_parameters):
         super().__init__()
         
         self.setWindowTitle(title)
@@ -65,6 +65,7 @@ class SubWindow(QMainWindow):
         self.linewidth = 0
         self.scan_num = 0
         self.x_offset = 0
+        self.position_parameters = position_parameters
         
         # Create a central widget
         self.central_widget = QWidget(self)
@@ -81,7 +82,8 @@ class SubWindow(QMainWindow):
         self.chart_widget = pg.PlotWidget()
         self.img_widget = pg.PlotWidget()
         self.info_label = QLabel('Currently scanning line 0')
-        self.xy_label = QLabel('X position = 0, Y position = 0')
+        self.xy_label = QLabel('X pixel = 0, Y pixel = 0')
+        self.position_label = QLabel('X position = 0 µm, Y position = µm')
         
 
         
@@ -92,6 +94,7 @@ class SubWindow(QMainWindow):
 
         self.layout.addWidget(self.info_label)
         self.layout.addWidget(self.xy_label)
+        self.layout.addWidget(self.position_label)
         self.layout.addWidget(self.chart_widget)
         self.layout.addWidget(self.img_widget)
 
@@ -125,8 +128,21 @@ class SubWindow(QMainWindow):
         x_label = int(x - self.x_offset)
         y_label = int(self.scan_num - y)
 
+        x_label = min(max(x_label, 0), self.linewidth - 1)
+        y_label = min(max(y_label, 0), self.scan_num - 1)
+
         # Update the textbox with the coordinates
-        self.xy_label.setText(f"X position = {x_label}, Y position = {y_label}")
+        self.xy_label.setText(f"X pixel = {x_label}, Y pixel = {y_label}")
+        
+
+        x_pos = self.position_parameters.x_coordinates[y_label, x_label]
+        y_pos = self.position_parameters.y_coordinates[y_label, x_label]
+        # x_pos, y_pos, z_pos = self.position_parameters.DAQ_output_data[0,y_label, x_label]
+        # print('\n\n\n')
+        # print(self.position_parameters.x_coordinates[y_label, x_label])
+        # print(self.position_parameters.y_coordinates[y_label, x_label])
+        # print('\n\n\n\n')
+        self.position_label.setText(f"X position = {x_pos:.1f} µm, Y position = {y_pos:.1f} µm")
 
         # print('\n\n\n\n\n\n\n\n')
         # print('Viewbox size: ')
@@ -157,10 +173,12 @@ class QPlot:
                  font_size,
                  channel_names,
                  axis_label_ticks_distance=10,
-                 text_bar_height=20) -> None:
+                 text_bar_height=15,
+                 position_parameters=None) -> None:
 
         self.app = QApplication(sys.argv)
         self.font_size = font_size
+        self.position_parameters = position_parameters
 
         
         font_family = load_font('font/SourceCodePro-Medium.ttf')
@@ -215,7 +233,7 @@ class QPlot:
         self.axis_label_ticks_distance = axis_label_ticks_distance
 
         self.total_width = self.total_width_scaling_factor*self.window_width
-        self.total_height = self.total_height_scaling_factor*(5 + self.chart_height + self.img_height + 2 * self.label_height)
+        self.total_height = self.total_height_scaling_factor*(5 + self.chart_height + self.img_height + 3 * self.label_height)
 
 
 
@@ -229,7 +247,7 @@ class QPlot:
         
         for channel_id in range(self.channel_num):
             
-            temp_window = SubWindow(title=f'Channel {channel_id}')
+            temp_window = SubWindow(title=f'Channel {channel_id}', position_parameters=self.position_parameters)
 
             temp_window.scan_num = self.scan_num
             temp_window.linewidth = self.line_width

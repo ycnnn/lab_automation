@@ -27,12 +27,12 @@ if __name__ == '__main__':
     display_parameters = Display_parameters(scan_id=scan_id)
 
     position_parameters = Position_parameters(
-                                            x_size=0,
-                                            y_size=0,
+                                            x_size=50,
+                                            y_size=50,
                                             x_pixels=200,
                                             y_pixels=200,
                                             z_center=0,
-                                            angle=-35)
+                                            angle=45)
   
     
     scan_parameters = Scan_parameters(point_time_constant=0.0001,

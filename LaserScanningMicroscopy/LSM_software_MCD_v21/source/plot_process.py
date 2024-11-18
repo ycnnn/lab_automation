@@ -46,7 +46,8 @@ class Data_receiver(mp.Process):
                          window_width_max=self.display_parameters.window_width_max,
                          show_zero_level=self.display_parameters.show_zero_level,
                          font_size=self.display_parameters.font_size,
-                         axis_label_ticks_distance=self.display_parameters.axis_label_ticks_distance)
+                         axis_label_ticks_distance=self.display_parameters.axis_label_ticks_distance,
+                         position_parameters=self.position_parameters)
         #####################################################################
 
         for scan_index in range(self.scan_num):
