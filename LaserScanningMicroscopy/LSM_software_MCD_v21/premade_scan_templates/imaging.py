@@ -33,9 +33,11 @@ if __name__ == '__main__':
     position_parameters = Position_parameters(
                                             x_size=40,
                                             y_size=40,
+                                            x_center=45.1,
+                                            y_center=37.0,
                                             x_pixels=50,
                                             y_pixels=50,
-                                            z_center=11,
+                                            z_center=5,
                                             angle=110)
   
     
