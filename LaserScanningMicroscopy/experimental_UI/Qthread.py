@@ -16,19 +16,20 @@ class DataThread(QThread):
 
     data_ready = Signal(list)
     
-    def __init__(self, scan_num, line_width, **kwargs):
+    def __init__(self, scan_num, line_width, channel_num=2, **kwargs):
         super().__init__()
         self.kwargs = kwargs
         self.count = 0
         self.scan_num = scan_num
         self.line_width = line_width
+        self.channel_num = channel_num
 
     def run(self):
         while self.count < self.scan_num:
-            data = np.random.normal(size=(self.line_width)) + self.count  # Simulate new data
+            data = np.random.normal(size=(self.channel_num,self.line_width)) + self.count  # Simulate new data
             self.data_ready.emit([self.count, data])
             self.count += 1
-            time.sleep(0.1)  # Simulate processing delay
+            time.sleep(0.02)  # Simulate processing delay
 
 
 class CustomAxisItem(pg.AxisItem):
@@ -71,10 +72,12 @@ def widget_format(widget):
       
 
 class SubWindow(QMainWindow):
-    def __init__(self, title, scan_num, line_width, window_width=400, axis_label_distance=10, font_size=12):
+    def __init__(self, scan_num, line_width, channel_id=0, title=None, window_width=400, axis_label_distance=10, font_size=12):
         super().__init__()
 
-        self.setWindowTitle(title)
+        self.channel_id = channel_id
+
+        self.setWindowTitle(title if title else f'Channel {channel_id}')
         self.scan_num, self.line_width = (scan_num, line_width)
         self.count = None
         self.data = np.zeros((self.scan_num, self.line_width))
@@ -189,7 +192,7 @@ class SubWindow(QMainWindow):
 
     def update_plot(self, data_pack):
         self.count, new_data = data_pack
-        self.data[self.count] = new_data
+        self.data[self.count] = new_data[self.channel_id]
         
         elapse_time = time.time() - self.time
         if self.count >= 1:
@@ -224,8 +227,8 @@ if __name__ == "__main__":
     data_thread = DataThread(scan_num=scan_num, line_width=line_width)
 
     # Create two main windows
-    window1 = SubWindow("Window 1", scan_num=scan_num, line_width=line_width)
-    window2 = SubWindow("Window 2", scan_num=scan_num, line_width=line_width)
+    window1 = SubWindow(channel_id=0, scan_num=scan_num, line_width=line_width)
+    window2 = SubWindow(channel_id=1, scan_num=scan_num, line_width=line_width)
 
     window2.move(0,0)
 
