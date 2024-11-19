@@ -82,7 +82,7 @@ class SubWindow(QMainWindow):
         self.chart_widget = pg.PlotWidget()
         self.img_widget = pg.PlotWidget()
         self.info_label = QLabel('Currently scanning line 0')
-        self.xy_label = QLabel('X pixel = 0, Y pixel = 0')
+        self.xy_label = QLabel('Click anywhere in the map to get the position info')
         self.position_label = QLabel('X position = 0 µm, Y position = 0 µm')
         
 
