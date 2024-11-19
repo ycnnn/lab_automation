@@ -181,7 +181,7 @@ class SubWindow(QMainWindow):
             self.x_offset = self.linewidth *  top_axis_coords[0] / (top_axis_coords[2] - top_axis_coords[0])
 
         x_label = int(x - self.x_offset)
-        y_label = int(self.scan_num - y)
+        y_label = int(y)
 
         x_label = min(max(x_label, 0), self.linewidth - 1)
         y_label = min(max(y_label, 0), self.scan_num - 1)
