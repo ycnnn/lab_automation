@@ -213,6 +213,7 @@ class SubWindow(QMainWindow):
 if __name__ == "__main__":
 
     scan_num, line_width = (100,100)
+    channel_num = 3
 
     app = QApplication([])
     font_family = load_font('font/SourceCodePro-Medium.ttf')
@@ -224,24 +225,22 @@ if __name__ == "__main__":
 
 
     # Create the shared data thread
-    data_thread = DataThread(scan_num=scan_num, line_width=line_width)
+    data_thread = DataThread(channel_num=channel_num, scan_num=scan_num, line_width=line_width)
 
-    # Create two main windows
-    window1 = SubWindow(channel_id=0, scan_num=scan_num, line_width=line_width)
-    window2 = SubWindow(channel_id=1, scan_num=scan_num, line_width=line_width)
+    windows = []
+    for channel_id in range(channel_num):
+        window = SubWindow(channel_id=channel_id, scan_num=scan_num, line_width=line_width)
+        data_thread.data_ready.connect(window.update_plot)
+        windows.append(window)
 
-    window2.move(0,0)
 
-    # Connect both windows to the data signal
-    data_thread.data_ready.connect(window1.update_plot)
-    data_thread.data_ready.connect(window2.update_plot)
 
     # Start the data thread
     data_thread.start()
 
     # Show both windows
-    window1.show()
-    window2.show()
+    for channel_id in range(channel_num):
+        windows[channel_id].show()
 
     app.exec()
 
