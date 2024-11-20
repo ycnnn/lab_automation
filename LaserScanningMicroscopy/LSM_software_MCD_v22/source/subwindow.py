@@ -161,14 +161,18 @@ class SubWindow(QMainWindow):
             self.x_range, self.y_range = (view_range[0][1] - view_range[0][0], view_range[1][1] - view_range[1][0])
             self.x_offset = self.x_range *  top_axis_coords[0] / (top_axis_coords[2] - top_axis_coords[0])
             self.y_offset = self.y_range *  right_axis_coords[1] / (right_axis_coords[3] - right_axis_coords[1])
+
         x_label = int(x - self.x_offset)
-        y_label = int(y - self.y_offset)
+        y_label = int(self.scan_num - (y - self.y_offset))
+
+        x_label = max(0, min(x_label, self.line_width - 1))
+        y_label = max(0, min(y_label, self.scan_num - 1))
 
         x_pos = self.position_parameters.x_coordinates[y_label, x_label]
         y_pos = self.position_parameters.y_coordinates[y_label, x_label]
 
         # Update the textbox with the coordinates
-        self.xy_label.setText(f"X position = {x_pos}, Y position = {y_pos}")
+        self.xy_label.setText(f"X position = {x_pos:.1f}, Y position = {y_pos:.1f}")
 
     def updateROI(self):
 

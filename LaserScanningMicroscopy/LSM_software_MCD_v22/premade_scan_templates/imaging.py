@@ -2,20 +2,25 @@ import os
 parentdir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 os.sys.path.insert(0,parentdir) 
 
-# import shutil
-# import os
 import sys
+import os
+import time
+from PySide6.QtWidgets import QApplication, QMainWindow, QLabel, QVBoxLayout, QWidget, QLabel
+from PySide6.QtGui import QGuiApplication, QFontDatabase, QFont, QColor, QPixmap, QPen
+from PySide6.QtCore import Qt, QByteArray, QBuffer, QLoggingCategory, QThread, Signal,QRectF
+import pyqtgraph as pg
 import numpy as np
-######################################################################
-# Custom dependencies
-# from mp import Data_fetcher, Data_receiver
+from decimal import Decimal
+import base64
+import warnings
 from source.params.position_params import Position_parameters
 from source.params.scan_params import Scan_parameters
 from source.params.display_params import Display_parameters
 from source.scan_process import LSM_scan
+from source.subwindow import SubWindow
+from source.plot_process import LSM_plot
 import source.inst_driver as inst_driver
-# from source.inst_driver import External_instrument, EmptyInstrument
-######################################################################
+
 
 
 
@@ -35,8 +40,11 @@ if __name__ == '__main__':
                                             y_size=40,
                                             x_pixels=50,
                                             y_pixels=50,
-                                            z_center=11,
-                                            angle=110)
+
+                                            x_center=44.4,
+                                            y_center=51.8,
+                                            z_center=10,
+                                            angle=70)
   
     
     scan_parameters = Scan_parameters(point_time_constant=0.01,
@@ -55,16 +63,17 @@ if __name__ == '__main__':
     laser = inst_driver.LaserDiode(
                     position_parameters=position_parameters,
                     scan_parameters=scan_parameters,
-                    **{'current':0.04},
+                    **{'current':0.026}
                     )
     instruments.append(laser)
 
 
 
     
-    LSM_scan(position_parameters=position_parameters,
+    LSM_plot(position_parameters=position_parameters,
              scan_parameters=scan_parameters,
              display_parameters=display_parameters,
-             instruments=instruments)
+             instruments=instruments,
+             simulate=False)
     
     

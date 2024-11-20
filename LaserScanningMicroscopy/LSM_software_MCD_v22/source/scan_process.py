@@ -134,7 +134,7 @@ class LSM_scan(QThread):
                         self.data[0, :, scan_index, :] = instr_data
                     else:
                         scan_index = int((total_scan_index - 1) / 2)
-                        self.data_ready.emit([scan_index, instr_data])
+                        # self.data_ready.emit([scan_index, instr_data])
                         self.data[1, :, scan_index, :] = instr_data
 
         self.logger.info('Scan finished.')
