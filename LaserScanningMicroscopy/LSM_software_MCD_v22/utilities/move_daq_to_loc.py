@@ -31,7 +31,7 @@ def set_pos(DAQ_name, position):
         write_task.write(np.ascontiguousarray(output))
     print(f'Stage position has been moved to ')
     print(position)
-    print('./n')
+    print('\n')
     return
 
 def read_daq_output(DAQ_name='Dev2'):
@@ -46,7 +46,7 @@ def read_daq_output(DAQ_name='Dev2'):
 
 def main():
     while True:
-        user_input = input("Enter the x,y,z position in microns, such as 50,50,0. Or press 'R' to reset, or press Enter to quit.")
+        user_input = input("Enter the x,y,z position in microns, such as 50,50,0. Or press 'R' to reset, or press Enter to quit:\n")
         
         # Check for empty content
         if user_input.strip() == "":
