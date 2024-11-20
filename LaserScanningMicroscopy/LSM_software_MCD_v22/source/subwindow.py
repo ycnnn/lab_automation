@@ -140,11 +140,15 @@ class SubWindow(QMainWindow):
         self.axis_label_distance = axis_label_distance
         self.font_size = font_size
         self.ui_format()
+    
+    def closeEvent(self, event):
+        # Terminate the scan safely
+        # The user can either click the Terminate button, or click the X button to safety terminate
+        self.set_terminate_flag()
+        # Allow the base class to handle the close event
+        super().closeEvent(event)
 
     def set_terminate_flag(self):
-        # print('\n\n\n')
-        # print('Terminate!')
-        # print('\n\n\n')
         self.thread.is_terminated = True
 
     def ui_format(self):

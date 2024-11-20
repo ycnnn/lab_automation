@@ -37,7 +37,7 @@ if __name__ == "__main__":
                                             z_center=0,
                                             angle=45)
   
-    scan_parameters = Scan_parameters(point_time_constant=0.001,
+    scan_parameters = Scan_parameters(point_time_constant=0.01,
                                     #   retrace_point_time_constant=0.02,
                                       return_to_zero=False)
 
