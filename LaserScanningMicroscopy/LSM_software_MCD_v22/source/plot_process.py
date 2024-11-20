@@ -40,7 +40,7 @@ class LSM_plot:
                  position_parameters, 
                  scan_parameters, 
                  instruments, 
-                 simulate=True):
+                 simulate=False):
 
         self.data_thread = LSM_scan(position_parameters=position_parameters,
              scan_parameters=scan_parameters,
