@@ -61,15 +61,18 @@ class LSM_plot:
             self.app.setFont(global_font)
 
         self.windows = []
+
+        screen_width = self.app.primaryScreen().size().width()
+        window_displacement = max(400, screen_width/self.channel_num)
         for channel_id in range(self.channel_num):
             window = SubWindow(channel_id=channel_id, 
                             title=self.channel_names[channel_id],
                             scan_num=scan_num, line_width=line_width,
                             position_parameters=position_parameters,
                             thread=self.data_thread)
+            window.move(window_displacement * channel_id,0)
             self.data_thread.data_ready.connect(window.update_plot)
             self.windows.append(window)
-
         
         self.run()
 
