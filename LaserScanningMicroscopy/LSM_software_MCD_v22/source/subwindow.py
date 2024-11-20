@@ -89,7 +89,7 @@ class SubWindow(QMainWindow):
             QPushButton {
                 background-color: red;  /* Red background */
                 border: 0px solid black;  /* Black border */
-                color: black;  /* White text color */
+                color: white;  /* White text color */
            
                 padding: 5px;  /* Padding inside the button */
             }
@@ -239,7 +239,7 @@ class SubWindow(QMainWindow):
             QPushButton {
                 background-color: green;  /* Red background */
                 border: 0px solid black;  /* Black border */
-                color: black;  /* White text color */
+                color: white;  /* White text color */
            
                 padding: 5px;  /* Padding inside the button */
             }
