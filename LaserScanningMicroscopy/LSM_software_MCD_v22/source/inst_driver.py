@@ -719,4 +719,4 @@ class DAQ_simulated(Instrument):
             return
         
 
-        self.data = DAQ_input_data + np.random.normal(loc=self.scan_index, size=DAQ_input_data.shape) 
+        self.data = DAQ_input_data + np.random.normal(loc=self.scan_index, size=DAQ_input_data.shape) + np.linspace(np.zeros(self.channel_num), 2 * self.scan_index * np.ones(self.channel_num),num=self.reading_num).T
