@@ -27,7 +27,7 @@ if __name__ == "__main__":
 
 
 
-    display_parameters = Display_parameters(scan_id='test')
+    display_parameters = Display_parameters(scan_id='test', window_width=400)
 
     position_parameters = Position_parameters(
                                             x_size=50,

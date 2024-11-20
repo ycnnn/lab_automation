@@ -69,7 +69,8 @@ class LSM_plot:
                             title=self.channel_names[channel_id],
                             scan_num=scan_num, line_width=line_width,
                             position_parameters=position_parameters,
-                            thread=self.data_thread)
+                            thread=self.data_thread,
+                            window_width=self.display_parameters.window_width)
             window.move(window_displacement * channel_id,0)
             self.data_thread.data_ready.connect(window.update_plot)
             self.windows.append(window)
@@ -90,6 +91,10 @@ class LSM_plot:
             pixmap = self.windows[channel_id].grab()
             # self.windows[channel_id].pixmap.save(self.display_parameters.save_destination + self.windows[channel_id].title + '.png')
             pixmap.save(self.display_parameters.save_destination + self.windows[channel_id].title + '.png')
+      
+
+
+        
 
 
 if __name__ == "__main__":

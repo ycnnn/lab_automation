@@ -7,19 +7,9 @@ class Display_parameters:
     def __init__(self,
                  scan_id=None,
                  save_destination=None,
-                 colormap=None,
-                 channel_min=None,
-                 channel_max=None,
-                 window_width=None,
-                 window_height=None,
-                 darkmode=True,
-                 text_bar_height=15,
-                 window_width_min=300, 
-                 window_width_max=500,
+                 window_width=500,
                  axis_label_ticks_distance=12,
-                 show_zero_level=True,
-                 font_size=12,
-                 save_data=True):
+               ):
         
         if len(scan_id) == 0:
             scan_id = 'temp_scan'
@@ -32,7 +22,7 @@ class Display_parameters:
     
         self.save_destination = path if not save_destination else save_destination
         self.axis_label_ticks_distance = axis_label_ticks_distance
-        self.font_size = font_size
+        # self.font_size = font_size
        
 
         # The following code save the data.
@@ -62,17 +52,10 @@ class Display_parameters:
         os.makedirs(self.save_destination + 'data_text/')
         os.makedirs(self.save_destination + 'parameters/')
 
-        self.colormap = colormap
-        self.channel_min = channel_min
-        self.channel_max = channel_max
+   
         self.window_width = window_width
-        self.window_height = window_height
-        self.text_bar_height = text_bar_height
-        self.window_width_min = window_width_min
-        self.window_width_max = window_width_max
-        self.darkmode = darkmode
-        self.save_data = save_data
-        self.show_zero_level = show_zero_level
+
+
 
 
 
