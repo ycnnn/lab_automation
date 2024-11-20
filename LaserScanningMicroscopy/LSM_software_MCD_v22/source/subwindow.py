@@ -117,7 +117,7 @@ class SubWindow(QMainWindow):
         # self.img_widget.mousePressEvent = self.on_click
         self.proxy = pg.SignalProxy(self.img_widget.scene().sigMouseMoved, rateLimit=60, slot=self.mouse_moved)
 
-        self.curve = self.chart_widget.plot()
+        self.curve = self.chart_widget.plot(pen=pg.mkPen('white', width=3))
         self.img = pg.ImageItem(self.data.T)
         self.img_widget.addItem(self.img)
 
