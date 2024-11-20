@@ -244,7 +244,7 @@ class SubWindow(QMainWindow):
                 padding: 5px;  /* Padding inside the button */
             }
             QPushButton:hover {
-                background-color: darkred;  /* Dark red when hovered */
+                background-color: green;  /* Dark red when hovered */
             }
         """)
     
