@@ -101,7 +101,7 @@ class SubWindow(QMainWindow):
         self.chart_widget = pg.PlotWidget()
         self.img_widget = pg.PlotWidget()
         self.info_label = QLabel('Currently scanning line 0')
-        self.xy_label = QLabel('X position = 0, Y position = 0')
+        self.xy_label = QLabel('X position = 0 µm, Y position = 0 µm')
         
         self.layout.setSpacing(0)
         self.layout.addWidget(self.button)
@@ -203,7 +203,7 @@ class SubWindow(QMainWindow):
         y_pos = self.position_parameters.y_coordinates[y_label, x_label]
 
         # Update the textbox with the coordinates
-        self.xy_label.setText(f"X position = {x_pos:.1f}, Y position = {y_pos:.1f}")
+        self.xy_label.setText(f"X position = {x_pos:.1f} µm, Y position = {y_pos:.1f} µm")
 
     def updateROI(self):
 
