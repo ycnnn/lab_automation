@@ -36,15 +36,15 @@ if __name__ == '__main__':
     display_parameters = Display_parameters(scan_id=scan_id)
 
     position_parameters = Position_parameters(
-                                            x_size=40,
-                                            y_size=40,
-                                            x_pixels=50,
-                                            y_pixels=50,
+                                            x_size=32,
+                                            y_size=32,
+                                            x_pixels=80,
+                                            y_pixels=80,
 
-                                            x_center=44.4,
-                                            y_center=51.8,
+                                            x_center=52.2,
+                                            y_center=54.7,
                                             z_center=10,
-                                            angle=70)
+                                            angle=20)
   
     
     scan_parameters = Scan_parameters(point_time_constant=0.01,

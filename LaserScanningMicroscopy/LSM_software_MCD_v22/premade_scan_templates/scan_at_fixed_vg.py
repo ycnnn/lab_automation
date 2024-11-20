@@ -2,32 +2,36 @@ import os
 parentdir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 os.sys.path.insert(0,parentdir) 
 
-# import shutil
-# import os
 import sys
+import os
+import time
+from PySide6.QtWidgets import QApplication, QMainWindow, QLabel, QVBoxLayout, QWidget, QLabel
+from PySide6.QtGui import QGuiApplication, QFontDatabase, QFont, QColor, QPixmap, QPen
+from PySide6.QtCore import Qt, QByteArray, QBuffer, QLoggingCategory, QThread, Signal,QRectF
+import pyqtgraph as pg
 import numpy as np
-######################################################################
-# Custom dependencies
-# from mp import Data_fetcher, Data_receiver
+from decimal import Decimal
+import base64
+import warnings
 from source.params.position_params import Position_parameters
 from source.params.scan_params import Scan_parameters
 from source.params.display_params import Display_parameters
 from source.scan_process import LSM_scan
+from source.subwindow import SubWindow
+from source.plot_process import LSM_plot
 import source.inst_driver as inst_driver
-# from source.inst_driver import External_instrument, EmptyInstrument
-######################################################################
 
 
 
 if __name__ == '__main__':
    
-    vg = -35
-    vd = -0.25
+    vg = 0
+    vd = 0
 
     try:
         scan_id = sys.argv[1]
     except:
-        scan_id = f'TS_Vg_{vg}_vd_{vd}'
+        scan_id = f'VJ_Vg_{vg}_vd_{vd}'
     
     # Fixed gate bias Vg, in volt
     
@@ -46,16 +50,19 @@ if __name__ == '__main__':
     display_parameters = Display_parameters(scan_id=scan_id)
 
     position_parameters = Position_parameters(
-                                            x_size=50,
-                                            y_size=50,
-                                            x_pixels=100,
-                                            y_pixels=100,
-                                            z_center=11,
-                                            angle=110)
+                                            x_size=32,
+                                            y_size=32,
+                                            x_pixels=80,
+                                            y_pixels=80,
+
+                                            x_center=52.2,
+                                            y_center=54.7,
+                                            z_center=10,
+                                            angle=20)
   
     
-    scan_parameters = Scan_parameters(point_time_constant=0.011,
-                                      retrace_point_time_constant=0.011,
+    scan_parameters = Scan_parameters(point_time_constant=0.035,
+                                      retrace_point_time_constant=0.005,
                                       return_to_zero=False,
                                       additional_info=f'')
 
@@ -75,30 +82,26 @@ if __name__ == '__main__':
                     )
     instruments.append(smu_gate)
 
-    smu_drain = inst_driver.SMU(
-                    address="USB0::0x05E6::0x2450::04096333::INSTR",
-                    position_parameters=position_parameters,
-                    scan_parameters=scan_parameters,
-                    **{'voltage':vd},
-                    )
-    instruments.append(smu_drain)
+    # smu_drain = inst_driver.SMU(
+    #                 address="USB0::0x05E6::0x2450::04096333::INSTR",
+    #                 position_parameters=position_parameters,
+    #                 scan_parameters=scan_parameters,
+    #                 **{'voltage':vd},
+    #                 )
+    # instruments.append(smu_drain)
 
     laser = inst_driver.LaserDiode(
                     position_parameters=position_parameters,
                     scan_parameters=scan_parameters,
-                    **{'current':0.04},
+                    **{'current':0.026},
                     )
     instruments.append(laser)
 
 
     lockin_prop = {
-        # Note the time constant levels
-        # Levels and range: 0->1us, 1->3us, 2->10us 3->30us, 4->100us, 5->300us, 6->1ms, 7->3ms, 8->10ms, 
-        # 9->30ms, 10->100ms, 11->300ms, 12->1s, 13->3s, 14->10s, 15->30s, 16->100s, 17->300s, 18->1000s, 19->3000s, 20->10000s
-
-        'time_constant_level':8,
-        'volt_input_range':0,
-        'signal_sensitivity':9,}
+        'time_constant_level':9,
+        'volt_input_range':2,
+        'signal_sensitivity':7,}
     
     lockin = inst_driver.Lockin(
                     position_parameters=position_parameters,
@@ -113,7 +116,7 @@ if __name__ == '__main__':
 
 
     
-    LSM_scan(position_parameters=position_parameters,
+    LSM_plot(position_parameters=position_parameters,
              scan_parameters=scan_parameters,
              display_parameters=display_parameters,
              instruments=instruments)

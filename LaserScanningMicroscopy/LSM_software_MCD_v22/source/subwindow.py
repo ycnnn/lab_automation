@@ -57,7 +57,7 @@ def widget_format(widget):
       
 
 class SubWindow(QMainWindow):
-    def __init__(self, scan_num, line_width, channel_id=0, title=None, window_width=400, axis_label_distance=10, font_size=12, position_parameters=None, thread=None):
+    def __init__(self, scan_num, line_width, channel_id=0, title=None, window_width=600, axis_label_distance=10, font_size=12, position_parameters=None, thread=None):
         super().__init__()
 
         self.channel_id = channel_id
