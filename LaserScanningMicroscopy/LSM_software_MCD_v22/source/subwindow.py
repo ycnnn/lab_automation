@@ -57,10 +57,11 @@ def widget_format(widget):
       
 
 class SubWindow(QMainWindow):
-    def __init__(self, scan_num, line_width, channel_id=0, title=None, window_width=400, axis_label_distance=10, font_size=12):
+    def __init__(self, scan_num, line_width, channel_id=0, title=None, window_width=400, axis_label_distance=10, font_size=12, position_parameters=None):
         super().__init__()
 
         self.channel_id = channel_id
+        self.position_parameters = position_parameters
         self.title = title if title else f'Channel {channel_id}'
         self.setWindowTitle(self.title)
         self.scan_num, self.line_width = (scan_num, line_width)
@@ -163,8 +164,11 @@ class SubWindow(QMainWindow):
         x_label = int(x - self.x_offset)
         y_label = int(y - self.y_offset)
 
+        x_pos = self.position_parameters.x_coordinates[y_label, x_label]
+        y_pos = self.position_parameters.y_coordinates[y_label, x_label]
+
         # Update the textbox with the coordinates
-        self.xy_label.setText(f"X position = {x_label}, Y position = {y_label}")
+        self.xy_label.setText(f"X position = {x_pos}, Y position = {y_pos}")
 
     def updateROI(self):
 
