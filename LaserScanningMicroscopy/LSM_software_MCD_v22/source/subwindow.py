@@ -1,7 +1,7 @@
 import sys
 import os
 import time
-from PySide6.QtWidgets import QApplication, QMainWindow, QLabel, QVBoxLayout, QWidget, QLabel
+from PySide6.QtWidgets import QApplication, QMainWindow, QLabel, QVBoxLayout, QWidget, QLabel,QPushButton
 from PySide6.QtGui import QGuiApplication, QFontDatabase, QFont, QColor, QPixmap, QPen
 from PySide6.QtCore import Qt, QByteArray, QBuffer, QLoggingCategory, QThread, Signal,QRectF
 import pyqtgraph as pg
@@ -57,16 +57,18 @@ def widget_format(widget):
       
 
 class SubWindow(QMainWindow):
-    def __init__(self, scan_num, line_width, channel_id=0, title=None, window_width=400, axis_label_distance=10, font_size=12, position_parameters=None):
+    def __init__(self, scan_num, line_width, channel_id=0, title=None, window_width=400, axis_label_distance=10, font_size=12, position_parameters=None, thread=None):
         super().__init__()
 
         self.channel_id = channel_id
         self.position_parameters = position_parameters
+       
         self.title = title if title else f'Channel {channel_id}'
         self.setWindowTitle(self.title)
         self.scan_num, self.line_width = (scan_num, line_width)
         self.count = None
         self.data = np.zeros((self.scan_num, self.line_width))
+        self.thread = thread
         
 
         
@@ -81,13 +83,31 @@ class SubWindow(QMainWindow):
         self.central_widget.setLayout(self.layout)
         self.central_widget.setStyleSheet("background-color: black;")
 
-       
+        self.button = QPushButton("Terminate", self)
+
+        self.button.setStyleSheet("""
+            QPushButton {
+                background-color: red;  /* Red background */
+                border: 0px solid black;  /* Black border */
+                color: black;  /* White text color */
+           
+                padding: 5px;  /* Padding inside the button */
+            }
+            QPushButton:hover {
+                background-color: darkred;  /* Dark red when hovered */
+            }
+        """)
+                
         self.chart_widget = pg.PlotWidget()
         self.img_widget = pg.PlotWidget()
         self.info_label = QLabel('Currently scanning line 0')
         self.xy_label = QLabel('X position = 0, Y position = 0')
         
         self.layout.setSpacing(0)
+        self.layout.addWidget(self.button)
+
+        self.button.clicked.connect(self.set_terminate_flag)
+
         self.layout.addWidget(self.info_label)
         self.layout.addWidget(self.xy_label)
         self.layout.addWidget(self.chart_widget)
@@ -120,6 +140,12 @@ class SubWindow(QMainWindow):
         self.font_size = font_size
         self.ui_format()
 
+    def set_terminate_flag(self):
+        # print('\n\n\n')
+        # print('Terminate!')
+        # print('\n\n\n')
+        self.thread.is_terminated = True
+
     def ui_format(self):
 
         widget_format(self.chart_widget)
@@ -145,7 +171,7 @@ class SubWindow(QMainWindow):
         self.img_widget.setFixedSize(self.window_width, (self.window_width-x_axis_offset) * self.scan_num/self.line_width)
 
 
-        
+    
     def mouse_moved(self, event):
       
         self.axis_label_offset_calculated = False

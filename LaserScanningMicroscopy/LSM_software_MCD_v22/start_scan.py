@@ -32,13 +32,12 @@ if __name__ == "__main__":
     position_parameters = Position_parameters(
                                             x_size=50,
                                             y_size=50,
-                                            x_pixels=100,
-                                            y_pixels=100,
+                                            x_pixels=40,
+                                            y_pixels=40,
                                             z_center=0,
                                             angle=45)
   
-    
-    scan_parameters = Scan_parameters(point_time_constant=0.0001,
+    scan_parameters = Scan_parameters(point_time_constant=0.01,
                                     #   retrace_point_time_constant=0.02,
                                       return_to_zero=False)
 
@@ -47,7 +46,7 @@ if __name__ == "__main__":
     daq = inst_driver.DAQ_simulated(
                     position_parameters=position_parameters,
                     scan_parameters=scan_parameters,
-                    input_mapping=['ai0', 'ai1'],
+                    input_mapping=['ai0', 'ai1', 'ai3'],
                     )
     instruments.append(daq)
 

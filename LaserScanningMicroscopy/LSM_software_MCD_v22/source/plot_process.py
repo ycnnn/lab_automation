@@ -65,7 +65,8 @@ class LSM_plot:
             window = SubWindow(channel_id=channel_id, 
                             title=self.channel_names[channel_id],
                             scan_num=scan_num, line_width=line_width,
-                            position_parameters=position_parameters)
+                            position_parameters=position_parameters,
+                            thread=self.data_thread)
             self.data_thread.data_ready.connect(window.update_plot)
             self.windows.append(window)
 

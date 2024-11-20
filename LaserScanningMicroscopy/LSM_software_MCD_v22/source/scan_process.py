@@ -28,6 +28,9 @@ class LSM_scan(QThread):
         self.instruments = instruments
         self.simulate = simulate
 
+        self.is_terminated = False
+
+
         # Mandatory code. There MUST be at least one external instrument present dring the scan.
         empty_instr = inst_driver.EmptyInstrument(
             address='',
@@ -115,27 +118,30 @@ class LSM_scan(QThread):
 
             for total_scan_index in range(self.total_scan_num):
                     auxiliary_scan_info = {'total_scan_index': total_scan_index}
-                        
+                    
+                    if self.is_terminated:
+                        terminated_message = 'The user has terminated the scan. All isntruments will be exited safely.'
+                        self.logger.info(terminated_message)
+                        raise RuntimeError(terminated_message)
+                    
                     with ExitStack() as scan_stack:
                         _ = [scan_stack.enter_context(
                                 instr_scan(**auxiliary_scan_info)
                                 ) for instr_scan in scan_manager]
-                 
+              
                     instr_data = np.vstack([
                             resource.data for resource in self.instruments
                             ])
-
-                    '''
-                    Update the plot, save the data, and add the screenshots
-                    '''
+               
+                
                     if total_scan_index % 2 == 0:
                         scan_index = int(total_scan_index / 2)
                         self.data_ready.emit([scan_index, instr_data])
                         self.data[0, :, scan_index, :] = instr_data
                     else:
                         scan_index = int((total_scan_index - 1) / 2)
-                        # self.data_ready.emit([scan_index, instr_data])
                         self.data[1, :, scan_index, :] = instr_data
+                    
 
         self.logger.info('Scan finished.')
         self.save_data()
