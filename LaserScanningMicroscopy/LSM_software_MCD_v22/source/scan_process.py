@@ -13,7 +13,10 @@ import source.inst_driver as inst_driver
 from source.log_config import setup_logging
 
 class LSM_scan(QThread):
+
     data_ready = Signal(list)
+    finished = Signal()
+
     def __init__(self,
                   position_parameters, 
                   scan_parameters, 
@@ -142,6 +145,7 @@ class LSM_scan(QThread):
                         scan_index = int((total_scan_index - 1) / 2)
                         self.data[1, :, scan_index, :] = instr_data
                     
+        self.finished.emit()
 
         self.logger.info('Scan finished.')
         self.save_data()

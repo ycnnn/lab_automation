@@ -107,6 +107,7 @@ class SubWindow(QMainWindow):
         self.layout.addWidget(self.button)
 
         self.button.clicked.connect(self.set_terminate_flag)
+        self.thread.finished.connect(self.finish)
 
         self.layout.addWidget(self.info_label)
         self.layout.addWidget(self.xy_label)
@@ -230,6 +231,22 @@ class SubWindow(QMainWindow):
         plot_max_val = np.max(data)
         plot_min_val = np.min(data)
         self.img.setLevels((plot_min_val, plot_max_val))
+
+    def finish(self):
+        # When the thread finishes, change the button's text and color
+        self.button.setText("Scan finished")
+        self.button.setStyleSheet("""
+            QPushButton {
+                background-color: green;  /* Red background */
+                border: 0px solid black;  /* Black border */
+                color: black;  /* White text color */
+           
+                padding: 5px;  /* Padding inside the button */
+            }
+            QPushButton:hover {
+                background-color: darkred;  /* Dark red when hovered */
+            }
+        """)
     
 
 if __name__ == "__main__":
