@@ -12,6 +12,24 @@ import warnings
 
 
 
+# class DataThread(QThread):
+
+#     data_ready = Signal(list)
+    
+#     def __init__(self, scan_num, line_width, channel_num=2, **kwargs):
+#         super().__init__()
+#         self.kwargs = kwargs
+#         self.count = 0
+#         self.scan_num = scan_num
+#         self.channel_num = channel_num
+
+#     def run(self):
+#         while self.count < self.scan_num:
+#             data = np.random.normal(size=(self.channel_num)) + self.count  # Simulate new data
+#             self.data_ready.emit([self.count, data])
+#             self.count += 1
+#             time.sleep(0.02)  # Simulate processing delay
+
 class DataThread(QThread):
 
     data_ready = Signal(list)
@@ -22,6 +40,35 @@ class DataThread(QThread):
         self.count = 0
         self.scan_num = scan_num
         self.channel_num = channel_num
+
+
+
+        self.app = QApplication([])
+        font_family = load_font('font/SourceCodePro-Medium.ttf')
+        if font_family:
+            global_font = QFont(font_family)
+            global_font.setPixelSize(12)
+            self.app.setFont(global_font)
+
+        # Create the shared data thread
+        data_thread = self
+
+        self.windows = []
+        for channel_id in range(channel_num):
+            window = SubWindow(channel_id=channel_id, scan_num=scan_num, line_width=line_width)
+            self.data_ready.connect(window.update_plot)
+            self.windows.append(window)
+
+
+
+        # Start the data thread
+        self.start()
+
+        # Show both windows
+        for channel_id in range(channel_num):
+            self.windows[channel_id].show()
+
+        self.app.exec()
 
     def run(self):
         while self.count < self.scan_num:
@@ -75,8 +122,9 @@ class SubWindow(QMainWindow):
         super().__init__()
 
         self.channel_id = channel_id
+        self.name = title if title else f'Channel {channel_id}'
 
-        self.setWindowTitle(title if title else f'Channel {channel_id}')
+        self.setWindowTitle(self.name)
         self.scan_num= (scan_num)
         self.count = None
         self.data = np.zeros(self.scan_num)
@@ -93,11 +141,11 @@ class SubWindow(QMainWindow):
 
        
         self.chart_widget = pg.PlotWidget()
-        self.info_label = QLabel('Currently scanning line 0')
+        # self.info_label = QLabel('Currently scanning line 0')
   
         
         self.layout.setSpacing(0)
-        self.layout.addWidget(self.info_label)
+        # self.layout.addWidget(self.info_label)
         self.layout.addWidget(self.chart_widget)
    
         self.curve = self.chart_widget.plot()
@@ -113,8 +161,6 @@ class SubWindow(QMainWindow):
     def ui_format(self):
 
         widget_format(self.chart_widget)
-        
-
         y_axis = CustomAxisItem(orientation='left',
                                      axis_label_ticks_distance=self.axis_label_distance)
 
@@ -131,7 +177,7 @@ class SubWindow(QMainWindow):
             self.remaining_time = int(elapse_time / self.count * (self.scan_num - self.count))
 
         self.curve.setData(self.data)
-        self.info_label.setText(f'Currently scanning line {int(self.count)}, ' + f'{self.remaining_time} s remaining')
+        self.setWindowTitle(self.name + f': scanning point {int(self.count)}, ' + f'{self.remaining_time} s remaining')
 
 
     
@@ -141,32 +187,32 @@ if __name__ == "__main__":
     scan_num, line_width = (100,100)
     channel_num = 3
 
-    app = QApplication([])
-    font_family = load_font('font/SourceCodePro-Medium.ttf')
-    if font_family:
-        global_font = QFont(font_family)
-        global_font.setPixelSize(12)
-        app.setFont(global_font)
+    # app = QApplication([])
+    # font_family = load_font('font/SourceCodePro-Medium.ttf')
+    # if font_family:
+    #     global_font = QFont(font_family)
+    #     global_font.setPixelSize(12)
+    #     app.setFont(global_font)
 
 
 
     # Create the shared data thread
     data_thread = DataThread(channel_num=channel_num, scan_num=scan_num, line_width=line_width)
 
-    windows = []
-    for channel_id in range(channel_num):
-        window = SubWindow(channel_id=channel_id, scan_num=scan_num, line_width=line_width)
-        data_thread.data_ready.connect(window.update_plot)
-        windows.append(window)
+    # windows = []
+    # for channel_id in range(channel_num):
+    #     window = SubWindow(channel_id=channel_id, scan_num=scan_num, line_width=line_width)
+    #     data_thread.data_ready.connect(window.update_plot)
+    #     windows.append(window)
 
 
 
-    # Start the data thread
-    data_thread.start()
+    # # Start the data thread
+    # data_thread.start()
 
-    # Show both windows
-    for channel_id in range(channel_num):
-        windows[channel_id].show()
+    # # Show both windows
+    # for channel_id in range(channel_num):
+    #     windows[channel_id].show()
 
-    app.exec()
+    # app.exec()
 
