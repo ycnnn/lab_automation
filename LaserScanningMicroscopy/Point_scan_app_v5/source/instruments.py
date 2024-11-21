@@ -622,6 +622,8 @@ class DAQ_simulated(Instrument):
 
 
     def write_data(self, ao_data):
+
+        time.sleep(0.1)
         DAQ_name = self.address
         input_mapping_full_path = [
             DAQ_name + '/'+ channel_name for channel_name in self.input_mapping]

@@ -82,6 +82,8 @@ class LSMLivePlot(QtWidgets.QMainWindow):
         # Plot the initial data
         self.plots = []
         self.curves = []
+        self.pen = pg.mkPen('white', width=1.5)
+
         for channel_id in range(self.channel_num):
             self.plots.append(PlotWidget(title=self.channel_names[channel_id]))
         
@@ -99,7 +101,14 @@ class LSMLivePlot(QtWidgets.QMainWindow):
                 self.plots[channel_id].getAxis(axis_label).setStyle(tickLength=2,showValues=True)
                 self.plots[channel_id].getAxis(axis_label).setStyle(tickFont=global_font)
             self.plots[channel_id].getAxis('top').setStyle(tickLength=2,showValues=False)   
-            self.plots[channel_id].getAxis('right').setStyle(tickLength=2,showValues=False)   
+            self.plots[channel_id].getAxis('right').setStyle(tickLength=2,showValues=False)
+
+            
+            self.plots[channel_id].getAxis('top').setPen(self.pen) 
+            self.plots[channel_id].getAxis('left').setPen(self.pen)     
+            self.plots[channel_id].getAxis('bottom').setPen(self.pen) 
+            self.plots[channel_id].getAxis('right').setPen(self.pen) 
+
             self.plots[channel_id].setLabel('bottom', "Time steps")
             self.plots[channel_id].setLabel('left', "")
             self.plots[channel_id].getAxis('bottom').label.setFont(global_font)
@@ -118,7 +127,7 @@ class LSMLivePlot(QtWidgets.QMainWindow):
             zero_line = pg.InfiniteLine(
                 pos=0, angle=0, 
                 pen=pg.mkPen('r', width=2, style=Qt.DashLine))
-            self.curves.append(self.plots[channel_id].plot( (0,0),(0,0) ))
+            self.curves.append(self.plots[channel_id].plot( (0,0),(0,0), pen=self.pen))
             if self.show_zero_level:
                 self.plots[channel_id].addItem(zero_line)
 
