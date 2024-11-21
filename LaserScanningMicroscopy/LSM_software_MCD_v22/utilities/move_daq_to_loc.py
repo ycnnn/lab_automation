@@ -1,4 +1,5 @@
 import os
+import time
 import itertools
 import numbers
 parentdir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -50,7 +51,11 @@ def main():
         
         # Check for empty content
         if user_input.strip() == "":
-            print("Exiting the program.")
+            daq_output = read_daq_output(DAQ_name='Dev2')
+            print('DAQ output is: ')
+            print(daq_output)
+            time.sleep(5)
+            print("\nExiting the program.")
             break
         
         # Check for the letter 'R'
