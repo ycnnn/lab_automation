@@ -151,6 +151,7 @@ class SubWindow(QMainWindow):
         # Terminate the scan safely
         # The user can either click the Terminate button, or click the X button to safety terminate
         self.set_terminate_flag()
+        self.controller.close_all_windows()
         # Allow the base class to handle the close event
         super().closeEvent(event)
 
