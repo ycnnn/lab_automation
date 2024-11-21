@@ -19,38 +19,46 @@ def main():
     scan_parameters = Scan_paramters(steps=steps, scan_id=scan_id)
     
 
-    # daq = inst_driver.DAQ_simulated(
-    #                 scan_parameters=scan_parameters,
-    #                 input_mapping=['ai0','ai1'],
-    #                 )
-    # instruments.append(daq)
-
-    smu_G = inst_driver.SMU(scan_parameters=scan_parameters,
-                 address="USB0::0x05E6::0x2450::04096331::INSTR",
-                 mode='Force_V_Sense_V',
-                 **{'Source':[-40,40]})
-    instruments.append(smu_G)
-
-    # smu_D = inst_driver.SMU(scan_parameters=scan_parameters,
-    #              address="USB0::0x05E6::0x2450::04096333::INSTR",
-    #              mode='Force_V_Sense_I',
-    #              **{'Source':[-1,1]})
-    # instruments.append(smu_D)
+    # # daq = inst_driver.DAQ_simulated(
+    # #                 scan_parameters=scan_parameters,
+    # #                 input_mapping=['ai0','ai1'],
+    # #                 )
+    # # instruments.append(daq)
 
 
+    daq = inst_driver.DAQ_only_read(
+                    scan_parameters=scan_parameters,
+                    input_mapping=['ai0','ai1'],
+                    )
+    instruments.append(daq)
+
+    # smu_G = inst_driver.SMU(scan_parameters=scan_parameters,
+    #              address="USB0::0x05E6::0x2450::04096331::INSTR",
+    #              mode='Force_V_Sense_V',
+    #              **{'Source':[-40,40]})
+    # instruments.append(smu_G)
+
+    # # smu_D = inst_driver.SMU(scan_parameters=scan_parameters,
+    # #              address="USB0::0x05E6::0x2450::04096333::INSTR",
+    # #              mode='Force_V_Sense_I',
+    # #              **{'Source':[-1,1]})
+    # # instruments.append(smu_D)
 
 
 
-    lockin = inst_driver.Lockin(scan_parameters=scan_parameters,
-                                **{
-                                    'time_constant_level':11, 
-                                    'volt_input_range':3, 
-                                    'signal_sensitivity':7,
-                    })
-    instruments.append(lockin)
 
-    laser = inst_driver.LaserDiode(scan_parameters=scan_parameters)
-    instruments.append(laser)
+
+    # lockin = inst_driver.Lockin(scan_parameters=scan_parameters,
+    #                             initial_wait_cycles=1.5,
+    #                             **{
+    #                                 'time_constant_level':13, 
+    #                                 'volt_input_range':2, 
+    #                                 'signal_sensitivity':7,
+    #                 })
+    # instruments.append(lockin)
+
+    # laser = inst_driver.LaserDiode(scan_parameters=scan_parameters)
+    # instruments.append(laser)
 
 
     LSM_single_scan(

@@ -523,7 +523,6 @@ class DAQ(Instrument):
                          steps=scan_parameters.steps, 
                          channel_name_list=input_mapping,
                          **kwargs)
-        
         self.name = self.name if not name else name
         self.input_mapping = input_mapping
         self.scan_parameters = scan_parameters
@@ -596,6 +595,50 @@ class DAQ(Instrument):
             return
         
         self.data = DAQ_input_data
+
+class DAQ_only_read(Instrument):
+    def __init__(self, 
+                 address='Dev2', 
+                 scan_parameters=None, 
+                 name=None,
+                 input_mapping=['ai0'],
+                 **kwargs):
+        super().__init__(address, channel_num=len(input_mapping), 
+                         steps=scan_parameters.steps, 
+                         channel_name_list=input_mapping,
+                         **kwargs)
+        self.name = self.name if not name else name
+        self.input_mapping = input_mapping
+        self.scan_parameters = scan_parameters
+        self.params = {}
+
+
+
+    def write_data(self):
+        DAQ_name = self.address
+        input_mapping_full_path = [
+            DAQ_name + '/'+ channel_name for channel_name in self.input_mapping]
+        
+        with ni.Task() as ai_task:
+            for ai_channel in input_mapping_full_path:
+                ai_task.ai_channels.add_ai_voltage_chan(ai_channel)
+            ai_data = ai_task.read(number_of_samples_per_channel=1)
+        return np.array(ai_data).reshape(-1)
+
+    def initialize(self, **kwargs):
+        super().initialize(**kwargs)
+
+    def quit(self, **kwargs):
+        super().quit(**kwargs)
+
+    def data_acquisition_start(self, **kwargs):
+        super().data_acquisition_start(**kwargs)
+        DAQ_input_data = self.write_data()
+        if len(DAQ_input_data) == 0:
+            return
+        self.data = DAQ_input_data
+
+        time.sleep(0.5)
 
 class DAQ_simulated(Instrument):
     def __init__(self, 

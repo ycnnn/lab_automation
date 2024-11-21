@@ -15,7 +15,7 @@ def main():
     instruments = []
     steps = 80
     # position_parameters = Position_parameters(steps=steps)
-    scan_parameters = Scan_paramters(steps=steps, scan_id='test')
+    scan_parameters = Scan_paramters(steps=steps)
     
 
     daq = inst_driver.DAQ_simulated(
