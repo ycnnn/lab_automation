@@ -360,6 +360,8 @@ class Lockin(Instrument):
         self.instrument.write('ivmd volt')
         # self.logger.info(self.instrument.query('ivmd?'))
 
+        # Set the phase shift to -90 deg
+        self.instrument.write('phas -90')
         # Set the input mode as A
         self.instrument.write('isrc 0')
         # self.logger.info(self.instrument.query('isrc?'))
