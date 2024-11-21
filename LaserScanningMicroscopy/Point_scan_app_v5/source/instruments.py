@@ -468,7 +468,7 @@ class LaserDiode(Instrument):
                          **kwargs)
         
         self.name = self.name if not name else name
-        self.params = {'current':0.01}
+        self.params = {'current':0.026}
         self.always_on_during_scan = always_on_during_scan
         self.laser_off_after_finish = laser_off_after_finish
         
