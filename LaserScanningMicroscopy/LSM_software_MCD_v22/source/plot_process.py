@@ -32,6 +32,19 @@ def load_font(font_path):
 
     return font_families[0]
 
+class AppController:
+    def __init__(self):
+        self.windows = []
+
+    def add_window(self, window):
+        self.windows.append(window)
+
+    def close_all_windows(self):
+        # print('\n\n\n')
+        # print('I am clicked!')
+        # print('\n\n\n')
+        for window in self.windows:
+            window.close()
 
 class LSM_plot:
 
@@ -54,6 +67,7 @@ class LSM_plot:
         self.channel_num = self.data_thread.channel_num
 
         self.app = QApplication([])
+        self.controller = AppController()
         font_family = load_font('font/SourceCodePro-Medium.ttf')
         if font_family:
             global_font = QFont(font_family)
@@ -66,6 +80,7 @@ class LSM_plot:
         window_displacement = max(400, screen_width/self.channel_num)
         for channel_id in range(self.channel_num):
             window = SubWindow(channel_id=channel_id, 
+                               controller=self.controller,
                             title=self.channel_names[channel_id],
                             scan_num=scan_num, line_width=line_width,
                             position_parameters=position_parameters,

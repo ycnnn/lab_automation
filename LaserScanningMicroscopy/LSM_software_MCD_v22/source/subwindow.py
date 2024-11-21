@@ -57,8 +57,13 @@ def widget_format(widget):
       
 
 class SubWindow(QMainWindow):
-    def __init__(self, scan_num, line_width, channel_id=0, title=None, window_width=600, axis_label_distance=10, font_size=12, position_parameters=None, thread=None):
+    def __init__(self, 
+                 controller, 
+                 scan_num, line_width, channel_id=0, title=None, window_width=600, axis_label_distance=10, font_size=12, position_parameters=None, thread=None):
         super().__init__()
+
+        self.controller = controller
+        self.controller.add_window(self)
 
         self.channel_id = channel_id
         self.position_parameters = position_parameters
@@ -107,6 +112,7 @@ class SubWindow(QMainWindow):
         self.layout.addWidget(self.button)
 
         self.button.clicked.connect(self.set_terminate_flag)
+
         self.thread.finished.connect(self.finish)
 
         self.layout.addWidget(self.info_label)
@@ -150,6 +156,8 @@ class SubWindow(QMainWindow):
 
     def set_terminate_flag(self):
         self.thread.is_terminated = True
+        self.button.clicked.connect(self.controller.close_all_windows)
+        # self.close()
 
     def ui_format(self):
 
@@ -240,7 +248,7 @@ class SubWindow(QMainWindow):
 
     def finish(self):
         # When the thread finishes, change the button's text and color
-        self.button.setText("Scan finished")
+        self.button.setText("Scan finished. Click to close all wondows.")
         self.button.setStyleSheet("""
             QPushButton {
                 background-color: green;  /* Red background */
@@ -250,7 +258,7 @@ class SubWindow(QMainWindow):
                 padding: 5px;  /* Padding inside the button */
             }
             QPushButton:hover {
-                background-color: green;  /* Dark red when hovered */
+                background-color: darkgreen;  /* Dark red when hovered */
             }
         """)
     
