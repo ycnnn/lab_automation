@@ -211,9 +211,11 @@ class SubWindow(QMainWindow):
         x_pos = self.position_parameters.x_coordinates[y_label, x_label]
         y_pos = self.position_parameters.y_coordinates[y_label, x_label]
 
-        # Update the textbox with the coordinates
-        current_val = self.data[self.scan_num - 1 - y_label, x_label]
-        self.xy_label.setText(f"X, Y position = {x_pos:.1f} µm, {y_pos:.1f} µm, data = {current_val:.2e}")
+        # # Update the textbox with the coordinates
+        # current_val = self.data[self.scan_num - 1 - y_label, x_label]
+        # self.xy_label.setText(f"X, Y position = {x_pos:.1f} µm, {y_pos:.1f} µm, data = {current_val:.2e}")
+
+        self.controller.update_displayed_data(x_label, y_label, x_pos, y_pos)
         
 
     def updateROI(self):
