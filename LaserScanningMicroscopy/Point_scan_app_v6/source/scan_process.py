@@ -80,7 +80,7 @@ class LSM_single_scan(QThread):
 
         self.windows = []
         for channel_id in range(self.channel_num):
-            window = SubWindow(channel_id=channel_id, thread=self, scan_num=self.scan_parameters.steps)
+            window = SubWindow(channel_id=channel_id, name=self.channel_names[channel_id], thread=self, scan_num=self.scan_parameters.steps)
             window.setFixedWidth(self.window_width)
             window.move(channel_id * self.window_width,0)
             self.data_ready.connect(window.update_plot)
@@ -209,11 +209,11 @@ def widget_format(widget):
       
 
 class SubWindow(QMainWindow):
-    def __init__(self, scan_num, thread, channel_id=0, title=None, window_width=400, font_size=12,):
+    def __init__(self, scan_num, thread, name='Channel 0', channel_id=0, window_width=400, font_size=12,):
         super().__init__()
 
         self.channel_id = channel_id
-        self.name = title if title else f'Channel {channel_id}'
+        self.name = name
         self.thread = thread
 
         self.setWindowTitle(self.name)
