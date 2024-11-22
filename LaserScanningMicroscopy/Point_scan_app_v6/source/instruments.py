@@ -200,6 +200,34 @@ class SimulatedInstrument(Instrument):
                 shape=(self.channel_num)) * self.scan_index)
         # self.data = np.cos(self.params_sweep_lists['param2'][self.scan_index])
   
+
+class Timer(Instrument):
+    def __init__(self, scan_parameters,  name=None,**kwargs):
+        super().__init__(address='', channel_num=1, 
+                         steps=scan_parameters.steps, 
+                         channel_name_list=['Timer'],
+                         **kwargs)
+        # self.steps = scan_parameters.steps
+        self.name = self.name if not name else name
+    
+        
+    def initialize(self, **kwargs):
+        super().initialize(**kwargs)
+        self.initial_time = time.time()
+
+    def quit(self, **kwargs):
+        super().quit(**kwargs)
+
+    def write_param_to_instrument(self, param, param_val):
+        super().write_param_to_instrument(param, param_val)
+
+    def data_acquisition_start(self, **kwargs):
+        # time.sleep(self.wait)
+        ramp_data = super().data_acquisition_start(**kwargs)
+
+        self.data = np.array([time.time() - self.initial_time])
+  
+
 class SMU(Instrument):
     def __init__(self, scan_parameters, 
                  address="USB0::0x05E6::0x2450::04096331::INSTR",
