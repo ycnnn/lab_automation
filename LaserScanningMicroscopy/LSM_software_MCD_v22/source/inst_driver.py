@@ -439,6 +439,136 @@ class Lockin(Instrument):
         self.data = input_data      
   
 
+
+class Lockin_dual_freq(Instrument):
+    def __init__(self, 
+                 address="USB0::0xB506::0x2000::002765::INSTR", 
+                 position_parameters=None, 
+                 name=None, 
+                 **kwargs):
+        super().__init__(address, channel_num=2, 
+                         reading_num=position_parameters.x_pixels, 
+                         scan_num=position_parameters.y_pixels, 
+                         channel_name_list = ['X', 'Y'],
+                         **kwargs)
+        
+        self.name = self.name if not name else name
+
+        self.params = {'time_constant_level':8, 
+                        'volt_input_range':3, 
+                        'signal_sensitivity':12,
+                        'internal_frequency':10170,
+                        'internal_sine_amplitude':0.50,
+                                  }
+        
+    def initialize(self, **kwargs):
+        super().initialize(**kwargs)
+
+        rm = pyvisa.ResourceManager()
+        self.instrument = rm.open_resource(self.address)
+
+        # Reset
+        self.instrument.write('*rst')
+        # self.logger.info(self.instrument.query('*idn?'))
+
+        # build buffer
+        self.instrument.write('capturelen 256')
+
+        # record XY signals
+        self.instrument.write('capturecfg xy')
+
+        # Set the capture mode as external trigger
+        self.instrument.write('rtrg posttl')
+
+        # Set the input source as VOLTAGE
+        self.instrument.write('ivmd volt')
+        # self.logger.info(self.instrument.query('ivmd?'))
+
+        # Set the input mode as A
+        self.instrument.write('isrc 0')
+        # self.logger.info(self.instrument.query('isrc?'))
+
+        # Set the input coupling. Always use AC coupling unless signal frequency <= 0.16 Hz (unlikely)
+        self.instrument.write('icpl 0')
+        # self.logger.info(self.instrument.query('icpl?'))
+
+        # Set the voltage input shield as float
+        self.instrument.write('ignd 0')
+        # self.logger.info(self.instrument.query('ignd?'))
+
+        # Set the voltage input range
+        # Levels and range: 0->1V, 1->300mV, 2->100mV 3->30mV, 4->10mV
+        self.instrument.write(f"irng {self.params_sweep_lists['volt_input_range'][0,0]}")
+        # self.logger.info(self.instrument.query('irng?'))
+
+        # Set the internal reference frequency
+        self.instrument.write(f"freq {self.params_sweep_lists['internal_frequency'][0,0]}")
+        # Set the initernal reference outout amplitude
+        self.instrument.write(f"slvl {self.params_sweep_lists['internal_sine_amplitude'][0,0]}")
+
+        
+        # Set the signal sensitivity
+        # Levels and range: 0->1V, 1->500mV, 2->200mV 3->100mV, 4->50mV, 5->20mV, 6->10mV, 7->5mV, 8->2mV, 
+        # 9->1mV, 10->500uV, 11->200uV, 12->100uV, 13->50uV, 14->20uV
+        self.instrument.write(f"scal {self.params_sweep_lists['signal_sensitivity'][0,0]}")
+        # self.logger.info(self.instrument.query('scal?'))
+
+        # Set the time constant
+        # Levels and range: 0->1us, 1->3us, 2->10us 3->30us, 4->100us, 5->300us, 6->1ms, 7->3ms, 8->10ms, 
+        # 9->30ms, 10->100ms, 11->300ms, 12->1s, 13->3s, 14->10s, 15->30s, 16->100s, 17->300s, 18->1000s, 19->3000s, 20->10000s
+        self.instrument.write(f"oflt {self.params_sweep_lists['time_constant_level'][0,0]}")
+        # self.logger.info(self.instrument.query('oflt?'))
+
+        # Set the reference mode as external reference
+        self.instrument.write(f"rsrc 1")
+        # Set the external reference trigger mode as positive TTL
+        self.instrument.write(f"rtrg 1")
+        # Set the external reference trigger input to 1 MOhm
+        self.instrument.write(f"refz 1")
+
+
+    def quit(self, **kwargs):
+        super().quit(**kwargs)
+        # Turn off sine output
+        # Disconnect 
+        self.instrument.close()
+
+    def write_param_to_instrument(self, param, param_val):
+        super().write_param_to_instrument(param, param_val)
+
+        if self.params_state[param] == param_val:
+            self.logger.info('Writing ' + param + f' at level {param_val} skipped, because there is no change in the set value.' )
+            return None
+
+        if param == 'time_constant_level':
+            self.instrument.write(f"oflt {param_val}")
+        elif param == 'volt_input_range':
+            self.instrument.write(f"irng {param_val}")
+        elif param == 'signal_sensitivity':
+            self.instrument.write(f"scal {param_val}")
+
+        return None
+
+    def data_acquisition_start(self, **kwargs):
+        super().data_acquisition_start(**kwargs)
+
+        self.instrument.write('capturestart one, samp')
+
+
+  
+    
+    def data_acquisition_finish(self, **kwargs):
+        super().data_acquisition_finish(**kwargs)
+
+        self.instrument.write('capturestop')
+        buffer_len = int(self.instrument.query('captureprog?')[:-1])
+        input_data = np.array(
+            self.instrument.query_binary_values(f'captureget? 0, {buffer_len}')
+            ).reshape(-1,2)[:self.reading_num,:].T
+
+        self.data = input_data      
+  
+
 class LaserDiode(Instrument):
     def __init__(self, address='USB0::0x1313::0x804F::M00423181::INSTR', 
                  position_parameters=None, 
