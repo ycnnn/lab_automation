@@ -623,6 +623,8 @@ class Lockin_dual_freq(Instrument):
 
     def quit(self, **kwargs):
         super().quit(**kwargs)
+        # Turn off sine output
+        self.instrument.write(f"slvl {self.params_sweep_lists['internal_sine_amplitude'][0,0]}")
         # Disconnect 
         self.instrument.close()
 
