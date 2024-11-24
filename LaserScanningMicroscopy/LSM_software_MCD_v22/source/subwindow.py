@@ -59,12 +59,14 @@ def widget_format(widget):
 class SubWindow(QMainWindow):
     def __init__(self, 
                  controller, 
-                 scan_num, line_width, channel_id=0, title=None, window_width=600, axis_label_distance=10, font_size=12, position_parameters=None, thread=None):
+                 scan_num, line_width, channel_id=0, title=None, 
+                 show_zero=True,
+                 window_width=600, axis_label_distance=10, font_size=12, position_parameters=None, thread=None):
         super().__init__()
 
         self.controller = controller
         self.controller.add_window(self)
-
+        self.show_zero = show_zero
         self.channel_id = channel_id
         self.position_parameters = position_parameters
        
@@ -126,6 +128,9 @@ class SubWindow(QMainWindow):
         self.curve = self.chart_widget.plot(pen=pg.mkPen('white', width=3))
         self.img = pg.ImageItem(self.data.T)
         self.img_widget.addItem(self.img)
+        if self.show_zero:
+            self.zero_ref_line = pg.InfiniteLine(pos=0, angle=0, pen=pg.mkPen((255, 0, 0)))
+            self.chart_widget.addItem(self.zero_ref_line)
 
 
         self.roi = pg.ROI([0, 0], [self.line_width,self.scan_num], pen='r', maxBounds=QRectF(0,0,self.line_width,self.scan_num))  # Initial position and size
@@ -239,6 +244,16 @@ class SubWindow(QMainWindow):
         self.img.setImage(self.data.T)
         self.rescale_color()
         self.info_label.setText(f'Currently scanning line {int(self.count)}, ' + f'{self.remaining_time} s remaining')
+
+        chart_data_max = np.max(self.data[self.count])
+        chart_data_min = np.min(self.data[self.count])
+
+        if self.show_zero and chart_data_max < 0:
+            self.invisible_ref_line = pg.InfiniteLine(pos=-chart_data_max * 0.1, angle=0, pen=pg.mkPen((0,0,0,0)))
+            self.chart_widget.addItem(self.invisible_ref_line)
+        if self.show_zero and chart_data_min > 0:
+            self.invisible_ref_line = pg.InfiniteLine(pos=-chart_data_min * 0.1, angle=0, pen=pg.mkPen((0,0,0,0)))
+            self.chart_widget.addItem(self.invisible_ref_line)
 
         if self.count == self.scan_num - 1:
             self.pixmap = self.grab()

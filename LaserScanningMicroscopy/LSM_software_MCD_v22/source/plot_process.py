@@ -61,6 +61,7 @@ class LSM_plot:
                  position_parameters, 
                  scan_parameters, 
                  instruments, 
+                 show_zero=True,
                  simulate=False):
 
         self.data_thread = LSM_scan(position_parameters=position_parameters,
@@ -93,6 +94,7 @@ class LSM_plot:
                             scan_num=scan_num, line_width=line_width,
                             position_parameters=position_parameters,
                             thread=self.data_thread,
+                            show_zero=show_zero,
                             window_width=self.display_parameters.window_width)
             window.move(window_displacement * channel_id,0)
             self.data_thread.data_ready.connect(window.update_plot)

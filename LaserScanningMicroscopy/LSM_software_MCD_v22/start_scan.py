@@ -54,7 +54,8 @@ if __name__ == "__main__":
              scan_parameters=scan_parameters,
              display_parameters=display_parameters,
              instruments=instruments,
-             simulate=True)
+             simulate=True,
+             show_zero=False)
     
     # scan.run()
     

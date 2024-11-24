@@ -20,12 +20,14 @@ class LSM_single_scan(QThread):
     data_ready = Signal(list)
     finished = Signal()
     def __init__(self,
+                 caller_file_path='',
                  instruments=[],
                  scan_parameters=None,
                  simulate=False,
                  window_wdith=400,
                  ):
         super().__init__()
+        self.caller_file_path = caller_file_path
         self.scan_parameters = scan_parameters
         self.instruments = instruments
         self.simulate = simulate
@@ -152,10 +154,9 @@ class LSM_single_scan(QThread):
     def save(self):
 
         # source_python_file = str(Path(__file__).resolve().parent) + '/start_scan.py'
-        # shutil.copy(source_python_file, 
-        # self.scan_parameters.save_destination + 'scan_settings.py')
-        # screenshot = self.app.grab()
-        # screenshot.save(self.scan_parameters.save_destination + 'screenshot.png')
+        shutil.copy(self.caller_file_path, 
+        self.scan_parameters.save_destination + 'scan_file.py')
+       
         np.save(self.scan_parameters.save_destination + 'data', self.data)
         np.savetxt(self.scan_parameters.save_destination + 'data.csv', self.data.T,
                    header=",".join(self.channel_names),

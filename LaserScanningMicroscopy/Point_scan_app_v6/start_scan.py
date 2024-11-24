@@ -36,6 +36,7 @@ if __name__ == "__main__":
 
 
     LSM_single_scan(
+            caller_file_path=os.path.abspath(__file__),
              scan_parameters=scan_parameters,
              instruments=instruments,
              simulate=True)
