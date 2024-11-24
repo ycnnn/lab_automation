@@ -426,8 +426,8 @@ class Lockin(Instrument):
         self.instrument.write(f"oflt {self.params_sweep_lists['time_constant_level'][0]}")
         # self.logger.info(self.instrument.query('oflt?'))
 
-        # Set the reference mode as dual frequency reference
-        self.instrument.write(f"rsrc 2")
+        # Set the reference mode as external reference
+        self.instrument.write(f"rsrc 1")
         # Set the external reference trigger mode as positive TTL
         self.instrument.write(f"rtrg 1")
         # Set the external reference trigger input to 1 MOhm
@@ -603,8 +603,8 @@ class Lockin_dual_freq(Instrument):
         self.instrument.write(f"oflt {self.params_sweep_lists['time_constant_level'][0]}")
         # self.logger.info(self.instrument.query('oflt?'))
 
-        # Set the reference mode as external reference
-        self.instrument.write(f"rsrc 1")
+        # Set the reference mode as dual reference
+        self.instrument.write(f"rsrc 2")
         # Set the external reference trigger mode as positive TTL
         self.instrument.write(f"rtrg 1")
         # Set the external reference trigger input to 1 MOhm
@@ -641,6 +641,10 @@ class Lockin_dual_freq(Instrument):
             self.instrument.write(f"irng {int(param_val)}")
         elif param == 'signal_sensitivity':
             self.instrument.write(f"scal {int(param_val)}")
+        elif param == 'internal_frequency':
+            self.instrument.write(f"freq {param_val}")
+        elif param == 'internal_sine_amplitude':
+            self.instrument.write(f"slvl {param_val}")
         
         return None
 
