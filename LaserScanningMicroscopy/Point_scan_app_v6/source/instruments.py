@@ -441,7 +441,7 @@ class Lockin(Instrument):
 
 
         # Set the amplitude of the sine output signal 
-        # self.instrument.write(f"slvl {self.params_sweep_lists['sine_amplitude'][0,0]}")
+        # self.instrument.write(f"slvl {self.params_sweep_lists['sine_amplitude'][0]}")
         # self.logger.info(self.instrument.query('slvl?'))
 
     def quit(self, **kwargs):
@@ -581,9 +581,9 @@ class Lockin_dual_freq(Instrument):
         # self.logger.info(self.instrument.query('ignd?'))
 
         # Set the internal reference frequency
-        self.instrument.write(f"freq {self.params_sweep_lists['internal_frequency'][0,0]}")
+        self.instrument.write(f"freq {self.params_sweep_lists['internal_frequency'][0]}")
         # Set the initernal reference outout amplitude
-        self.instrument.write(f"slvl {self.params_sweep_lists['internal_sine_amplitude'][0,0]}")
+        self.instrument.write(f"slvl {self.params_sweep_lists['internal_sine_amplitude'][0]}")
 
 
         # Set the voltage input range
@@ -618,13 +618,13 @@ class Lockin_dual_freq(Instrument):
 
 
         # Set the amplitude of the sine output signal 
-        # self.instrument.write(f"slvl {self.params_sweep_lists['sine_amplitude'][0,0]}")
+        # self.instrument.write(f"slvl {self.params_sweep_lists['sine_amplitude'][0]}")
         # self.logger.info(self.instrument.query('slvl?'))
 
     def quit(self, **kwargs):
         super().quit(**kwargs)
         # Turn off sine output
-        self.instrument.write(f"slvl {self.params_sweep_lists['internal_sine_amplitude'][0,0]}")
+        self.instrument.write(f"slvl {self.params_sweep_lists['internal_sine_amplitude'][0]}")
         # Disconnect 
         self.instrument.close()
 
