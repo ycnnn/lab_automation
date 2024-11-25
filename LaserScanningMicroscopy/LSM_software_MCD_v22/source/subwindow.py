@@ -1,8 +1,9 @@
 import sys
 import os
 import time
+from datetime import datetime
 from PySide6.QtWidgets import QApplication, QMainWindow, QLabel, QVBoxLayout, QWidget, QLabel,QPushButton
-from PySide6.QtGui import QGuiApplication, QFontDatabase, QFont, QColor, QPixmap, QPen
+from PySide6.QtGui import QGuiApplication, QFontDatabase, QFont, QColor, QPixmap, QPen,QMouseEvent
 from PySide6.QtCore import Qt, QByteArray, QBuffer, QLoggingCategory, QThread, Signal,QRectF
 import pyqtgraph as pg
 import numpy as np
@@ -63,6 +64,12 @@ class SubWindow(QMainWindow):
                  show_zero=True,
                  window_width=600, axis_label_distance=10, font_size=12, position_parameters=None, thread=None):
         super().__init__()
+
+        self.setWindowFlags(Qt.FramelessWindowHint | Qt.Window)
+        self._is_mouse_pressed = False
+        self._mouse_start_pos = None
+        self._window_start_pos = None
+
 
         self.controller = controller
         self.controller.add_window(self)
@@ -151,14 +158,39 @@ class SubWindow(QMainWindow):
         self.axis_label_distance = axis_label_distance
         self.font_size = font_size
         self.ui_format()
+
+
+    def mousePressEvent(self, event: QMouseEvent):
+        if event.button() == Qt.LeftButton:
+            self._is_mouse_pressed = True
+            self._mouse_start_pos = event.globalPos()
+            self._window_start_pos = self.pos()
+
+    def mouseMoveEvent(self, event: QMouseEvent):
+        if self._is_mouse_pressed:
+            mouse_delta = event.globalPos() - self._mouse_start_pos
+            self.move(self._window_start_pos + mouse_delta)
+
+    def mouseReleaseEvent(self, event: QMouseEvent):
+        if event.button() == Qt.LeftButton:
+            self._is_mouse_pressed = False
     
     def closeEvent(self, event):
         # Terminate the scan safely
         # The user can either click the Terminate button, or click the X button to safety terminate
         self.set_terminate_flag()
-        self.controller.close_all_windows()
+        if self.thread.is_finished:
+
+            # print('\n\n\n')
+            # print(str(datetime.now()) + ' Will close the window')
+            # print('\n\n\n')
+            
+            self.controller.close_all_windows()
+            super().closeEvent(event)
         # Allow the base class to handle the close event
-        super().closeEvent(event)
+        else:
+            event.ignore()
+        
 
     def set_terminate_flag(self):
         self.thread.is_terminated = True
@@ -243,7 +275,7 @@ class SubWindow(QMainWindow):
         self.curve.setData(self.data[self.count])
         self.img.setImage(self.data.T)
         self.rescale_color()
-        self.info_label.setText(f'Currently scanning line {int(self.count)}, ' + f'{self.remaining_time} s remaining')
+        self.info_label.setText(self.title + '\n' + f'Currently scanning line {int(self.count)}, ' + f'{self.remaining_time} s remaining')
 
         chart_data_max = np.max(self.data[self.count])
         chart_data_min = np.min(self.data[self.count])

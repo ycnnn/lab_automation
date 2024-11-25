@@ -32,12 +32,12 @@ if __name__ == "__main__":
     position_parameters = Position_parameters(
                                             x_size=50,
                                             y_size=50,
-                                            x_pixels=150,
-                                            y_pixels=150,
+                                            x_pixels=100,
+                                            y_pixels=100,
                                             z_center=0,
                                             angle=45)
   
-    scan_parameters = Scan_parameters(point_time_constant=0.001,
+    scan_parameters = Scan_parameters(point_time_constant=0.05,
                                     #   retrace_point_time_constant=0.02,
                                       return_to_zero=False)
 

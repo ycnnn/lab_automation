@@ -32,6 +32,7 @@ class LSM_scan(QThread):
         self.simulate = simulate
 
         self.is_terminated = False
+        self.is_finished = False
 
 
         # Mandatory code. There MUST be at least one external instrument present dring the scan.
@@ -60,6 +61,7 @@ class LSM_scan(QThread):
         
         if not daq_exists:
             raise RuntimeError('DAQ not added to instrument list.')
+            
 
         for instr_index, instr in enumerate(self.instruments):
             if isinstance(instr, DAQ_type):
@@ -125,7 +127,13 @@ class LSM_scan(QThread):
                     if self.is_terminated:
                         terminated_message = 'The user has terminated the scan. All isntruments will be exited safely.'
                         self.logger.info(terminated_message)
+                        # print('\n\n\n')
+                        # print('Scan aborted!')
+                        # print('\n\n\n')
+                        self.is_finished = True
+                        self.logger.info('The scan is aborted. Thread finished flag is set.')
                         raise RuntimeError(terminated_message)
+                        
                     
                     with ExitStack() as scan_stack:
                         _ = [scan_stack.enter_context(
@@ -146,8 +154,14 @@ class LSM_scan(QThread):
                         self.data[1, :, scan_index, :] = instr_data
                     
         self.finished.emit()
+        self.is_finished = True
 
-        self.logger.info('Scan finished.')
+        # print('\n\n\n')
+        # print('Scan finished!')
+        # print('\n\n\n')
+        
+
+        self.logger.info('Scan finished. Thread finished flag is set.')
         self.save_data()
         self.save_parameters()
         

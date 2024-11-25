@@ -48,9 +48,7 @@ class AppController:
             window.xy_label.setText(f"X, Y position = {x_pos:.1f} µm, {y_pos:.1f} µm, data = {current_val:.2e}")
 
     def close_all_windows(self):
-        # print('\n\n\n')
-        # print('I am clicked!')
-        # print('\n\n\n')
+        
         for window in self.windows:
             window.close()
 
