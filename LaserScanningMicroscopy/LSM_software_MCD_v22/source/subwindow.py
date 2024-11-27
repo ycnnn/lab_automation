@@ -129,6 +129,8 @@ class SubWindow(QMainWindow):
         self.layout.addWidget(self.chart_widget)
         self.layout.addWidget(self.img_widget)
 
+        
+
         # self.img_widget.mousePressEvent = self.on_click
         self.proxy = pg.SignalProxy(self.img_widget.scene().sigMouseMoved, rateLimit=60, slot=self.mouse_moved)
 
@@ -139,6 +141,14 @@ class SubWindow(QMainWindow):
             self.zero_ref_line = pg.InfiniteLine(pos=0, angle=0, pen=pg.mkPen((255, 0, 0)))
             self.chart_widget.addItem(self.zero_ref_line)
 
+        self.visible_crosshair_pen = pg.mkPen(color=(255,0,0,127), width=1) 
+        self.invisible_crosshair_pen = pg.mkPen(color=(0, 0, 0, 0), width=1) 
+        self.v_line = pg.InfiniteLine(pos=(self.line_width/2,self.scan_num/2),
+                                      angle=90, pen=self.visible_crosshair_pen)
+        self.h_line = pg.InfiniteLine(pos=(self.line_width/2,self.scan_num/2),
+                                      angle=0, pen=self.visible_crosshair_pen)
+        self.img_widget.addItem(self.v_line, ignoreBounds=True)
+        self.img_widget.addItem(self.h_line, ignoreBounds=True)
 
         self.roi = pg.ROI([0, 0], [self.line_width,self.scan_num], pen='r', maxBounds=QRectF(0,0,self.line_width,self.scan_num))  # Initial position and size
         self.roi.addScaleHandle([1, 1], [0, 0])  # Add scaling handles
@@ -221,6 +231,8 @@ class SubWindow(QMainWindow):
         self.chart_widget.setFixedSize(self.window_width, max(100, self.window_width/3))
         self.img_widget.setFixedSize(self.window_width, (self.window_width-x_axis_offset) * self.scan_num/self.line_width)
 
+        
+
 
     
     def mouse_moved(self, event):
@@ -242,12 +254,23 @@ class SubWindow(QMainWindow):
         x_label = int(x - self.x_offset)
         y_label = int(self.scan_num - (y - self.y_offset))
 
+        # self.mouse_move_is_inside_plot_region = True
+
+        if x_label < 0 or x_label > self.line_width - 1 or y_label < 0 or y_label > self.scan_num - 1:
+            # self.mouse_move_is_inside_plot_region = False
+            
+            self.controller.hide_all_crosshair()
+            return
+
+
         x_label = max(0, min(x_label, self.line_width - 1))
         y_label = max(0, min(y_label, self.scan_num - 1))
 
         x_pos = self.position_parameters.x_coordinates[y_label, x_label]
         y_pos = self.position_parameters.y_coordinates[y_label, x_label]
 
+        
+     
         # # Update the textbox with the coordinates
         # current_val = self.data[self.scan_num - 1 - y_label, x_label]
         # self.xy_label.setText(f"X, Y position = {x_pos:.1f} µm, {y_pos:.1f} µm, data = {current_val:.2e}")

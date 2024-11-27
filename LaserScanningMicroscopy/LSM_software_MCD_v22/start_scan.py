@@ -37,7 +37,7 @@ if __name__ == "__main__":
                                             z_center=0,
                                             angle=45)
   
-    scan_parameters = Scan_parameters(point_time_constant=0.05,
+    scan_parameters = Scan_parameters(point_time_constant=0.005,
                                     #   retrace_point_time_constant=0.02,
                                       return_to_zero=False)
 
@@ -55,7 +55,7 @@ if __name__ == "__main__":
              display_parameters=display_parameters,
              instruments=instruments,
              simulate=True,
-             show_zero=False)
+             show_zero=True)
     
     # scan.run()
     

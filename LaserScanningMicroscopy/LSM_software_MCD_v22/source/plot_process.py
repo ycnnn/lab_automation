@@ -40,12 +40,26 @@ class AppController:
         self.windows.append(window)
 
     def update_displayed_data(self, x_label, y_label, x_pos, y_pos):
-        # print('\n\n\n')
-        # print('I am clicked!')
-        # print('\n\n\n')
+     
+        inside_plot_region = True
+        
+     
         for window in self.windows:
             current_val = window.data[window.scan_num - 1 - y_label, x_label]
             window.xy_label.setText(f"X, Y position = {x_pos:.1f} µm, {y_pos:.1f} µm, data = {current_val:.2e}")
+
+            window.v_line.setPen(window.visible_crosshair_pen)
+            window.h_line.setPen(window.visible_crosshair_pen)
+            window.v_line.setPos((x_label,window.scan_num - 1 - y_label))
+            window.h_line.setPos((x_label,window.scan_num - 1 - y_label))
+
+
+    def hide_all_crosshair(self):
+
+        for window in self.windows:
+            window.h_line.setPen(window.invisible_crosshair_pen)
+            window.v_line.setPen(window.invisible_crosshair_pen)
+
 
     def close_all_windows(self):
         
