@@ -66,6 +66,8 @@ class SubWindow(QMainWindow):
         super().__init__()
 
         self.setWindowFlags(Qt.FramelessWindowHint | Qt.Window)
+
+
         self._is_mouse_pressed = False
         self._mouse_start_pos = None
         self._window_start_pos = None
@@ -209,6 +211,11 @@ class SubWindow(QMainWindow):
 
     def ui_format(self):
 
+        screen_size = QApplication.primaryScreen().availableGeometry()
+
+        # Calculate 90% of the screen height
+        self.img_max_height = int(screen_size.height() * 0.65)
+
         widget_format(self.chart_widget)
         widget_format(self.img_widget)
 
@@ -229,7 +236,9 @@ class SubWindow(QMainWindow):
         self.img_widget.setAspectLocked(False)
         x_axis_offset = self.img_widget.getPlotItem().getAxis('top').geometry().getCoords()[0]
         self.chart_widget.setFixedSize(self.window_width, max(100, self.window_width/3))
-        self.img_widget.setFixedSize(self.window_width, (self.window_width-x_axis_offset) * self.scan_num/self.line_width)
+        self.img_height = min(self.img_max_height, (self.window_width-x_axis_offset) * self.scan_num/self.line_width)
+        self.img_widget.setFixedSize(self.window_width, self.img_height)
+        
 
         
 
