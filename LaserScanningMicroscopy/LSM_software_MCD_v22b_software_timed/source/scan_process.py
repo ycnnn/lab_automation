@@ -185,8 +185,14 @@ class LSM_scan(QThread):
         for instr in self.instruments:
             instr_params[instr.name] = instr.params_config_save
 
+        class NumpyEncoder(json.JSONEncoder):
+            def default(self, obj):
+                if isinstance(obj, np.ndarray):
+                    return obj.tolist()
+                return super().default(obj)
+
         with open(instr_params_save_filepath, 'w') as file:
-            json.dump(instr_params, file, indent=8)
+            json.dump(instr_params, file, indent=8,cls=NumpyEncoder)
     
     def save_data(self):
 

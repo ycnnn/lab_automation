@@ -82,7 +82,7 @@ class Instrument:
                 self.logger.info(self.name + ': ' + param + ' set to ' + str(
                     self.customized_params[param]) + '\n')
                 if isinstance(self.customized_params[param], np.ndarray):
-                    self.params_config_save[param]= self.customized_params[param].tolist()   
+                    self.params_config_save[param]= self.customized_params[param]  
                 else: 
                     self.params_config_save[param]= self.customized_params[param]    
                 param_sweep_list = self.sweep_parameter_generator(
@@ -231,7 +231,7 @@ class SimulatedInstrument(Instrument):
         
         self.name = self.name if not name else name
 
-        self.params = {'param1':20, 'param2':10, 'param3':0}
+        self.params = {'param1':20, 'param2':np.arange((2*self.scan_num*self.reading_num)).reshape(2, self.scan_num, self.reading_num), 'param3':0}
         
     def initialize(self, **kwargs):
         super().initialize(**kwargs)
@@ -248,6 +248,8 @@ class SimulatedInstrument(Instrument):
         self.data = np.random.normal(
                 loc=self.params_sweep_lists['param2'][self.trace_id,self.scan_index, self.point_index],
                 size=(self.channel_num))
+        self.data = self.params_sweep_lists['param2'][self.trace_id,self.scan_index, self.point_index] * np.ones(self.channel_num) 
+        self.data = np.abs(self.data  - np.mean(self.params_sweep_lists['param2'][self.trace_id,self.scan_index]) ) + self.scan_index
 
 
 class DAQ_simulated(Instrument):
