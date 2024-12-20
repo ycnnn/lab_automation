@@ -290,6 +290,8 @@ class SMU(Instrument):
         self.write_param_to_instrument('voltage', 0)
         self.smu.write('smu.source.output = smu.OFF')
 
+        self.smu.close()
+
     def write_param_to_instrument(self, param, param_val):
         super().write_param_to_instrument(param, param_val)
     # By default, ramp Keithley 2450 SMU from current voltage level to the target voltage level (end_volt).
