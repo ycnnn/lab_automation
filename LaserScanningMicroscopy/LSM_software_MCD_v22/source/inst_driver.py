@@ -577,7 +577,7 @@ class Lockin_dual_freq(Instrument):
   
 
 class LaserDiode(Instrument):
-    def __init__(self, address='USB0::0x1313::0x804F::M00423181::INSTR', 
+    def __init__(self, address='USB0::0x1313::0x804F::M00332686::INSTR', 
                  position_parameters=None, 
                  name=None, 
                  **kwargs):
@@ -618,6 +618,7 @@ class LaserDiode(Instrument):
         super().write_param_to_instrument(param, param_val)
         if param_val == self.params_state[param]:
             self.logger.info('Writing ' + param + ' for ' + self.name + ' skipped, because there is no change in the set value.')
+            return None
         self.instrument.write(f"source1:current:level:amplitude {param_val}")
 
     def data_acquisition_start(self, **kwargs):
@@ -629,6 +630,75 @@ class LaserDiode(Instrument):
         super().data_acquisition_finish(**kwargs)
         if self.total_scan_index >= 2 * self.scan_num - 1:
             self.instrument.write('output:state 0')
+
+class Oscilloscope(Instrument):
+    def __init__(self, address='USB0::0x0957::0x179A::MY51350123::INSTR', 
+                 position_parameters=None, 
+                 name=None, 
+                 **kwargs):
+        
+        super().__init__(address, channel_num=0, 
+                         reading_num=position_parameters.x_pixels, 
+                         scan_num=position_parameters.y_pixels, 
+                         **kwargs)
+        
+        self.name = self.name if not name else name
+
+        self.params = {'chopper_frequency':810.0,
+                       'duty_cycle_percent': 50,
+                       'mod_volt_high_in_volt':0.17,
+                       'mod_volt_low_in_volt':0.0}
+        
+        
+    def initialize(self, **kwargs):
+        super().initialize(**kwargs)
+        rm = pyvisa.ResourceManager()
+        self.instrument = rm.open_resource(self.address)
+
+        self.logger.info('Currently, the oscilloscope does not support variable input parameters.')
+   
+        if np.min(
+            self.params_sweep_lists['mod_volt_high_in_volt']
+            ) < 0 or np.max(
+            self.params_sweep_lists['mod_volt_high_in_volt']
+            ) >= 0.30:
+            self.logger.info('Error: the modulated laser current setpoint is outside the allowed range.\nCheck the mod voltage high level. Laser current = 150 mA/V * modulation voltage.')
+            raise RuntimeError('Error: the modulated laser current setpoint is outside the allowed range.\nCheck the mod voltage high level. Laser current = 150 mA/V * modulation voltage.')
+
+        # Set the wave generator output as square wave
+        self.instrument.write(':wgen:func squ')
+        # Set the rear BNC output as synchronized TTL signal
+        self.instrument.write(':cal:outp wave')
+   
+    def quit(self, **kwargs):
+        super().quit(**kwargs)
+        self.instrument.write(':wgen:outp 0')
+        self.instrument.close()
+
+    def write_param_to_instrument(self, param, param_val):
+        super().write_param_to_instrument(param, param_val)
+        if param_val == self.params_state[param]:
+            self.logger.info('Writing ' + param + ' for ' + self.name + ' skipped, because there is no change in the set value.')
+            return None
+        if param == 'chopper_frequency':
+            self.instrument.write(f':wgen:freq {param_val}')
+        if param == 'duty_cycle_percent':
+            self.instrument.write(f':wgen:func:squ:dcyc {param_val}')
+        if param == 'mod_volt_high_in_volt':
+            self.instrument.write(f':wgen:volt:high {param_val}')
+        if param == 'mod_volt_low_in_volt':
+            self.instrument.write(f':wgen:volt:low {param_val}')
+   
+
+    def data_acquisition_start(self, **kwargs):
+        super().data_acquisition_start(**kwargs)
+        if self.total_scan_index == 0:
+            self.instrument.write(':wgen:outp 1')
+
+    def data_acquisition_finish(self, **kwargs):
+        super().data_acquisition_finish(**kwargs)
+        if self.total_scan_index >= 2 * self.scan_num - 1:
+            self.instrument.write(':wgen:outp 0')
 
 class RotationStage(Instrument):
     _driver_module = None
@@ -661,7 +731,7 @@ class RotationStage(Instrument):
         super().write_param_to_instrument(param, param_val)
         if param_val == self.params_state[param]:
             self.logger.info('Writing ' + param + f' at level {param_val} skipped, because there is no change in the set value.' )
-            return
+            return None
         self.instrument.move(param_val)
         self.logger.info('Moved ' + self.name + f' to {param_val}.')
 

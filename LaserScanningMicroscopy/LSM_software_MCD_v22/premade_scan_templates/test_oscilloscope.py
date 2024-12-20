@@ -36,14 +36,14 @@ if __name__ == '__main__':
     display_parameters = Display_parameters(scan_id=scan_id)
 
     position_parameters = Position_parameters(
-                                            x_size=35,
-                                            y_size=35,
+                                            x_size=0,
+                                            y_size=0,
                                             x_pixels=70,
                                             y_pixels=70,
 
-                                            x_center=51.3,
-                                            y_center=48.2,
-                                            z_center=4,
+                                            x_center=0,
+                                            y_center=0,
+                                            z_center=0,
                                             angle=0)
   
     
@@ -53,12 +53,22 @@ if __name__ == '__main__':
     instruments = []
 
 
-    daq = inst_driver.DAQ(
+    daq = inst_driver.DAQ_simulated(
                     position_parameters=position_parameters,
                     scan_parameters=scan_parameters,
                     input_mapping=['ai0'],
                     )
     instruments.append(daq)
+
+    oscilloscope = inst_driver.Oscilloscope(
+                    position_parameters=position_parameters,
+                    scan_parameters=scan_parameters,
+                    **{'chopper_frequency':799.0,
+                       'duty_cycle_percent': 40,
+                       'mod_volt_high_in_volt':0.12,
+                       'mod_volt_low_in_volt':0.05}
+    )
+    instruments.append(oscilloscope)
 
     # laser = inst_driver.LaserDiode(
     #                 position_parameters=position_parameters,
@@ -74,6 +84,6 @@ if __name__ == '__main__':
              scan_parameters=scan_parameters,
              display_parameters=display_parameters,
              instruments=instruments,
-             simulate=False)
+             simulate=True)
     
     
