@@ -589,7 +589,7 @@ class LaserDiode(Instrument):
         
         self.name = self.name if not name else name
 
-        self.params = {'current':0.01}
+        self.params = {'current':0.00}
         
         
     def initialize(self, **kwargs):
@@ -601,17 +601,18 @@ class LaserDiode(Instrument):
             self.params_sweep_lists['current']
             ) < 0 or np.max(
             self.params_sweep_lists['current']
-            ) >= 0.101:
+            ) >= 0.035:
             self.logger.info('Warning: the laser current setpoint is outside the allowed range.\nFor your safety, the laser power has been set to 10 mA.')
-            self.current_levels = 0.01 * np.ones(self.params_sweep_lists['current'].shape)
+            self.current_levels = np.zeros(self.params_sweep_lists['current'].shape)
 
-        self.instrument.write(f"source1:current:level:amplitude {self.params_sweep_lists['current'][0,0]}")
-        # self.instrument.write('output:state 1')
+        # self.instrument.write(f"source1:current:level:amplitude {self.params_sweep_lists['current'][0,0]}")
+        self.instrument.write(f"source1:current:level:amplitude 0")
+        self.instrument.write('output:state 1')
 
     def quit(self, **kwargs):
         super().quit(**kwargs)
-        self.instrument.write('output:state 0')
-        # self.instrument.write(f"source1:current:level:amplitude 0.01")
+        # self.instrument.write('output:state 0')
+        self.instrument.write(f"source1:current:level:amplitude 0")
         self.instrument.close()
 
     def write_param_to_instrument(self, param, param_val):
@@ -623,13 +624,13 @@ class LaserDiode(Instrument):
 
     def data_acquisition_start(self, **kwargs):
         super().data_acquisition_start(**kwargs)
-        if self.total_scan_index == 0:
-            self.instrument.write('output:state 1')
+        # if self.total_scan_index == 0:
+        #     self.instrument.write('output:state 1')
 
     def data_acquisition_finish(self, **kwargs):
         super().data_acquisition_finish(**kwargs)
-        if self.total_scan_index >= 2 * self.scan_num - 1:
-            self.instrument.write('output:state 0')
+        # if self.total_scan_index >= 2 * self.scan_num - 1:
+        #     self.instrument.write('output:state 0')
 
 class Oscilloscope(Instrument):
     def __init__(self, address='USB0::0x0957::0x179A::MY51350123::INSTR', 
