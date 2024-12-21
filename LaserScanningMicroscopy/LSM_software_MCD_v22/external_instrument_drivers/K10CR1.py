@@ -89,7 +89,7 @@ class K10CR1_stage:
     def read(self):
         return Decimal.ToDouble(self.device.Position)
 
-    def quit(self):
+    def close(self):
         self.home_device()
         # Stop polling loop and disconnect device before program finishes. 
         self.device.StopPolling()

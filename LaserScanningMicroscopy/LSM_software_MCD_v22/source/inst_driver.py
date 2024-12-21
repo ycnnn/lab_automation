@@ -164,6 +164,10 @@ class Instrument:
    
 
     def quit(self, **kwargs):
+        try:
+            self.instrument.close()
+        except:
+            pass
         self.logger.info('Quitted ' + self.name)
         # os.remove(self.log_file_path)
 
@@ -250,8 +254,8 @@ class SimulatedInstrument(Instrument):
         self.data = np.random.normal(
                 loc=self.params_sweep_lists['param2'][self.trace_id,self.scan_index],
                 size=(self.channel_num, self.reading_num))
-  
-class SMU(Instrument):
+
+class SMU_deprecated(Instrument):
     def __init__(self, position_parameters, 
                  address="USB0::0x05E6::0x2450::04096331::INSTR",
                  name=None,
@@ -286,11 +290,10 @@ class SMU(Instrument):
 
 
     def quit(self, **kwargs):
-        super().quit(**kwargs)
+        
         self.write_param_to_instrument('voltage', 0)
         self.smu.write('smu.source.output = smu.OFF')
-
-        self.smu.close()
+        super().quit(**kwargs)
 
     def write_param_to_instrument(self, param, param_val):
         super().write_param_to_instrument(param, param_val)
@@ -318,6 +321,73 @@ class SMU(Instrument):
         measured_voltage = ramp_data['voltage']
         self.data = np.ones(shape=(self.channel_num, self.reading_num)) * measured_voltage
         
+
+class SMU(Instrument):
+    def __init__(self, position_parameters, 
+                 address="USB0::0x05E6::0x2450::04096331::INSTR",
+                 name=None,
+                 ramp_steps=10,
+                 **kwargs):
+        
+        super().__init__(address, channel_num=1, 
+                         reading_num=position_parameters.x_pixels, 
+                         scan_num=position_parameters.y_pixels, 
+                         channel_name_list=['Voltage'],
+                         **kwargs)
+        
+        self.name = self.name if not name else name
+        self.ramp_steps = ramp_steps
+        self.params = {'voltage':0}
+
+        
+    def initialize(self, **kwargs):
+        super().initialize(**kwargs)
+        rm = pyvisa.ResourceManager()
+        self.logger.info('\n\nInitializing...\n\n')
+        self.instrument = rm.open_resource(self.address)
+        self.instrument.timeout = 500
+        self.instrument.write('reset()')
+        self.instrument.write("smu.source.autorange = smu.ON")
+        self.instrument.write("smu.measure.func = smu.FUNC_DC_VOLTAGE")
+        self.instrument.write("smu.measure.autorange = smu.ON")
+        self.instrument.write("smu.measure.terminals = smu.TERMINALS_FRONT")
+        self.instrument.write("smu.measure.func = smu.FUNC_DC_VOLTAGE")
+        self.instrument.write("smu.source.level = 0")
+        self.instrument.write('smu.source.output = smu.ON')
+
+
+    def quit(self, **kwargs):
+        self.write_param_to_instrument('voltage', 0)
+        self.instrument.write('smu.source.output = smu.OFF')
+        super().quit(**kwargs)
+
+    def write_param_to_instrument(self, param, param_val):
+        super().write_param_to_instrument(param, param_val)
+    # By default, ramp Keithley 2450 SMU from current voltage level to the target voltage level (end_volt).
+        ramp_steps=self.ramp_steps
+        self.instrument.write('reading = smu.measure.read()')
+        volt_reading = np.array(self.instrument.query_ascii_values('print(reading)'))[0]
+        self.logger.info(f'Current VOLT reading is {volt_reading} V.')
+        start_volt = volt_reading
+        end_volt = param_val
+        voltages = np.linspace(start_volt, end_volt, ramp_steps)
+        volt_readings = []
+        # return start_volt
+        for volt in voltages:
+            self.instrument.write(f"smu.source.level = {volt}")
+            self.instrument.write('reading = smu.measure.read()')
+            volt_reading = self.instrument.query_ascii_values('print(reading)')
+            self.instrument.write('waitcomplete()')
+            volt_readings.append(volt_reading)
+
+        return np.array(volt_readings).reshape(-1)[-1]
+
+    def data_acquisition_start(self, **kwargs):
+        ramp_data = super().data_acquisition_start(**kwargs)
+        measured_voltage = ramp_data['voltage']
+        self.data = np.ones(shape=(self.channel_num, self.reading_num)) * measured_voltage
+        
+
 
 class Lockin(Instrument):
     def __init__(self, 
@@ -400,10 +470,9 @@ class Lockin(Instrument):
 
 
     def quit(self, **kwargs):
-        super().quit(**kwargs)
         # Turn off sine output
         # Disconnect 
-        self.instrument.close()
+        super().quit(**kwargs)
 
     def write_param_to_instrument(self, param, param_val):
         super().write_param_to_instrument(param, param_val)
@@ -530,11 +599,10 @@ class Lockin_dual_freq(Instrument):
 
 
     def quit(self, **kwargs):
-        super().quit(**kwargs)
         # Turn off sine output
         self.instrument.write(f"slvl 0")
         # Disconnect 
-        self.instrument.close()
+        super().quit(**kwargs)
 
     def write_param_to_instrument(self, param, param_val):
         super().write_param_to_instrument(param, param_val)
@@ -612,10 +680,10 @@ class LaserDiode(Instrument):
         self.instrument.write('output:state 1')
 
     def quit(self, **kwargs):
-        super().quit(**kwargs)
+        
         # self.instrument.write('output:state 0')
         self.instrument.write(f"source1:current:level:amplitude 0")
-        self.instrument.close()
+        super().quit(**kwargs)
 
     def write_param_to_instrument(self, param, param_val):
         super().write_param_to_instrument(param, param_val)
@@ -674,9 +742,9 @@ class Oscilloscope(Instrument):
         self.instrument.write(':cal:outp wave')
    
     def quit(self, **kwargs):
-        super().quit(**kwargs)
+
         self.instrument.write(':wgen:outp 0')
-        self.instrument.close()
+        super().quit(**kwargs)
 
     def write_param_to_instrument(self, param, param_val):
         super().write_param_to_instrument(param, param_val)
@@ -727,8 +795,9 @@ class RotationStage(Instrument):
         self.instrument.home_device()
 
     def quit(self, **kwargs):
+        
+        # self.instrument.quit()
         super().quit(**kwargs)
-        self.instrument.quit()
 
     def write_param_to_instrument(self, param, param_val):
         super().write_param_to_instrument(param, param_val)
@@ -843,9 +912,9 @@ class DAQ(Instrument):
         self.reset(destination=self.position_parameters.center_output)
 
     def quit(self, **kwargs):
-        super().quit(**kwargs)
         destination = np.array([0,0,0]) if self.scan_parameters.return_to_zero else self.position_parameters.center_output
         self.reset(destination=destination)
+        super().quit(**kwargs)
 
     def data_acquisition_start(self, **kwargs):
         super().data_acquisition_start(**kwargs)
@@ -914,9 +983,9 @@ class DAQ_simulated(Instrument):
         self.reset(destination=self.position_parameters.center_output)
 
     def quit(self, **kwargs):
-        super().quit(**kwargs)
         destination = np.array([0,0,0]) if self.scan_parameters.return_to_zero else self.position_parameters.center_output
         self.reset(destination=destination)
+        super().quit(**kwargs)
 
     def data_acquisition_start(self, **kwargs):
         super().data_acquisition_start(**kwargs)
