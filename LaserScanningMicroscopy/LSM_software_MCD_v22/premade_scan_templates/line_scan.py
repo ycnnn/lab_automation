@@ -51,6 +51,7 @@ if __name__ == '__main__':
                                             x_pixels=100,
                                             y_pixels=100,
                                             z_center=11,
+                                            # A positiove angle rotates the image clockwise. Negative angle for counterclockwise.
                                             angle=110)
   
     
