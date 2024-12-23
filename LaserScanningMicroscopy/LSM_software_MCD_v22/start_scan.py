@@ -35,6 +35,7 @@ if __name__ == "__main__":
                                             x_pixels=100,
                                             y_pixels=100,
                                             z_center=0,
+                                            # A positiove angle rotates the image clockwise. Negative angle for counterclockwise.
                                             angle=45)
   
     scan_parameters = Scan_parameters(point_time_constant=0.005,
