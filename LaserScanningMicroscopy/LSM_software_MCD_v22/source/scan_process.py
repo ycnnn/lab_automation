@@ -162,6 +162,11 @@ class LSM_scan(QThread):
         
 
         self.logger.info('Scan finished. Thread finished flag is set.')
+        try:
+            import winsound
+            winsound.Beep(frequency=1100, duration=200)
+        except:
+            pass
         self.save_data()
         self.save_parameters()
         
