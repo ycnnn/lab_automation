@@ -4,6 +4,7 @@ from contextlib import ExitStack
 import json
 import os
 import base64
+from playsound import playsound
 from PySide6.QtWidgets import QApplication, QMainWindow, QLabel, QVBoxLayout, QWidget, QLabel
 from PySide6.QtGui import QGuiApplication, QFontDatabase, QFont, QColor, QPixmap, QPen
 from PySide6.QtCore import Qt, QByteArray, QBuffer, QLoggingCategory, QThread, Signal
@@ -162,9 +163,14 @@ class LSM_scan(QThread):
         
 
         self.logger.info('Scan finished. Thread finished flag is set.')
+        # Get the current directory of the Python file
+        source_folder = os.path.dirname(os.path.abspath(__file__))
+
+        # Get the parent directory
+        media_path = str(os.path.dirname(source_folder)) + '/media/finish_sound.mp3'
+        playsound(media_path)
         try:
-            import winsound
-            winsound.Beep(frequency=1100, duration=200)
+            pass
         except:
             pass
         self.save_data()
