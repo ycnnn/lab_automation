@@ -23,7 +23,8 @@ class LSM_scan(QThread):
                   scan_parameters, 
                   display_parameters,
                   instruments=[],
-                  simulate=False):
+                  simulate=False,
+                  beep_when_finish=True):
         super().__init__()
         self.scan_parameters = scan_parameters
         self.position_parameters = position_parameters
@@ -34,6 +35,7 @@ class LSM_scan(QThread):
 
         self.is_terminated = False
         self.is_finished = False
+        self.beep_when_finish = beep_when_finish
 
 
         # Mandatory code. There MUST be at least one external instrument present dring the scan.
@@ -163,18 +165,17 @@ class LSM_scan(QThread):
         
 
         self.logger.info('Scan finished. Thread finished flag is set.')
-        # Get the current directory of the Python file
-        source_folder = os.path.dirname(os.path.abspath(__file__))
 
-        # Get the parent directory
-        media_path = str(os.path.dirname(source_folder)) + '/media/finish_sound.mp3'
-        playsound(media_path)
-        try:
-            pass
-        except:
-            pass
+        
+        
         self.save_data()
         self.save_parameters()
+        if self.beep_when_finish:
+
+            source_folder = os.path.dirname(os.path.abspath(__file__))
+            media_path = str(os.path.dirname(source_folder)) + '/media/finish_sound.mp3'
+
+            playsound(media_path)
         
     def save_parameters(self):
         ######################################################################
