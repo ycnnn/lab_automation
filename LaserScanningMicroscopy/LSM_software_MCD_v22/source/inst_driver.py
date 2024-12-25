@@ -365,8 +365,13 @@ class SMU(Instrument):
         super().write_param_to_instrument(param, param_val)
     # By default, ramp Keithley 2450 SMU from current voltage level to the target voltage level (end_volt).
         ramp_steps=self.ramp_steps
-        self.instrument.write('reading = smu.measure.read()')
-        volt_reading = np.array(self.instrument.query_ascii_values('print(reading)'))[0]
+        # self.instrument.write('reading = smu.measure.read()')
+        # volt_reading = np.array(self.instrument.query_ascii_values('print(reading)'))[0]
+        try:
+            volt_reading = np.array(self.instrument.query_ascii_values('print(smu.measure.read())'))[0]
+        except:
+            volt_reading = np.array(self.instrument.query_ascii_values('print(smu.measure.read())'))[0]
+        
         self.logger.info(f'Current VOLT reading is {volt_reading} V.')
         start_volt = volt_reading
         end_volt = param_val
@@ -375,8 +380,11 @@ class SMU(Instrument):
         # return start_volt
         for volt in voltages:
             self.instrument.write(f"smu.source.level = {volt}")
-            self.instrument.write('reading = smu.measure.read()')
-            volt_reading = self.instrument.query_ascii_values('print(reading)')
+            # self.instrument.write('reading = smu.measure.read()')
+            try:
+                volt_reading = self.instrument.query_ascii_values('print(smu.measure.read())')
+            except:
+                volt_reading = self.instrument.query_ascii_values('print(smu.measure.read())')
             self.instrument.write('waitcomplete()')
             volt_readings.append(volt_reading)
 
