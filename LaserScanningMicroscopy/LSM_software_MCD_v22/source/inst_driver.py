@@ -374,7 +374,7 @@ class SMU(Instrument):
         try:
             volt_reading = np.array(self.instrument.query_ascii_values('print(smu.measure.read())'))[0]
         except:
-            self.logger.info('The SMU ' + self.name + 'fails to read its source output value. Try again.')
+            self.logger.info('The SMU ' + self.name + ' fails to read its source output value. Try again.')
             volt_reading = np.array(self.instrument.query_ascii_values('print(smu.measure.read())'))[0]
         
         self.logger.info(f'Current VOLT reading is {volt_reading} V.')
@@ -389,7 +389,7 @@ class SMU(Instrument):
             try:
                 volt_reading = self.instrument.query_ascii_values('print(smu.measure.read())')
             except:
-                self.logger.info('The SMU ' + self.name + 'fails to read its source output value. Try again.')
+                self.logger.info('The SMU ' + self.name + ' fails to read its source output value. Try again.')
                 volt_reading = self.instrument.query_ascii_values('print(smu.measure.read())')
             self.instrument.write('waitcomplete()')
             volt_readings.append(volt_reading)
