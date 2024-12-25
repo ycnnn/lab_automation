@@ -363,10 +363,10 @@ class SMU(Instrument):
 
     def write_param_to_instrument(self, param, param_val):
         super().write_param_to_instrument(param, param_val)
-    # By default, ramp Keithley 2450 SMU from current voltage level to the target voltage level (end_volt).
+        # By default, ramp Keithley 2450 SMU from current voltage level to the target voltage level (end_volt).
         ramp_steps=self.ramp_steps
-        # self.instrument.write('reading = smu.measure.read()')
-        # volt_reading = np.array(self.instrument.query_ascii_values('print(reading)'))[0]
+        # In some cases, the SMU will not be able to measure the voltage and report the result timely.
+        # An easy fix is to ask the SMU to measure and report again.
         try:
             volt_reading = np.array(self.instrument.query_ascii_values('print(smu.measure.read())'))[0]
         except:
