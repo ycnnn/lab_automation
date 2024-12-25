@@ -29,10 +29,11 @@ class Instrument:
                  channel_num, 
                  reading_num, 
                  scan_num,
+                 name=None,
                  channel_name_list=None,
                  **kwargs):
         
-        self.name = self.__class__.__name__
+        self.name = self.__class__.__name__ if not name else name
         self.address = address
 
 
@@ -263,12 +264,13 @@ class SMU_deprecated(Instrument):
                  **kwargs):
         
         super().__init__(address, channel_num=1, 
+                         name=name,
                          reading_num=position_parameters.x_pixels, 
                          scan_num=position_parameters.y_pixels, 
                          channel_name_list=['Voltage'],
                          **kwargs)
         
-        self.name = self.name if not name else name
+        
         self.ramp_steps = ramp_steps
         self.params = {'voltage':0}
 
@@ -328,17 +330,19 @@ class SMU(Instrument):
                  name=None,
                  ramp_steps=10,
                  **kwargs):
-        
+       
+
         super().__init__(address, channel_num=1, 
+                         name=name,
                          reading_num=position_parameters.x_pixels, 
                          scan_num=position_parameters.y_pixels, 
                          channel_name_list=['Voltage'],
                          **kwargs)
-        
-        self.name = self.name if not name else name
         self.ramp_steps = ramp_steps
         self.params = {'voltage':0}
-
+        
+        
+        
         
     def initialize(self, **kwargs):
         super().initialize(**kwargs)
@@ -363,7 +367,7 @@ class SMU(Instrument):
 
     def write_param_to_instrument(self, param, param_val):
         super().write_param_to_instrument(param, param_val)
-        # By default, ramp Keithley 2450 SMU from current voltage level to the target voltage level (end_volt).
+    # By default, ramp Keithley 2450 SMU from current voltage level to the target voltage level (end_volt).
         ramp_steps=self.ramp_steps
         # In some cases, the SMU will not be able to measure the voltage and report the result timely.
         # An easy fix is to ask the SMU to measure and report again.
@@ -404,12 +408,13 @@ class Lockin(Instrument):
                  name=None, 
                  **kwargs):
         super().__init__(address, channel_num=2, 
+                         name=name,
                          reading_num=position_parameters.x_pixels, 
                          scan_num=position_parameters.y_pixels, 
                          channel_name_list = ['X', 'Y'],
                          **kwargs)
         
-        self.name = self.name if not name else name
+    
 
         self.params = {'time_constant_level':8, 
                         'volt_input_range':3, 
@@ -515,6 +520,7 @@ class Lockin(Instrument):
             self.instrument.query_binary_values(f'captureget? 0, {buffer_len}')
             ).reshape(-1,2)[:self.reading_num,:].T
 
+
         self.data = input_data      
   
 
@@ -526,12 +532,13 @@ class Lockin_dual_freq(Instrument):
                  name=None, 
                  **kwargs):
         super().__init__(address, channel_num=2, 
+                         name=name,
                          reading_num=position_parameters.x_pixels, 
                          scan_num=position_parameters.y_pixels, 
                          channel_name_list = ['X', 'Y'],
                          **kwargs)
         
-        self.name = self.name if not name else name
+       
 
         self.params = {'time_constant_level':8, 
                         'volt_input_range':3, 
@@ -661,11 +668,12 @@ class LaserDiode(Instrument):
                  **kwargs):
         
         super().__init__(address, channel_num=0, 
+                         name=name,
                          reading_num=position_parameters.x_pixels, 
                          scan_num=position_parameters.y_pixels, 
                          **kwargs)
         
-        self.name = self.name if not name else name
+     
 
         self.params = {'current':0.00}
         
@@ -717,11 +725,12 @@ class Oscilloscope(Instrument):
                  **kwargs):
         
         super().__init__(address, channel_num=0, 
+                         name=name,
                          reading_num=position_parameters.x_pixels, 
                          scan_num=position_parameters.y_pixels, 
                          **kwargs)
         
-        self.name = self.name if not name else name
+ 
 
         self.params = {'chopper_frequency':810.0,
                        'duty_cycle_percent': 50,
@@ -784,6 +793,7 @@ class RotationStage(Instrument):
 
     def __init__(self, address=55425494, position_parameters=None, name=None,**kwargs):
         super().__init__(address=address, channel_num=0, 
+                         name=name,
                          reading_num=position_parameters.x_pixels, 
                          scan_num=position_parameters.y_pixels, 
                          **kwargs)
@@ -792,7 +802,7 @@ class RotationStage(Instrument):
             from external_instrument_drivers import K10CR1 as K10CR1
             RotationStage._driver_module = K10CR1
         
-        self.name = self.name if not name else name
+       
         self.params = {'angle':0}
         
     def initialize(self, **kwargs):
@@ -827,12 +837,13 @@ class DAQ(Instrument):
                  scan_parameters=None,
                  **kwargs):
         super().__init__(address, channel_num=len(input_mapping), 
+                         name=name,
                          reading_num=position_parameters.x_pixels, 
                          scan_num=position_parameters.y_pixels, 
                          channel_name_list=input_mapping,
                          **kwargs)
         
-        self.name = self.name if not name else name
+     
         self.input_mapping = input_mapping
         self.scan_parameters = scan_parameters
         self.position_parameters = position_parameters
@@ -948,12 +959,12 @@ class DAQ_simulated(Instrument):
                  scan_parameters=None,
                  **kwargs):
         super().__init__(address, channel_num=len(input_mapping), 
+                         name=name,
                          reading_num=position_parameters.x_pixels, 
                          scan_num=position_parameters.y_pixels, 
                          channel_name_list=input_mapping,
                          **kwargs)
-        
-        self.name = self.name if not name else name
+     
         self.input_mapping = input_mapping
         self.scan_parameters = scan_parameters
         self.position_parameters = position_parameters
