@@ -102,6 +102,9 @@ def label_format(fig=None,
     
     fig = fig or plt.gcf()
     for ax in fig.axes:
+        ax_title = ax.get_title()
+        if len(ax_title) > 0:
+            ax.set_title(ax_title, fontsize=label_size)
         if show_ticks:
             # ax.xaxis.set_major_formatter(x_format)
             # ax.yaxis.set_major_formatter(y_format)
