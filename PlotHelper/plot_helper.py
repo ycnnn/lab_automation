@@ -11,8 +11,8 @@ from matplotlib.patches import Rectangle
 from matplotlib.lines import Line2D
 
 
-svg = {'bbox_inches':None, 'transparent':True,'pad_inches':0}
-pdf = {'bbox_inches':None, 'transparent':True,'pad_inches':0}
+svg = {'bbox_inches':'tight', 'transparent':True,'pad_inches':0.1}
+pdf = {'bbox_inches':'tight', 'transparent':True,'pad_inches':0.1}
 font_size = 10
 
 def generate_colormap(N=1024):
