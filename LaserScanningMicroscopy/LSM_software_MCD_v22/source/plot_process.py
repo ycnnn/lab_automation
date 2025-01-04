@@ -73,6 +73,7 @@ class LSM_plot:
                  position_parameters, 
                  scan_parameters, 
                  instruments, 
+                 auto_close_time_in_ms=2000,
                  show_zero=True,
                  simulate=False):
 
@@ -107,6 +108,7 @@ class LSM_plot:
                             position_parameters=position_parameters,
                             thread=self.data_thread,
                             show_zero=show_zero,
+                            auto_close_time_in_ms=auto_close_time_in_ms,
                             window_width=self.display_parameters.window_width)
             window.move(window_displacement * channel_id,0)
             self.data_thread.data_ready.connect(window.update_plot)

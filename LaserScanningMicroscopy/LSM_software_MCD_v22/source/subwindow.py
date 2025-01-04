@@ -4,7 +4,7 @@ import time
 from datetime import datetime
 from PySide6.QtWidgets import QApplication, QMainWindow, QLabel, QVBoxLayout, QWidget, QLabel,QPushButton
 from PySide6.QtGui import QGuiApplication, QFontDatabase, QFont, QColor, QPixmap, QPen,QMouseEvent
-from PySide6.QtCore import Qt, QByteArray, QBuffer, QLoggingCategory, QThread, Signal,QRectF
+from PySide6.QtCore import Qt, QByteArray, QBuffer, QLoggingCategory, QThread, Signal,QRectF, QTimer
 import pyqtgraph as pg
 import numpy as np
 from decimal import Decimal
@@ -61,6 +61,7 @@ class SubWindow(QMainWindow):
     def __init__(self, 
                  controller, 
                  scan_num, line_width, channel_id=0, title=None, 
+                 auto_close_time_in_ms=2000,
                  show_zero=True,
                  window_width=600, axis_label_distance=10, font_size=12, position_parameters=None, thread=None):
         super().__init__()
@@ -85,9 +86,11 @@ class SubWindow(QMainWindow):
         self.count = None
         self.data = np.zeros((self.scan_num, self.line_width))
         self.thread = thread
-        
 
-        
+        self.auto_close_timer = QTimer(self)
+        self.auto_close_timer.setInterval(auto_close_time_in_ms)  
+        self.auto_close_timer.timeout.connect(self.close)
+
         # Create a central widget
         self.central_widget = QWidget(self)
         self.setCentralWidget(self.central_widget)
@@ -343,6 +346,7 @@ class SubWindow(QMainWindow):
                 background-color: darkgreen;  /* Dark red when hovered */
             }
         """)
+        self.auto_close_timer.start()
     
 
 if __name__ == "__main__":
