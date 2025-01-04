@@ -61,7 +61,7 @@ class SubWindow(QMainWindow):
     def __init__(self, 
                  controller, 
                  scan_num, line_width, channel_id=0, title=None, 
-                 auto_close_time_in_ms=2000,
+                 auto_close_time_in_s=3,
                  show_zero=True,
                  window_width=600, axis_label_distance=10, font_size=12, position_parameters=None, thread=None):
         super().__init__()
@@ -86,10 +86,11 @@ class SubWindow(QMainWindow):
         self.count = None
         self.data = np.zeros((self.scan_num, self.line_width))
         self.thread = thread
+        self.auto_close_time_in_s = auto_close_time_in_s
 
-        self.auto_close_timer = QTimer(self)
-        self.auto_close_timer.setInterval(auto_close_time_in_ms)  
-        self.auto_close_timer.timeout.connect(self.close)
+        # self.auto_close_timer = QTimer(self)
+        # self.auto_close_timer.setInterval(self.auto_close_time_in_s * 1000)  
+        # self.auto_close_timer.timeout.connect(self.close)
 
         # Create a central widget
         self.central_widget = QWidget(self)
@@ -333,7 +334,8 @@ class SubWindow(QMainWindow):
 
     def finish(self):
         # When the thread finishes, change the button's text and color
-        self.button.setText("Scan finished. Click to close all wondows.")
+        
+        self.info_label.setText(self.title + '\n' + 'To close immediately, click the green button above.')
         self.button.setStyleSheet("""
             QPushButton {
                 background-color: green;  /* Red background */
@@ -346,7 +348,23 @@ class SubWindow(QMainWindow):
                 background-color: darkgreen;  /* Dark red when hovered */
             }
         """)
-        self.auto_close_timer.start()
+  
+        self.timer_for_count_down = QTimer(self)
+        self.timer_for_count_down.timeout.connect(self.update_countdown_before_close)
+        self.timer_for_count_down.start(1000)
+        self.auto_close_remaining_time = max(0, self.auto_close_time_in_s)
+
+    def update_countdown_before_close(self):
+   
+        if self.auto_close_remaining_time >= 0:
+            self.button.setText(f"Scan finished, auto close in {int(self.auto_close_remaining_time)} s.")
+            self.auto_close_remaining_time -= 1
+        else:
+            if self.timer_for_count_down.isActive():
+                self.timer_for_count_down.stop()
+            self.button.setText("Scan finished, the app will close now.")
+            self.close()
+
     
 
 if __name__ == "__main__":

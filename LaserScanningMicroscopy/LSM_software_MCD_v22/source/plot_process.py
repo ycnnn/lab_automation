@@ -73,7 +73,7 @@ class LSM_plot:
                  position_parameters, 
                  scan_parameters, 
                  instruments, 
-                 auto_close_time_in_ms=2000,
+                 auto_close_time_in_s=2,
                  show_zero=True,
                  simulate=False):
 
@@ -88,7 +88,10 @@ class LSM_plot:
         scan_num, line_width = (position_parameters.y_pixels,position_parameters.x_pixels)
         self.channel_num = self.data_thread.channel_num
 
-        self.app = QApplication([])
+        if not QApplication.instance():
+            self.app = QApplication([])
+        else:
+            self.app = QApplication.instance()
         self.controller = AppController()
         font_family = load_font('font/SourceCodePro-Medium.ttf')
         if font_family:
@@ -108,7 +111,7 @@ class LSM_plot:
                             position_parameters=position_parameters,
                             thread=self.data_thread,
                             show_zero=show_zero,
-                            auto_close_time_in_ms=auto_close_time_in_ms,
+                            auto_close_time_in_s=auto_close_time_in_s,
                             window_width=self.display_parameters.window_width)
             window.move(window_displacement * channel_id,0)
             self.data_thread.data_ready.connect(window.update_plot)

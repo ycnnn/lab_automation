@@ -128,7 +128,7 @@ class LSM_scan(QThread):
                     auxiliary_scan_info = {'total_scan_index': total_scan_index}
                     
                     if self.is_terminated:
-                        terminated_message = 'The user has terminated the scan. All isntruments will be exited safely.'
+                        terminated_message = 'The user has terminated the scan. All instruments will be exited safely.'
                         self.logger.info(terminated_message)
                         # print('\n\n\n')
                         # print('Scan aborted!')

@@ -19,14 +19,8 @@ import source.inst_driver as inst_driver
 
 
 
-
-    
-
-if __name__ == "__main__":
-
-
-
-
+def scan_start():
+  
     display_parameters = Display_parameters(scan_id='test', window_width=400)
 
     position_parameters = Position_parameters(
@@ -38,7 +32,7 @@ if __name__ == "__main__":
                                             # A positiove angle rotates the image clockwise. Negative angle for counterclockwise.
                                             angle=45)
   
-    scan_parameters = Scan_parameters(point_time_constant=0.0002,
+    scan_parameters = Scan_parameters(point_time_constant=0.0001,
                                     #   retrace_point_time_constant=0.02,
                                       return_to_zero=False)
 
@@ -55,16 +49,23 @@ if __name__ == "__main__":
              scan_parameters=scan_parameters,
              display_parameters=display_parameters,
              instruments=instruments,
+             auto_close_time_in_s=10,
              simulate=True,
              show_zero=True)
+
     
-    # scan.run()
+
+
+
+
+if __name__ == "__main__":
     
-
-
-
-
-
+    scan_start()
+    '''
+    # You can call start the scan multiple times. This feature is helpful if you want to automate multiple scans one by one. Like the following:
+    scan_start()
+    '''
+    
 
 
 
