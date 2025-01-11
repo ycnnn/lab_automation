@@ -349,7 +349,7 @@ class SubWindow(QMainWindow):
             }
         """)
   
-        self.timer_for_count_down = QTimer(self)
+        self.timer_for_count_down = QTimer()
         self.timer_for_count_down.timeout.connect(self.update_countdown_before_close)
         self.timer_for_count_down.start(1000)
         self.auto_close_remaining_time = max(0, self.auto_close_time_in_s)
