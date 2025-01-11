@@ -230,12 +230,13 @@ class EmptyInstrument(Instrument):
 class SimulatedInstrument(Instrument):
     def __init__(self, address, position_parameters, name=None,**kwargs):
         super().__init__(address, channel_num=1, 
+                         name=name,
                          reading_num=position_parameters.x_pixels, 
                          scan_num=position_parameters.y_pixels, 
                          channel_name_list=['Sim_instr'],
                          **kwargs)
         
-        self.name = self.name if not name else name
+     
 
         self.params = {'param1':20, 'param2':[0,1], 'param3':0}
         

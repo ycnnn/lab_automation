@@ -26,19 +26,20 @@ def scan_start():
     position_parameters = Position_parameters(
                                             x_size=50,
                                             y_size=50,
-                                            x_pixels=100,
-                                            y_pixels=100,
+                                            x_pixels=200,
+                                            y_pixels=200,
                                             z_center=0,
                                             # A positiove angle rotates the image clockwise. Negative angle for counterclockwise.
                                             angle=45)
   
-    scan_parameters = Scan_parameters(point_time_constant=0.0001,
+    scan_parameters = Scan_parameters(point_time_constant=0.0002,
                                     #   retrace_point_time_constant=0.02,
                                       return_to_zero=False)
 
     instruments = []
 
     daq = inst_driver.DAQ_simulated(
+                    name='My_DAQ',
                     position_parameters=position_parameters,
                     scan_parameters=scan_parameters,
                     input_mapping=['ai0', 'ai1', 'ai3'],

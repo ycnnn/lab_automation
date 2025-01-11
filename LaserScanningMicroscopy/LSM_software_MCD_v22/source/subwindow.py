@@ -1,20 +1,13 @@
 import sys
 import os
 import time
-from datetime import datetime
-from PySide6.QtWidgets import QApplication, QMainWindow, QLabel, QVBoxLayout, QWidget, QLabel,QPushButton
-from PySide6.QtGui import QGuiApplication, QFontDatabase, QFont, QColor, QPixmap, QPen,QMouseEvent
-from PySide6.QtCore import Qt, QByteArray, QBuffer, QLoggingCategory, QThread, Signal,QRectF, QTimer
+from PySide6.QtWidgets import QApplication, QMainWindow, QLabel, QVBoxLayout, QWidget, QLabel,QPushButton, QProgressBar, QSpacerItem, QSizePolicy,QToolTip
+from PySide6.QtGui import QFontDatabase, QColor,QMouseEvent
+from PySide6.QtCore import Qt, QRectF, QTimer
 import pyqtgraph as pg
 import numpy as np
 from decimal import Decimal
-import base64
-import warnings
-from source.params.position_params import Position_parameters
-from source.params.scan_params import Scan_parameters
-from source.params.display_params import Display_parameters
-from source.scan_process import LSM_scan
-import source.inst_driver as inst_driver
+
 
 
 
@@ -99,37 +92,40 @@ class SubWindow(QMainWindow):
         # Create a layout
         self.layout = QVBoxLayout()
         
+        
     
         self.central_widget.setLayout(self.layout)
         self.central_widget.setStyleSheet("background-color: black;")
 
-        self.button = QPushButton("Terminate", self)
-
+    
+        self.button = QPushButton(f"Scanning line %v/{self.scan_num + 1}", self)
         self.button.setStyleSheet("""
             QPushButton {
-                background-color: red;  /* Red background */
+                
+                background-color: black;  /* Red background */
                 border: 0px solid black;  /* Black border */
                 color: white;  /* White text color */
            
                 padding: 5px;  /* Padding inside the button */
             }
             QPushButton:hover {
-                background-color: darkred;  /* Dark red when hovered */
+                background-color: darkred;  /* red when hovered */
             }
         """)
                 
         self.chart_widget = pg.PlotWidget()
         self.img_widget = pg.PlotWidget()
-        self.info_label = QLabel('Currently scanning line 0')
+        self.info_label = QLabel(self.title + ' \nClick the progress bar to terminate')
         self.xy_label = QLabel('Move the mouse to read the location')
         
         self.layout.setSpacing(0)
-        self.layout.addWidget(self.button)
+        
 
         self.button.clicked.connect(self.set_terminate_flag)
-
         self.thread.finished.connect(self.finish)
 
+        
+        self.layout.addWidget(self.button)
         self.layout.addWidget(self.info_label)
         self.layout.addWidget(self.xy_label)
         self.layout.addWidget(self.chart_widget)
@@ -301,7 +297,36 @@ class SubWindow(QMainWindow):
         self.rescale_color()
 
     def update_plot(self, data_pack):
+        
         self.count, new_data = data_pack
+        #self.progress_bar.setValue(self.count)
+        #self.progress_bar.setFormat(self.title + f" scanning line " + f"{self.count}/{self.scan_num},"  + f' {self.remaining_time} s remaining')
+        self.button.setText(f"Scanning line " + f"{self.count + 1}/{self.scan_num},"  + f' {self.remaining_time} s remaining')
+        self.executed_porntion = (self.count+1)/self.scan_num
+
+
+        self.button.setStyleSheet("""
+            QPushButton {
+                
+                background: qlineargradient(""" + 
+                f"""x1: {self.executed_porntion-1E-8}, y1: 0, x2: {self.executed_porntion}, y2: 0, """ + """
+                                                    stop: 0 green, 
+                                                    stop: 1 rgb(0, 0, 0));
+                border: 0px solid black;  /* Black border */
+                color: white;  /* White text color */
+           
+                padding: 5px;  /* Padding inside the button */
+            }
+            QPushButton:hover {
+                 background: qlineargradient(""" + 
+                f"""x1: {self.executed_porntion-1E-8}, y1: 0, x2: {self.executed_porntion}, y2: 0, """ + """
+                                                    stop: 0 darkgreen, 
+                                                    stop: 1 rgb(0, 0, 0));
+            }
+        """)
+                
+                
+
         self.data[self.count] = new_data[self.channel_id]
         
         elapse_time = time.time() - self.time
@@ -311,7 +336,7 @@ class SubWindow(QMainWindow):
         self.curve.setData(self.data[self.count])
         self.img.setImage(self.data.T)
         self.rescale_color()
-        self.info_label.setText(self.title + '\n' + f'Currently scanning line {int(self.count)}, ' + f'{self.remaining_time} s remaining')
+        
 
         chart_data_max = np.max(self.data[self.count])
         chart_data_min = np.min(self.data[self.count])
@@ -334,21 +359,9 @@ class SubWindow(QMainWindow):
 
     def finish(self):
         # When the thread finishes, change the button's text and color
-        
-        self.info_label.setText(self.title + '\n' + 'To close immediately, click the green button above.')
-        self.button.setStyleSheet("""
-            QPushButton {
-                background-color: green;  /* Red background */
-                border: 0px solid black;  /* Black border */
-                color: white;  /* White text color */
-           
-                padding: 5px;  /* Padding inside the button */
-            }
-            QPushButton:hover {
-                background-color: darkgreen;  /* Dark red when hovered */
-            }
-        """)
-  
+
+        self.info_label.setText(self.title + '\nClick the button to close immediately')
+    
         self.timer_for_count_down = QTimer()
         self.timer_for_count_down.timeout.connect(self.update_countdown_before_close)
         self.timer_for_count_down.start(1000)
