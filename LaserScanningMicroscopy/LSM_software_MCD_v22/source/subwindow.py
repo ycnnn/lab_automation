@@ -112,10 +112,11 @@ class SubWindow(QMainWindow):
                 background-color: darkred;  /* red when hovered */
             }
         """)
+        self.button.setToolTip('Click to terminate the scan.')
                 
         self.chart_widget = pg.PlotWidget()
         self.img_widget = pg.PlotWidget()
-        self.info_label = QLabel(self.title + ' \nClick the progress bar to terminate')
+      
         self.xy_label = QLabel('Move the mouse to read the location')
         
         self.layout.setSpacing(0)
@@ -126,7 +127,6 @@ class SubWindow(QMainWindow):
 
         
         self.layout.addWidget(self.button)
-        self.layout.addWidget(self.info_label)
         self.layout.addWidget(self.xy_label)
         self.layout.addWidget(self.chart_widget)
         self.layout.addWidget(self.img_widget)
@@ -359,8 +359,7 @@ class SubWindow(QMainWindow):
 
     def finish(self):
         # When the thread finishes, change the button's text and color
-
-        self.info_label.setText(self.title + '\nClick the button to close immediately')
+        self.button.setToolTip('Click to to close the window immediately.')
     
         self.timer_for_count_down = QTimer()
         self.timer_for_count_down.timeout.connect(self.update_countdown_before_close)
