@@ -309,7 +309,7 @@ class SubWindow(QMainWindow):
             QPushButton {
                 
                 background: qlineargradient(""" + 
-                f"""x1: {self.executed_porntion-1E-5}, y1: 0, x2: {self.executed_porntion}, y2: 0, """ + """
+                f"""x1: {self.executed_porntion-1E-3}, y1: 0, x2: {self.executed_porntion}, y2: 0, """ + """
                                                     stop: 0 green, 
                                                     stop: 1 rgb(0, 0, 0));
                 border: 0px solid black;  /* Black border */
@@ -319,7 +319,7 @@ class SubWindow(QMainWindow):
             }
             QPushButton:hover {
                  background: qlineargradient(""" + 
-                f"""x1: {self.executed_porntion-1E-5}, y1: 0, x2: {self.executed_porntion}, y2: 0, """ + """
+                f"""x1: {self.executed_porntion-1E-3}, y1: 0, x2: {self.executed_porntion}, y2: 0, """ + """
                                                     stop: 0 darkgreen, 
                                                     stop: 1 rgb(0, 0, 0));
             }
