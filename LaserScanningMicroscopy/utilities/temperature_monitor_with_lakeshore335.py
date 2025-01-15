@@ -24,6 +24,24 @@ class temprature_controller:
     def measure(self):
         self.data = self.instrument.get_all_kelvin_reading()[0]
         return self.data
+    
+    def heat(self, temp_set_point=4.00):
+        self.temp_set_point = temp_set_point
+        self.instrument.set_control_setpoint(1,self.temp_set_point)
+        self.measure()
+        temp_difference = self.data - self.temp_set_point
+        if temp_difference >= -1E-1:
+            self.instrument.set_heater_range(1, self.instrument.HeaterRange.OFF)
+        elif abs(temp_difference) <= 20.0:
+            self.instrument.set_heater_range(1, self.instrument.HeaterRange.LOW)
+        elif abs(temp_difference) <= 50.0:
+            self.instrument.set_heater_range(1, self.instrument.HeaterRange.MEDIUM)
+        elif abs(temp_difference) <= 300.0:
+            self.instrument.set_heater_range(1, self.instrument.HeaterRange.HIGH)
+        else:
+            self.instrument.set_heater_range(1, self.instrument.HeaterRange.OFF)
+            raise RuntimeError
+        
 
 if __name__=='__main__':
 
