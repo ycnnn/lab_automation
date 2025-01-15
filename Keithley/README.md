@@ -1,6 +1,7 @@
 **Python script to automate semiconductor parameter analysis with Keithley 2450 SMUs**
 
-⚠️ Important! Make sure you always turn off all SMUs after you finish operations using this script. You can trun SMUs on again for other codes uploaded in this repository.
+⚠️ Before starting, always make sure all SMUs are using TSP command sets, and the TSPLink has been initialited. See below for how to set up TSP command sets and TSPLink.
+⚠️ Important! Make sure you always restart all SMUs, and make sure TSP Link is not initiated if you want to use other scripts in this repository.
 
 Prerequisites:
 - Two Kiethley 2450 series source-measure-units (SMUs). 
