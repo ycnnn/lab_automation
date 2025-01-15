@@ -117,6 +117,7 @@ class SubWindow(QMainWindow):
         self.chart_widget = pg.PlotWidget()
         self.img_widget = pg.PlotWidget()
       
+        self.title_label = QLabel(self.title)
         self.xy_label = QLabel('Move the mouse to read the location')
         
         self.layout.setSpacing(0)
@@ -127,6 +128,7 @@ class SubWindow(QMainWindow):
 
         
         self.layout.addWidget(self.button)
+        self.layout.addWidget(self.title_label)
         self.layout.addWidget(self.xy_label)
         self.layout.addWidget(self.chart_widget)
         self.layout.addWidget(self.img_widget)
