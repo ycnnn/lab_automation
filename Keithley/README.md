@@ -1,5 +1,7 @@
 **Python script to automate semiconductor parameter analysis with Keithley 2450 SMUs**
 
+⚠️ Important! Make sure you always turn off all SMUs after you finish operations using this script. You can trun SMUs on again for other codes uploaded in this repository.
+
 Prerequisites:
 - Two Kiethley 2450 series source-measure-units (SMUs). 
 - A RJ45 LAN crossover cable.
