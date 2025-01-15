@@ -98,7 +98,7 @@ class SubWindow(QMainWindow):
         self.central_widget.setStyleSheet("background-color: black;")
 
     
-        self.button = QPushButton(f"Scanning line 1/{self.scan_num + 1}", self)
+        self.button = QPushButton(f"Scanning line 1/{self.scan_num}", self)
         self.button.setStyleSheet("""
             QPushButton {
                 
