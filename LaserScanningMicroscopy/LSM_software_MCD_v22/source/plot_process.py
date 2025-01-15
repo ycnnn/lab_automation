@@ -73,7 +73,7 @@ class LSM_plot:
                  position_parameters, 
                  scan_parameters, 
                  instruments, 
-                 auto_close_time_in_s=2,
+                 auto_close_time_in_s=360,
                  show_zero=True,
                  simulate=False):
 
