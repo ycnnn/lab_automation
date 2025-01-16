@@ -8,7 +8,7 @@ class Display_parameters:
                  scan_id=None,
                  save_destination=None,
                  window_width=500,
-                 font_size=16,
+                 font_size=None,
                  axis_label_ticks_distance=12,
                ):
         

@@ -1,5 +1,5 @@
 import sys
-import os
+import os, platform
 import time
 from PySide6.QtWidgets import QApplication, QMainWindow, QLabel, QVBoxLayout, QWidget, QLabel
 from PySide6.QtGui import QGuiApplication, QFontDatabase, QFont, QColor, QPixmap, QPen
@@ -92,17 +92,25 @@ class LSM_plot:
             self.app = QApplication([])
         else:
             self.app = QApplication.instance()
+        screen_width = self.app.primaryScreen().size().width()
+        screen_height = self.app.primaryScreen().size().height()
+
         self.controller = AppController()
-        default_font_size = self.app.font().pointSize()
+        # default_font_size = self.app.font().pointSize()
+        # Standard point size, a screen roughly have 60 lines
+        default_font_size = screen_height / 70
         font_family = load_font('font/SourceCodePro-Medium.ttf')
         if font_family:
             global_font = QFont(font_family)
-            global_font.setPixelSize(max(self.display_parameters.font_size,default_font_size))
+            if self.display_parameters.font_size:
+                global_font.setPointSize(self.display_parameters.font_size)
+            else:
+                global_font.setPointSize(default_font_size)
             self.app.setFont(global_font)
 
         self.windows = []
 
-        screen_width = self.app.primaryScreen().size().width()
+        
         window_displacement = max(400, screen_width/self.channel_num)
         for channel_id in range(self.channel_num):
             window = SubWindow(channel_id=channel_id, 
