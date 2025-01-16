@@ -7,7 +7,7 @@ class Display_parameters:
     def __init__(self,
                  scan_id=None,
                  save_destination=None,
-                 window_width=500,
+                 window_width=None,
                  font_size=None,
                  axis_label_ticks_distance=12,
                ):

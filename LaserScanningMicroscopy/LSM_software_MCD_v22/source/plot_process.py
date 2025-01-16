@@ -111,7 +111,13 @@ class LSM_plot:
         self.windows = []
 
         
-        window_displacement = max(400, screen_width/self.channel_num)
+        
+        
+        if self.display_parameters.window_width:
+            window_width = self.display_parameters.window_width
+        else:
+            window_width = screen_width/4
+        window_displacement = min(window_width, (screen_width-window_width)/self.channel_num)
         for channel_id in range(self.channel_num):
             window = SubWindow(channel_id=channel_id, 
                                controller=self.controller,
@@ -121,7 +127,7 @@ class LSM_plot:
                             thread=self.data_thread,
                             show_zero=show_zero,
                             auto_close_time_in_s=auto_close_time_in_s,
-                            window_width=self.display_parameters.window_width)
+                            window_width=window_width)
             window.move(window_displacement * channel_id,0)
             self.data_thread.data_ready.connect(window.update_plot)
             self.windows.append(window)
