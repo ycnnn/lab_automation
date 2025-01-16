@@ -852,7 +852,7 @@ class DAQ(Instrument):
         self.input_mapping = input_mapping
         self.scan_parameters = scan_parameters
         self.position_parameters = position_parameters
-        self.input_average = input_average
+        self.input_average = int(input_average)
         if self.input_average < 1:
             raise RuntimeError('Input average factor should be greater than 1.')
         self.params = {}
