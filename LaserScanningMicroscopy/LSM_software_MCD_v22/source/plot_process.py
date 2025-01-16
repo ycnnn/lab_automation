@@ -93,10 +93,11 @@ class LSM_plot:
         else:
             self.app = QApplication.instance()
         self.controller = AppController()
+        default_font_size = self.app.font().pointSize()
         font_family = load_font('font/SourceCodePro-Medium.ttf')
         if font_family:
             global_font = QFont(font_family)
-            global_font.setPixelSize(12)
+            global_font.setPixelSize(default_font_size)
             self.app.setFont(global_font)
 
         self.windows = []
