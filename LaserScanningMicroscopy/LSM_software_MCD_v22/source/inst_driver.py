@@ -947,8 +947,8 @@ class DAQ(Instrument):
         self.attempted_trace_sample_rate = num_samples * self.frequency * self.input_average
         self.attempted_retrace_sample_rate = num_samples * self.retrace_frequency * self.input_average
         if max(self.attempted_retrace_sample_rate, self.attempted_trace_sample_rate) >= self.max_ai_sample_rate:
-            error_message = '''
-                            Error: Attempted sample rate greater than max allowed sample rate. Try: 
+            error_message = f"\tError: Attempted trace samplerate {self.attempted_trace_sample_rate} or attempted trace samplerate {self.attempted_retrace_sample_rate} greater than max allowed sample rate {self.max_ai_sample_rate}. " + '''
+                            Try: 
                             (1) reduce input_average;
                             (2) reduce x_pixels;
                             (3) increate point time constant for trace and/or retrace scan.
