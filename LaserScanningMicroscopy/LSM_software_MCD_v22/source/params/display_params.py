@@ -8,6 +8,7 @@ class Display_parameters:
                  scan_id=None,
                  save_destination=None,
                  window_width=500,
+                 font_size=16,
                  axis_label_ticks_distance=12,
                ):
         
@@ -22,7 +23,7 @@ class Display_parameters:
     
         self.save_destination = path if not save_destination else save_destination
         self.axis_label_ticks_distance = axis_label_ticks_distance
-        # self.font_size = font_size
+        self.font_size = font_size
        
 
         # The following code save the data.
@@ -54,6 +55,7 @@ class Display_parameters:
 
    
         self.window_width = window_width
+        self.font_size = font_size
 
 
 

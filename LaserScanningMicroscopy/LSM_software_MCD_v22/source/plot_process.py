@@ -97,7 +97,7 @@ class LSM_plot:
         font_family = load_font('font/SourceCodePro-Medium.ttf')
         if font_family:
             global_font = QFont(font_family)
-            global_font.setPixelSize(default_font_size)
+            global_font.setPixelSize(max(self.display_parameters.font_size,default_font_size))
             self.app.setFont(global_font)
 
         self.windows = []
