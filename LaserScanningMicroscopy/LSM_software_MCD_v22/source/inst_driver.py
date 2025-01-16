@@ -838,7 +838,7 @@ class DAQ(Instrument):
                  position_parameters=None, 
                  name=None,
                  input_mapping=['ai0'],
-                 average_input_channels=['ai0'],
+                 no_average_input_channels=[],
                  input_average=1,
                  scan_parameters=None,
                  **kwargs):
@@ -854,7 +854,7 @@ class DAQ(Instrument):
         self.scan_parameters = scan_parameters
         self.position_parameters = position_parameters
         self.input_average = int(input_average)
-        self.average_input_channels = average_input_channels
+        self.no_average_input_channels = no_average_input_channels
         
         if self.input_average < 1:
             raise RuntimeError('Input average factor should be greater than 1.')
@@ -952,14 +952,14 @@ class DAQ(Instrument):
 
     def initialize(self, **kwargs):
         super().initialize(**kwargs)
-        if not all(channel in self.input_mapping for channel in self.average_input_channels):
-            error_message = f'Input channel list is {self.input_mapping}, the input channles that will be averaged is {self.average_input_channels}. Some of the averaged input channles are not included in the input channel list.'
+        if not all(channel in self.input_mapping for channel in self.no_average_input_channels):
+            error_message = f'Error:\nInput channel list is {self.input_mapping}, the input channel that will not be averaged is {self.no_average_input_channels}. \nSome of the non-averaged input channels are not included in the input channel list.'
             self.logger.info(error_message)
             raise RuntimeError(error_message)
-        self.is_channel_averaged = [False for channel in self.input_mapping]
+        self.is_channel_averaged = [True for _ in self.input_mapping]
         for channel_index, channel in enumerate(self.input_mapping):
-            if channel in self.average_input_channels:
-                self.is_channel_averaged[channel_index] = True
+            if channel in self.no_average_input_channels:
+                self.is_channel_averaged[channel_index] = False
 
         device = nidaqSystem.local().devices[self.address]
         self.max_ai_sample_rate = device.ai_max_multi_chan_rate
