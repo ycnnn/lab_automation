@@ -15,7 +15,6 @@ from nidaqmx.constants import Edge, AcquisitionType, TaskMode, WAIT_INFINITELY
 from nidaqmx.stream_readers import AnalogMultiChannelReader
 from nidaqmx.stream_writers import AnalogMultiChannelWriter
 
-from nidaqmx.system import System as nidaqSystem
 # from source.logger import Logger
 # from source.daq_driver import daq_interface, reset_daq
 
@@ -838,7 +837,6 @@ class DAQ(Instrument):
                  position_parameters=None, 
                  name=None,
                  input_mapping=['ai0'],
-                 input_average=1,
                  scan_parameters=None,
                  **kwargs):
         super().__init__(address, channel_num=len(input_mapping), 
@@ -852,9 +850,6 @@ class DAQ(Instrument):
         self.input_mapping = input_mapping
         self.scan_parameters = scan_parameters
         self.position_parameters = position_parameters
-        self.input_average = input_average
-        if self.input_average < 1:
-            raise RuntimeError('Input average factor should be greater than 1.')
         self.params = {}
 
         self.DAQ_output_data = self.position_parameters.DAQ_output_data
@@ -862,7 +857,6 @@ class DAQ(Instrument):
         self.retrace_frequency = 1/(self.scan_parameters.retrace_point_time_constant * self.position_parameters.x_pixels)
         self.output_mapping=['ao0', 'ao1', 'ao2']
         self.pulse_terminal='PFI0'
-
 
     def write_data(self, ao_data, frequency):
 
@@ -890,8 +884,7 @@ class DAQ(Instrument):
             for input_channel in input_mapping_full_path:
                 ai_task.ai_channels.add_ai_voltage_chan(input_channel,
                                                         min_val=-10, max_val=10)    
-            ai_task.timing.cfg_samp_clk_timing(rate=sample_rate * self.input_average, 
-                                               sample_mode=AcquisitionType.FINITE, samps_per_chan=num_samples * self.input_average)
+            ai_task.timing.cfg_samp_clk_timing(sample_rate, sample_mode=AcquisitionType.FINITE, samps_per_chan=num_samples)
             
             pulse_channel = pulse_task.co_channels.add_co_pulse_chan_freq('Dev2/ctr0', freq=sample_rate, duty_cycle=0.25)
             pulse_channel.co_pulse_term = '/' + DAQ_name + '/' + self.pulse_terminal
@@ -908,15 +901,12 @@ class DAQ(Instrument):
             ao_task.start()
 
             ai_reader = AnalogMultiChannelReader(ai_task.in_stream)
-            ai_data = np.zeros((len(input_mapping_full_path), num_samples * self.input_average))
-            ai_reader.read_many_sample(ai_data, num_samples * self.input_average, timeout=600)
+            ai_data = np.zeros((len(input_mapping_full_path), num_samples))
+            ai_reader.read_many_sample(ai_data, num_samples, timeout=600)
 
             ao_task.wait_until_done()
             ai_task.wait_until_done()
             pulse_task.wait_until_done()
-
-            if self.input_average != 1:
-                ai_data = ai_data.reshape(ai_data.shape[0], -1, self.input_average).mean(axis=2)
 
             return ai_data
 
@@ -941,24 +931,6 @@ class DAQ(Instrument):
 
     def initialize(self, **kwargs):
         super().initialize(**kwargs)
-        device = nidaqSystem.local().devices[self.address]
-        self.max_ai_sample_rate = device.ai_max_multi_chan_rate
-        num_samples = self.position_parameters.DAQ_output_data.shape[2]
-        self.attempted_trace_sample_rate = num_samples * self.frequency * self.input_average
-        self.attempted_retrace_sample_rate = num_samples * self.retrace_frequency * self.input_average
-        if max(self.attempted_retrace_sample_rate, self.attempted_trace_sample_rate) >= self.max_ai_sample_rate:
-            error_message = '''
-                            Error: Attempted sample rate greater than max allowed sample rate. Try: 
-                            (1) reduce input_average;
-                            (2) reduce x_pixels;
-                            (3) increate point time constant for trace and/or retrace scan.
-
-                            '''
-            self.logger.info(error_message)
-            raise RuntimeError(error_message)
-        # for device in devices:
-        #     print(f'Device: {device.name}')
-            # print(f'Max sample rate: {device.ai_max_multi_chan_rate}')
         self.reset(destination=self.position_parameters.center_output)
 
     def quit(self, **kwargs):
