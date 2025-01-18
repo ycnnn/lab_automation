@@ -9,7 +9,7 @@ import matplotlib.patches as patches
 from matplotlib.colors import ListedColormap, LinearSegmentedColormap
 from matplotlib.patches import Rectangle
 from matplotlib.lines import Line2D
-
+from matplotlib.patheffects import withStroke
 
 svg = {'bbox_inches':'tight', 'transparent':True,'pad_inches':0.1}
 pdf = {'bbox_inches':'tight', 'transparent':True,'pad_inches':0.1}
@@ -99,13 +99,16 @@ def label_format(fig=None,
            x_label_pad=5,
            y_label_pad=0,
            show_ticks=True,
-           show_labels=True):
+           show_labels=True,
+           set_size_global=False):
     
     fig = fig or plt.gcf()
     for ax in fig.axes:
         ax_title = ax.get_title()
         if len(ax_title) > 0:
             ax.set_title(ax_title, fontsize=label_size)
+        for text in ax.texts:
+            text.set_fontsize(label_size) 
         if show_ticks:
             # ax.xaxis.set_major_formatter(x_format)
             # ax.yaxis.set_major_formatter(y_format)
@@ -122,6 +125,8 @@ def label_format(fig=None,
         if show_labels:
             ax.xaxis.label.set_size(label_size)
             ax.yaxis.label.set_size(label_size)
+        if set_size_global:
+            plt.rcParams.update({'font.size': label_size})
   
 
 
@@ -378,3 +383,50 @@ def boxplot_2d_helper(x,y, ax, whis=1.5, linewidth=0.5,
         facecolors='none', edgecolors=markercolor, s=markersize, **props
     )
 
+
+
+def generate_horizontal_cbar(cbar_ax, cmap='bwr', vmin=0, vmax=1, 
+                             title='Colorbar',
+                             label_position=[0.08,0.5,0.92],
+                             custom_labels = None,
+                             foreground=(1,1,1,0.75),
+                             ):
+    cbar = cbar_ax.imshow(np.linspace([0,0],[1,1], num=500).T, aspect='auto', cmap=cmap)
+    fig = plt.gcf()
+        # Get the bounding box of the axes in pixels
+    bbox = cbar_ax.get_window_extent()
+
+    # Convert the size to points (1 inch = 72 points)
+    width_in_points = bbox.width / fig.dpi * 72
+    height_in_points = bbox.height / fig.dpi * 72
+
+    pad = -height_in_points/2
+    cbar_ax.set_yticks([])
+    cbar_ax.tick_params(axis='x', which='both', length=0) 
+    cbar_ax.tick_params(axis='x', labelbottom=True, labeltop=False, pad=pad)
+
+    for label in cbar_ax.get_xticklabels():
+        label.set_path_effects([withStroke(linewidth=3, foreground=foreground)])
+        label.set_verticalalignment('center')
+    label_position = np.array(label_position) * 500
+    cbar_ax.set_xticks(label_position)
+    if not custom_labels:
+        tick_labels = [vmin, title ,vmax]
+    else:
+        tick_labels = custom_labels
+    cbar_ax.set_xticklabels(tick_labels)
+
+def add_scale_bar(ax,
+                  x_start, x_end,
+                  y_start, y_end,
+                  scale_label='',
+                  text_x_offset=0,
+                  text_y_offset=-5,
+                  color='black'):
+    
+    ax.plot([x_start, x_end],[y_start, y_end], linewidth=4, color=(1,1,1,0.75))
+    ax.plot([x_start, x_end],[y_start, y_end], linewidth=1, color='black')
+    text_artist = ax.text((x_start + x_end)/ 2 + text_x_offset, (y_start + y_end)/ 2 + text_y_offset, scale_label, color=color, 
+            ha='center', va='center', fontsize=font_size)
+
+    text_artist.set_path_effects([withStroke(linewidth=3, foreground=(1,1,1,0.75))])
