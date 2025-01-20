@@ -10,6 +10,7 @@ from matplotlib.colors import ListedColormap, LinearSegmentedColormap
 from matplotlib.patches import Rectangle
 from matplotlib.lines import Line2D
 from matplotlib.patheffects import withStroke
+from matplotlib.ticker import MaxNLocator
 
 svg = {'bbox_inches':'tight', 'transparent':True,'pad_inches':0.1}
 pdf = {'bbox_inches':'tight', 'transparent':True,'pad_inches':0.1}
@@ -430,3 +431,10 @@ def add_scale_bar(ax,
             ha='center', va='center', fontsize=font_size)
 
     text_artist.set_path_effects([withStroke(linewidth=3, foreground=(1,1,1,0.75))])
+
+def set_tick_num(ax, x_tick_num=None, y_tick_num=None):
+    ax = ax if ax else plt.gca()
+    if x_tick_num:
+        ax.xaxis.set_major_locator(MaxNLocator(nbins=x_tick_num))  # Control the x-axis ticks
+    if y_tick_num:
+        ax.yaxis.set_major_locator(MaxNLocator(nbins=y_tick_num))

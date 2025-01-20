@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Live Text Editor</title>
+  <style>
+
+
+    body {
+      font-family: 'JuliaMono', 'JuliaMono', monospace;
+      margin: 8px;
+    } 
+
+    
+    #text-editor {
+      width: 100%;
+      height: 1000px;
+      font-family: 'JuliaMono', 'JuliaMono', monospace;
+      font-size: 18px;
+      padding: 10px;
+      border: 0px solid #ccc;
+      border-radius: 5px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Live Remote Editor</h1>
+  <textarea id="text-editor" placeholder="Start typing..."></textarea>
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const socket = io();
+
+    const textEditor = document.getElementById("text-editor");
+
+    // Receive updated text from server
+    socket.on("update-text", (newText) => {
+      textEditor.value = newText;
+    });
+
+    // Send updates to the server when text changes
+    textEditor.addEventListener("input", () => {
+      socket.emit("edit-text", textEditor.value);
+    });
+  </script>
+</body>
+</html>
