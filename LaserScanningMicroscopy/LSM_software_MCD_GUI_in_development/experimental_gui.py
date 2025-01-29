@@ -13,6 +13,14 @@ from decimal import Decimal
 from functools import partial
 import random
 
+def enforce_font_size(widget, font_size):
+    """ Recursively apply font size to all child widgets. """
+    font = widget.font()
+    font.setPointSize(font_size)
+    widget.setFont(font)
+
+    for child in widget.findChildren(QWidget):
+        enforce_font_size(child, font_size)  # Apply to all descendants
 
 def read_instrument_setup(path='source.inst_driver'):
     instr_module = importlib.import_module(path)
@@ -235,8 +243,8 @@ class Instrument_area(QLabel):
 
             self.param_input_fields[param] = [param_trace_field, param_retrace_field]
             self.set_params_trace_retrace(param)
-            param_trace_field.editingFinished.connect(partial(self.set_params_linear, param))
-            param_retrace_field.editingFinished.connect(partial(self.set_params_linear, param))
+            param_trace_field.editingFinished.connect(partial(self.set_params_trace_retrace, param))
+            param_retrace_field.editingFinished.connect(partial(self.set_params_trace_retrace, param))
 
         elif index == 3:
             self.param_modes[param] = 'Custom'
@@ -288,9 +296,9 @@ class Instrument_area(QLabel):
         
 
 class ControlPanel(QMainWindow):
-    def __init__(self):
+    def __init__(self, app):
         super().__init__()
-
+        self.app = app
         ######################################
         # Define scan and position parameters to be used
         self.scan_parameters = {}
@@ -457,6 +465,8 @@ class ControlPanel(QMainWindow):
         self.start_scan_button = QPushButton('Start scan')
         self.params_layout.addWidget(self.start_scan_button, 12, 3)
 
+    # def set_font(self):
+    #     pass
     def synchronize_retrace_if_retrace_time_equal_to_trace(self):
         if self.retrace_state.checkState() == Qt.Checked:
             self.retrace_time_constant_field.setText(self.trace_time_constant_field.text())
@@ -538,12 +548,12 @@ class ControlPanel(QMainWindow):
         self.overall_settings['instruments_paramaters'] = self.instruments_save_list
 
         default_save_folder_path = os.path.dirname(os.path.abspath(__file__))
-        folder_path = QFileDialog.getExistingDirectory(self, "Select Directory",default_save_folder_path)
+        folder_path = QFileDialog.getExistingDirectory(self, "Select Directory to save",default_save_folder_path)
   
 
-        saved_setting_path = folder_path + '/settings.json'
+        saved_setting_path = folder_path + '/' + self.scan_parameters['scan_id'] + '.json'
         with open(saved_setting_path, 'w') as json_file:
-            json.dump(self.overall_settings, json_file)
+            json.dump(self.overall_settings, json_file, indent=4)
 
 
     def load_settings(self):
@@ -641,9 +651,12 @@ class ControlPanel(QMainWindow):
         self.scan_parameters['custom_font_size'] = customize_font_size
         self.scan_parameters['custom_window_width'] = customize_window_width
         if customize_font_size:
-            app = QApplication.instance()
-            current_font = app.font()
-            current_font.setPointSize(customize_font_size)
+            # app = QApplication.instance()
+            current_font = self.app.font()
+            current_font.setPixelSize(customize_font_size)
+            self.app.setFont(current_font)
+            self.setFont(current_font)
+            enforce_font_size(self, customize_font_size)
         
 
         
@@ -656,7 +669,9 @@ else:
 font_family = load_font('font/SourceCodePro-Medium.ttf')
 if font_family:
     global_font = QFont(font_family)
+    global_font.setPixelSize(12)
     app.setFont(global_font)
-control_panel = ControlPanel()
+
+control_panel = ControlPanel(app=app)
 control_panel.show()
 app.exec()
