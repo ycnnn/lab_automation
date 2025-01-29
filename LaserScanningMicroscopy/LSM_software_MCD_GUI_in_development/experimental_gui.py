@@ -4,7 +4,7 @@ import ast
 import time
 import inspect
 import importlib
-from PySide6.QtWidgets import QApplication, QMainWindow, QLabel, QVBoxLayout, QHBoxLayout, QGridLayout, QWidget, QLabel,QPushButton, QProgressBar, QSpacerItem, QSizePolicy,QToolTip, QSpacerItem, QLineEdit, QScrollArea, QComboBox, QCheckBox,QLayout, QFileDialog, QDialog,QDialogButtonBox
+from PySide6.QtWidgets import QApplication, QMainWindow, QLabel, QVBoxLayout, QHBoxLayout, QGridLayout, QWidget, QLabel,QPushButton, QProgressBar, QSpacerItem, QSizePolicy,QToolTip, QSpacerItem, QLineEdit, QScrollArea, QComboBox, QCheckBox,QLayout, QFileDialog, QDialog,QDialogButtonBox, QMessageBox
 from PySide6.QtGui import QFontDatabase, QColor,QMouseEvent, QFont,QFontMetrics
 from PySide6.QtCore import Qt, QRectF, QTimer
 import pyqtgraph as pg
@@ -125,9 +125,10 @@ class Instrument_area(QLabel):
         self.init_args_input_fields = {}
         self.param_values = {}
         self.param_input_fields = {}
+        self.is_selected = False
 
         
-        self.type_label = QLabel(self.instr_type)
+        self.type_label = QLabel("Type: " + self.instr_type)
         self.layout.addWidget(self.type_label, 0, 0)
 
         self.name_label = QLabel('Instrument name')
@@ -511,13 +512,21 @@ class ControlPanel(QMainWindow):
             self.remove_instr_button.setEnabled(False)
 
     def select_instr(self, instr):
+        if self.selected_instr == instr:
+            if instr.is_selected:
+                self.selected_instr.setStyleSheet("background-color: black;")
+                self.selected_instr.is_selected = False
+                self.remove_instr_button.setEnabled(False)
+                return
         # Reset previous selection
         if self.selected_instr:
             self.selected_instr.setStyleSheet("background-color: black;")
+            self.selected_instr.is_selected = False
 
         # Highlight the new selection
         self.selected_instr = instr
         self.selected_instr.setStyleSheet("background-color: darkgreen;")
+        self.selected_instr.is_selected = True
 
         # Enable remove button
         self.remove_instr_button.setEnabled(True)
@@ -552,8 +561,11 @@ class ControlPanel(QMainWindow):
   
 
         saved_setting_path = folder_path + '/' + self.scan_parameters['scan_id'] + '.json'
-        with open(saved_setting_path, 'w') as json_file:
-            json.dump(self.overall_settings, json_file, indent=4)
+        try:
+            with open(saved_setting_path, 'w') as json_file:
+                json.dump(self.overall_settings, json_file, indent=4)
+        except:
+            self.show_info_message('No setting file has been saved.')
 
 
     def load_settings(self):
@@ -564,12 +576,14 @@ class ControlPanel(QMainWindow):
 
         current_dir = os.path.dirname(os.path.abspath(__file__))
         imported_settings_path, _ = QFileDialog.getOpenFileName(self, "Select a LSM setting file", current_dir, "JSON Files (*.json)")
-        imported_settings_path
-        with open(imported_settings_path, 'r', encoding='utf-8') as file:
-            saved_settings = json.load(file)
+        try:
+            with open(imported_settings_path, 'r', encoding='utf-8') as file:
+                saved_settings = json.load(file)
 
-        saved_scan_parameters = saved_settings['scan_paramaters']
-        saved_instruments_parameters = saved_settings['instruments_paramaters']
+            saved_scan_parameters = saved_settings['scan_paramaters']
+            saved_instruments_parameters = saved_settings['instruments_paramaters']
+        except:
+            self.show_info_message('No setting file has been loaded.')
 
 
         ###################################################
@@ -658,7 +672,13 @@ class ControlPanel(QMainWindow):
             self.setFont(current_font)
             enforce_font_size(self, customize_font_size)
         
-
+    def show_info_message(self, message):
+        msg_box = QMessageBox()
+        msg_box.setIcon(QMessageBox.Information)
+        msg_box.setText(message)
+        msg_box.setWindowTitle("Information")
+        msg_box.setStandardButtons(QMessageBox.Ok)
+        msg_box.exec()
         
 
 if not QApplication.instance():
