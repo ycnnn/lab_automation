@@ -4,7 +4,7 @@ import ast
 import time
 import inspect
 import importlib
-from PySide6.QtWidgets import QApplication, QMainWindow, QLabel, QVBoxLayout, QHBoxLayout, QGridLayout, QWidget, QLabel,QPushButton, QProgressBar, QSpacerItem, QSizePolicy,QToolTip, QSpacerItem, QLineEdit, QScrollArea, QComboBox, QCheckBox,QLayout, QFileDialog
+from PySide6.QtWidgets import QApplication, QMainWindow, QLabel, QVBoxLayout, QHBoxLayout, QGridLayout, QWidget, QLabel,QPushButton, QProgressBar, QSpacerItem, QSizePolicy,QToolTip, QSpacerItem, QLineEdit, QScrollArea, QComboBox, QCheckBox,QLayout, QFileDialog, QDialog,QDialogButtonBox
 from PySide6.QtGui import QFontDatabase, QColor,QMouseEvent, QFont,QFontMetrics
 from PySide6.QtCore import Qt, QRectF, QTimer
 import pyqtgraph as pg
@@ -51,6 +51,56 @@ def load_font(font_path):
 
     return font_families[0]
 
+class AppearanceDialog(QDialog):
+    def __init__(self, system=None):
+        super().__init__()
+
+        self.setWindowTitle("Setting window appearances")
+
+        layout = QGridLayout()
+        customize_font_size = system.scan_parameters['custom_font_size']
+        customize_window_width = system.scan_parameters['custom_window_width']
+        self.font_size_label = QLabel("Customize font size:")
+        self.font_size_input = QLineEdit(str(customize_font_size))
+        layout.addWidget(self.font_size_label, 0, 0)  # Row 0, Column 0
+        layout.addWidget(self.font_size_input, 0, 1)  # Row 0, Column 1
+
+        self.window_width_label = QLabel("Customize scanning window width:")
+        self.window_width_input = QLineEdit(str(customize_window_width))
+        layout.addWidget(self.window_width_label, 1, 0)  # Row 1, Column 0
+        layout.addWidget(self.window_width_input, 1, 1)  # Row 1, Column 1
+
+        # OK and Cancel buttons
+        self.buttonBox = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
+        self.buttonBox.accepted.connect(self.accept)
+        self.buttonBox.rejected.connect(self.reject)
+
+        layout.addWidget(self.buttonBox, 2, 0, 1, 2)  # Span across two columns
+
+        self.setLayout(layout)
+
+    def get_values(self):
+        font_size_input, window_width_input = self.font_size_input.text(), self.window_width_input.text()
+        font_size_input = font_size_input.strip()  # Remove any spaces
+        window_width_input = window_width_input.strip() 
+
+        if font_size_input.lower() == "none":  # User explicitly types "None"
+            font_size = None
+        else:
+            try:
+                font_size = int(float(font_size_input))  # Convert to int otherwise
+            except:
+                pass
+
+        if window_width_input.lower() == "none":  # User explicitly types "None"
+            window_width= None
+        else:
+            try:
+                window_width = int(float(window_width_input))  # Convert to int otherwise
+            except:
+                pass
+        
+        return font_size, window_width
 
 
 class Instrument_area(QLabel):
@@ -245,6 +295,8 @@ class ControlPanel(QMainWindow):
         # Define scan and position parameters to be used
         self.scan_parameters = {}
         self.scan_parameters_input_fields = {}
+        self.scan_parameters['custom_font_size'] = None
+        self.scan_parameters['custom_window_width'] = None
         self.scan_parameters['scan_id'] = 'LSM_scan'
         self.scan_parameters['x_center'] = 50
         self.scan_parameters['y_center'] = 50
@@ -274,7 +326,7 @@ class ControlPanel(QMainWindow):
 
         self.params_layout = QGridLayout()
 
-        self.params_layout.addWidget(QLabel('Step 1: Setting up scan parameters'), 0, 0, 1,4)
+        self.params_layout.addWidget(QLabel('Step 1: Setting up scan parameters'), 0, 0, 1,3)
 
         self.params_layout.addWidget(QLabel('Scan ID'), 1, 0)
         self.scan_id_field = QLineEdit(self.scan_parameters['scan_id'])
@@ -284,6 +336,10 @@ class ControlPanel(QMainWindow):
         self.scan_id_field.editingFinished.connect(partial(
             self.set_scan_parameters, 'scan_id'))
         
+
+        self.change_appearance_button = QPushButton('Change Appearance')
+        self.change_appearance_button.clicked.connect(self.open_appearance_dialog)
+        self.params_layout.addWidget(self.change_appearance_button, 0, 2,1,2)
 
         self.save_settings_button = QPushButton('Save settings')
         self.load_settings_button = QPushButton('Load settings')
@@ -517,6 +573,12 @@ class ControlPanel(QMainWindow):
             self.scan_parameters_input_fields[key].setText(
                 str(saved_scan_parameters[key]))
             self.scan_parameters_input_fields[key].editingFinished.emit()
+        
+        custom_font_size = saved_scan_parameters['custom_font_size']
+        custom_window_width = saved_scan_parameters['custom_window_width']
+
+        self.set_system_apprearance(custom_font_size, custom_window_width)
+
         ###################################################
         ###################################################
         for instrument_dict in saved_instruments_parameters:
@@ -569,8 +631,22 @@ class ControlPanel(QMainWindow):
                     raise RuntimeError
                    
        
-       
+    def open_appearance_dialog(self):
+        dialog = AppearanceDialog(system=self)
+        if dialog.exec():  # If OK is pressed
+            customize_font_size, customize_window_width = dialog.get_values()   
+            self.set_system_apprearance(customize_font_size, customize_window_width)
+            
+    def set_system_apprearance(self, customize_font_size, customize_window_width):
+        self.scan_parameters['custom_font_size'] = customize_font_size
+        self.scan_parameters['custom_window_width'] = customize_window_width
+        if customize_font_size:
+            app = QApplication.instance()
+            current_font = app.font()
+            current_font.setPointSize(customize_font_size)
+        
 
+        
 
 if not QApplication.instance():
     app = QApplication([])
@@ -580,7 +656,6 @@ else:
 font_family = load_font('font/SourceCodePro-Medium.ttf')
 if font_family:
     global_font = QFont(font_family)
-    # global_font.setPixelSize(12)
     app.setFont(global_font)
 control_panel = ControlPanel()
 control_panel.show()
