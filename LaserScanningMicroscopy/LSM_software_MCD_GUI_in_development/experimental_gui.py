@@ -470,10 +470,10 @@ class ControlPanel(QMainWindow):
 
         self.params_layout.addWidget(QLabel('Step 3: Start the scan'), 13, 0, 1,3)
         self.start_scan_button = QPushButton('Start scan')
+        self.start_scan_button.clicked.connect(self.start_scan)
         self.params_layout.addWidget(self.start_scan_button, 13, 3)
 
-    # def set_font(self):
-    #     pass
+
     def synchronize_retrace_if_retrace_time_equal_to_trace(self):
         if self.retrace_state.checkState() == Qt.Checked:
             self.retrace_time_constant_field.setText(self.trace_time_constant_field.text())
@@ -685,6 +685,40 @@ class ControlPanel(QMainWindow):
         msg_box.setWindowTitle("Information")
         msg_box.setStandardButtons(QMessageBox.Ok)
         msg_box.exec()
+
+    def start_scan(self):
+        from source.params.position_params import Position_parameters
+        from source.params.scan_params import Scan_parameters
+        from source.params.display_params import Display_parameters
+        from source.plot_process import LSM_plot
+        import source.inst_driver as inst_driver
+
+        display_parameters = Display_parameters(
+            scan_id=self.scan_parameters['scan_id'], 
+            window_width=self.scan_parameters['custom_window_width'],
+            font_size=self.scan_parameters['custom_font_size'])
+
+        position_parameters = Position_parameters(
+                                                x_size=self.scan_parameters['x_center'],
+                                                y_size=self.scan_parameters['y_center'],
+                                                x_pixels=self.scan_parameters['x_pixels'],
+                                                y_pixels=self.scan_parameters['y_pixels'],
+                                                z_center=self.scan_parameters['z_center'],
+                                                angle=self.scan_parameters['angle'])
+    
+        scan_parameters = Scan_parameters(
+            point_time_constant=self.scan_parameters['point_time_constant'],retrace_point_time_constant=self.scan_parameters['retrace_point_time_constant'],
+            return_to_zero=False)
+        
+        instruments = []
+
+        scan = LSM_plot(position_parameters=position_parameters,
+             scan_parameters=scan_parameters,
+             display_parameters=display_parameters,
+             instruments=instruments,
+             auto_close_time_in_s=self.scan_parameters['auto_close_after_finish'],
+             simulate=True,
+             show_zero=True)
         
 
 if not QApplication.instance():
