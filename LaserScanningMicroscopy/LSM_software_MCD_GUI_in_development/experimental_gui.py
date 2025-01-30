@@ -317,6 +317,7 @@ class ControlPanel(QMainWindow):
         self.scan_parameters['angle'] = 0
         self.scan_parameters['point_time_constant'] = 0.1
         self.scan_parameters['retrace_point_time_constant'] = 0.05
+        self.scan_parameters['auto_close_after_finish'] = 10
         ######################################
 
 
@@ -430,20 +431,25 @@ class ControlPanel(QMainWindow):
         self.params_layout.addWidget(self.trace_time_constant_field, 8, 1)
         self.params_layout.addWidget(self.retrace_time_constant_field, 8, 2)
 
-        self.params_layout.addWidget(QLabel('Step 2: Setting up instruments'), 9, 0, 1,4)
+        self.params_layout.addWidget(QLabel('Auto close time after finish'), 9, 0, 1,2)
+        self.auto_close_time_constant_field = QLineEdit(str(self.scan_parameters['auto_close_after_finish']))
+        self.scan_parameters_input_fields['auto_close_after_finish'] = self.auto_close_time_constant_field
+        self.auto_close_time_constant_field.editingFinished.connect(partial(self.set_scan_parameters, 'auto_close_after_finish'))
+        self.params_layout.addWidget(self.auto_close_time_constant_field, 9, 2)
+        self.params_layout.addWidget(QLabel('Step 2: Setting up instruments'), 10, 0, 1,4)
 
 
         self.instr_dropdown = QComboBox()
         self.instr_names, self.instr_params, self.instr_init_arguments = read_instrument_setup()
         self.instr_dropdown.addItems(self.instr_names)
-        self.params_layout.addWidget(self.instr_dropdown,10,0,1,2)
+        self.params_layout.addWidget(self.instr_dropdown,11,0,1,2)
         self.add_instr_button = QPushButton('Add')
         self.remove_instr_button = QPushButton('Remove')
         self.remove_instr_button.setEnabled(False) 
         
 
-        self.params_layout.addWidget(self.add_instr_button, 10,2)
-        self.params_layout.addWidget(self.remove_instr_button, 10,3)
+        self.params_layout.addWidget(self.add_instr_button, 11,2)
+        self.params_layout.addWidget(self.remove_instr_button, 11,3)
 
         self.instrument_display_area = QScrollArea()
         self.instrument_display_area.setWidgetResizable(True)
@@ -454,7 +460,7 @@ class ControlPanel(QMainWindow):
         self.instrument_layout.setAlignment(Qt.AlignTop) 
         self.instrument_display_area.setWidget(self.instrument_content)
         self.instrument_content.setLayout(self.instrument_layout)
-        self.params_layout.addWidget(self.instrument_display_area, 11,0,1,4)
+        self.params_layout.addWidget(self.instrument_display_area, 12,0,1,4)
         self.add_instr_button.clicked.connect(self.add_instr)
         self.remove_instr_button.clicked.connect(self.remove_instr)
         self.selected_instr = None
@@ -462,9 +468,9 @@ class ControlPanel(QMainWindow):
         self.main_layout.addLayout(self.params_layout)
 
 
-        self.params_layout.addWidget(QLabel('Step 3: Start the scan'), 12, 0, 1,3)
+        self.params_layout.addWidget(QLabel('Step 3: Start the scan'), 13, 0, 1,3)
         self.start_scan_button = QPushButton('Start scan')
-        self.params_layout.addWidget(self.start_scan_button, 12, 3)
+        self.params_layout.addWidget(self.start_scan_button, 13, 3)
 
     # def set_font(self):
     #     pass
@@ -593,7 +599,7 @@ class ControlPanel(QMainWindow):
         self.set_retrace_state(self.retrace_state.checkState())
         for key in ['scan_id', 'x_center', 'y_center', 'z_center', 'x_size', 'y_size',
                      'x_pixels', 'y_pixels', 'angle', 'point_time_constant',
-                     'retrace_point_time_constant']:
+                     'retrace_point_time_constant', 'auto_close_after_finish']:
             self.scan_parameters_input_fields[key].setText(
                 str(saved_scan_parameters[key]))
             self.scan_parameters_input_fields[key].editingFinished.emit()

@@ -15,7 +15,6 @@ from nidaqmx.constants import Edge, AcquisitionType, TaskMode, WAIT_INFINITELY
 from nidaqmx.stream_readers import AnalogMultiChannelReader
 from nidaqmx.stream_writers import AnalogMultiChannelWriter
 
-from nidaqmx.system import System as nidaqSystem
 # from source.logger import Logger
 # from source.daq_driver import daq_interface, reset_daq
 
@@ -24,6 +23,19 @@ class Instrument:
 
     # log_file_path = os.path.dirname(os.path.dirname(__file__)) + '/temp_files/temp_instr_log.txt'
     # logger = Logger(log_file_path)
+    _params = {}
+
+    @property
+    def params(self):
+        # Access the class-level _params variable
+        return self._params
+    
+    @params.setter
+    def params(self, new_params):
+        if isinstance(new_params, dict):  # Ensure only dictionaries are assigned
+            self._params = new_params
+        else:
+            raise ValueError("params must be a dictionary")
 
     def __init__(self, 
                  address, 
@@ -229,6 +241,7 @@ class EmptyInstrument(Instrument):
         pass
    
 class SimulatedInstrument(Instrument):
+    _params = {'param1':20, 'param2':[0,1], 'param3':0}
     def __init__(self, address, position_parameters, name=None,**kwargs):
         super().__init__(address, channel_num=1, 
                          name=name,
@@ -239,7 +252,7 @@ class SimulatedInstrument(Instrument):
         
      
 
-        self.params = {'param1':20, 'param2':[0,1], 'param3':0}
+        # self.params = {'param1':20, 'param2':[0,1], 'param3':0}
         
     def initialize(self, **kwargs):
         super().initialize(**kwargs)
@@ -259,6 +272,7 @@ class SimulatedInstrument(Instrument):
                 size=(self.channel_num, self.reading_num))
 
 class SMU_deprecated(Instrument):
+    _params = {'voltage':0}
     def __init__(self, position_parameters, 
                  address="USB0::0x05E6::0x2450::04096331::INSTR",
                  name=None,
@@ -274,7 +288,7 @@ class SMU_deprecated(Instrument):
         
         
         self.ramp_steps = ramp_steps
-        self.params = {'voltage':0}
+        # self.params = {'voltage':0}
 
         
     def initialize(self, **kwargs):
@@ -327,6 +341,7 @@ class SMU_deprecated(Instrument):
         
 
 class SMU(Instrument):
+    _params = {'voltage':0}
     def __init__(self, position_parameters, 
                  address="USB0::0x05E6::0x2450::04096331::INSTR",
                  name=None,
@@ -341,7 +356,7 @@ class SMU(Instrument):
                          channel_name_list=['Voltage'],
                          **kwargs)
         self.ramp_steps = ramp_steps
-        self.params = {'voltage':0}
+
         
         
         
@@ -406,6 +421,10 @@ class SMU(Instrument):
 
 
 class Lockin(Instrument):
+    _params = {'time_constant_level':8, 
+                        'volt_input_range':3, 
+                        'signal_sensitivity':12,
+                                  }
     def __init__(self, 
                  address="USB0::0xB506::0x2000::002765::INSTR", 
                  position_parameters=None, 
@@ -420,10 +439,10 @@ class Lockin(Instrument):
         
     
 
-        self.params = {'time_constant_level':8, 
-                        'volt_input_range':3, 
-                        'signal_sensitivity':12,
-                                  }
+        # self.params = {'time_constant_level':8, 
+        #                 'volt_input_range':3, 
+        #                 'signal_sensitivity':12,
+        #                           }
         
         
     def initialize(self, **kwargs):
@@ -530,6 +549,12 @@ class Lockin(Instrument):
 
 
 class Lockin_dual_freq(Instrument):
+    _params = {'time_constant_level':8, 
+                        'volt_input_range':3, 
+                        'signal_sensitivity':12,
+                        'internal_frequency':10170,
+                        'internal_sine_amplitude':0.50,
+                                  }
     def __init__(self, 
                  address="USB0::0xB506::0x2000::002765::INSTR", 
                  position_parameters=None, 
@@ -544,12 +569,12 @@ class Lockin_dual_freq(Instrument):
         
        
 
-        self.params = {'time_constant_level':8, 
-                        'volt_input_range':3, 
-                        'signal_sensitivity':12,
-                        'internal_frequency':10170,
-                        'internal_sine_amplitude':0.50,
-                                  }
+        # self.params = {'time_constant_level':8, 
+        #                 'volt_input_range':3, 
+        #                 'signal_sensitivity':12,
+        #                 'internal_frequency':10170,
+        #                 'internal_sine_amplitude':0.50,
+        #                           }
         
     def initialize(self, **kwargs):
         super().initialize(**kwargs)
@@ -666,6 +691,7 @@ class Lockin_dual_freq(Instrument):
   
 
 class LaserDiode(Instrument):
+    _params = {'current':0.00}
     def __init__(self, address='USB0::0x1313::0x804F::M00332686::INSTR', 
                  position_parameters=None, 
                  name=None, 
@@ -679,7 +705,7 @@ class LaserDiode(Instrument):
         
      
 
-        self.params = {'current':0.00}
+        # self.params = {'current':0.00}
         
         
     def initialize(self, **kwargs):
@@ -723,6 +749,10 @@ class LaserDiode(Instrument):
         #     self.instrument.write('output:state 0')
 
 class Oscilloscope(Instrument):
+    _params = {'chopper_frequency':810.0,
+                       'duty_cycle_percent': 50,
+                       'mod_volt_high_in_volt':0.17,
+                       'mod_volt_low_in_volt':0.0}
     def __init__(self, address='USB0::0x0957::0x179A::MY51350123::INSTR', 
                  position_parameters=None, 
                  name=None, 
@@ -736,10 +766,10 @@ class Oscilloscope(Instrument):
         
  
 
-        self.params = {'chopper_frequency':810.0,
-                       'duty_cycle_percent': 50,
-                       'mod_volt_high_in_volt':0.17,
-                       'mod_volt_low_in_volt':0.0}
+        # self.params = {'chopper_frequency':810.0,
+        #                'duty_cycle_percent': 50,
+        #                'mod_volt_high_in_volt':0.17,
+        #                'mod_volt_low_in_volt':0.0}
         
         
     def initialize(self, **kwargs):
@@ -794,6 +824,7 @@ class Oscilloscope(Instrument):
 
 class RotationStage(Instrument):
     _driver_module = None
+    _params = {'angle':0}
 
     def __init__(self, address=55425494, position_parameters=None, name=None,**kwargs):
         super().__init__(address=address, channel_num=0, 
@@ -807,7 +838,7 @@ class RotationStage(Instrument):
             RotationStage._driver_module = K10CR1
         
        
-        self.params = {'angle':0}
+        # self.params = {'angle':0}
         
     def initialize(self, **kwargs):
         super().initialize(**kwargs)
@@ -831,8 +862,8 @@ class RotationStage(Instrument):
 
     def data_acquisition_start(self, **kwargs):
         super().data_acquisition_start(**kwargs)
-
 class DAQ(Instrument):
+    _params = {}
     def __init__(self, 
                  address='Dev2', 
                  position_parameters=None, 
@@ -1002,6 +1033,7 @@ class DAQ(Instrument):
         self.data = DAQ_input_data
 
 class DAQ_simulated(Instrument):
+    _params = {}
     def __init__(self, 
                  address='Dev2', 
                  position_parameters=None, 
@@ -1019,7 +1051,7 @@ class DAQ_simulated(Instrument):
         self.input_mapping = input_mapping
         self.scan_parameters = scan_parameters
         self.position_parameters = position_parameters
-        self.params = {}
+        # self.params = {}
 
         self.DAQ_output_data = self.position_parameters.DAQ_output_data
         self.frequency = 1/(self.scan_parameters.point_time_constant * self.position_parameters.x_pixels)
