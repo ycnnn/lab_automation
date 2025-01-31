@@ -21,7 +21,7 @@ class Display_parameters:
         full_path = os.path.realpath(__file__)
         path = str(Path(os.path.dirname(full_path)).parents[1].absolute()) + '/results/' + self.scan_id + '/'
     
-        self.save_destination = path if not save_destination else save_destination
+        self.save_destination = path if not save_destination else save_destination + '/results/' + self.scan_id + '/'
         self.axis_label_ticks_distance = axis_label_ticks_distance
         self.font_size = font_size
        
@@ -39,10 +39,10 @@ class Display_parameters:
 
         else:
             uniq = 1
-            backup_path = path[:-1] + '_backup_' + str(uniq) + '/'
+            backup_path = self.save_destination[:-1] + '_backup_' + str(uniq) + '/'
             while os.path.exists(backup_path):
                 uniq += 1
-                backup_path = path[:-1] + '_backup_' + str(uniq) + '/'
+                backup_path = self.save_destination[:-1] + '_backup_' + str(uniq) + '/'
             # shutil.copytree(self.save_destination, backup_path)
             # shutil.rmtree(self.save_destination)
             # os.makedirs(self.save_destination)
