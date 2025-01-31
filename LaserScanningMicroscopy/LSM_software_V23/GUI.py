@@ -107,7 +107,7 @@ def load_font(font_path):
 class AppearanceDialog(QDialog):
     def __init__(self, system=None):
         super().__init__()
-
+        self.system = system
         self.setWindowTitle("Setting window appearances")
 
         layout = QGridLayout()
@@ -123,10 +123,14 @@ class AppearanceDialog(QDialog):
         layout.addWidget(self.window_width_label, 1, 0)  # Row 1, Column 0
         layout.addWidget(self.window_width_input, 1, 1)  # Row 1, Column 1
 
-        # default_save_folder_path = os.path.dirname(os.path.abspath(__file__))
+
         self.save_destination_label = QLabel("Customize save destination:")
-        self.save_destination_input = QLineEdit('')
+        self.save_destination_button = QPushButton("Choose")
+        self.save_destination_button.clicked.connect(self.set_save_destination)
+        self.save_destination_input = QLabel(system.save_destination)
+        self.save_destination_input.setWordWrap(True)
         layout.addWidget(self.save_destination_label, 2, 0)  # Row 1, Column 0
+        layout.addWidget(self.save_destination_button, 2, 1) 
         layout.addWidget(self.save_destination_input, 3, 0,1,2)  # Row 1, Column 1
 
         # OK and Cancel buttons
@@ -138,6 +142,12 @@ class AppearanceDialog(QDialog):
 
         self.setLayout(layout)
 
+    def set_save_destination(self):
+        # try:
+            folder_path = QFileDialog.getExistingDirectory(self, "Select Directory to save",self.system.save_destination)
+            self.save_destination_input.setText(folder_path)
+        # except:
+        #     pass
     def get_values(self):
         font_size_input, window_width_input, save_destination = self.font_size_input.text(), self.window_width_input.text(), self.save_destination_input.text()
         font_size_input = font_size_input.strip()  # Remove any spaces
@@ -370,7 +380,8 @@ class ControlPanel(QMainWindow):
         self.scan_parameters['retrace_point_time_constant'] = self.scan_parameters['point_time_constant']
         self.scan_parameters['auto_close_after_finish'] = 10
 
-        self.save_destination = ''
+        self.default_save_folder_path = os.path.dirname(os.path.abspath(__file__))
+        self.save_destination = self.default_save_folder_path
         ######################################
 
 
@@ -616,8 +627,8 @@ class ControlPanel(QMainWindow):
         self.overall_settings['scan_paramaters'] = self.scan_parameters
         self.overall_settings['instruments_paramaters'] = self.instruments_save_list
 
-        default_save_folder_path = os.path.dirname(os.path.abspath(__file__))
-        folder_path = QFileDialog.getExistingDirectory(self, "Select Directory to save",default_save_folder_path)
+        
+        folder_path = QFileDialog.getExistingDirectory(self, "Select Directory to save",self.default_save_folder_path)
   
 
         saved_setting_path = folder_path + '/' + self.scan_parameters['scan_id'] + '.json'
@@ -779,7 +790,10 @@ class ControlPanel(QMainWindow):
 
             customize_window_width = self.scan_parameters['custom_window_width']
             customize_font_size = self.scan_parameters['custom_font_size']
-            customize_save_destination = self.save_destination if len(self.save_destination) > 0  else None
+            # customize_save_destination = self.save_destination if len(self.save_destination) > 0  else None
+            customize_save_destination = self.save_destination + '/'
+
+            print(f'\n\nSave destination: {customize_save_destination}\n\n\n')
 
             display_parameters = Display_parameters(
                 scan_id=self.scan_parameters['scan_id'], 
