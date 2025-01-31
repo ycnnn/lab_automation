@@ -1,7 +1,7 @@
 import sys
 import os, json
 import ast
-import time
+import time, traceback
 import inspect
 import importlib
 from PySide6.QtWidgets import QApplication, QMainWindow, QLabel, QVBoxLayout, QHBoxLayout, QGridLayout, QWidget, QLabel,QPushButton, QProgressBar, QSpacerItem, QSizePolicy,QToolTip, QSpacerItem, QLineEdit, QScrollArea, QComboBox, QCheckBox,QLayout, QFileDialog, QDialog,QDialogButtonBox, QMessageBox
@@ -22,6 +22,9 @@ def enforce_font_size(widget, font_size):
     for child in widget.findChildren(QWidget):
         enforce_font_size(child, font_size)  # Apply to all descendants
 
+
+
+
 def read_instrument_setup(path='source.inst_driver'):
     instr_module = importlib.import_module(path)
     instr_classes = inspect.getmembers(instr_module, inspect.isclass)
@@ -32,18 +35,60 @@ def read_instrument_setup(path='source.inst_driver'):
     for instr_name, instr_obj in instr_classes:
         if issubclass(instr_obj, instr_module.Instrument) and instr_obj is not instr_module.Instrument:
             instr_names.append(instr_name)
-            instr_params[instr_name] = instr_obj._params
+
+            ##########################################
+            ##########################################
+            ##########################################
             init_method = instr_obj.__init__
             signature = inspect.signature(init_method)
             default_args = {
                             param_name: param.default
                             for param_name, param in signature.parameters.items()
-                            if param.default is not inspect.Parameter.empty and param.default is not None
+                            if param_name not in ['self', 'scan_parameters', 'position_parameters',
+                                                  'name','kwargs']
                         }
+            for arg in default_args.keys():
+                default_arg_val = default_args[arg]
+                if isinstance(default_arg_val, type):
+                    default_args[arg] = '0'
             instr_init_arguments[instr_name] = default_args
+            ##########################################
+            ##########################################
+            ##########################################
+            source = inspect.getsource(instr_obj)
+            instr_params[instr_name] = {}
+            # Parse the source code into an AST
+            tree = ast.parse(source)
+            
+            # Traverse the AST to find the assignment to self.params
+            class_body = [node for node in tree.body if isinstance(node, ast.ClassDef)][0]
+            init_method = next(
+                (node for node in class_body.body if isinstance(node, ast.FunctionDef) and node.name == "__init__"), 
+                None
+            )
+
+            if not init_method:
+                raise ValueError("No __init__ method found in the class.")
+
+            for node in init_method.body:
+                if isinstance(node, ast.Assign):
+                    for target in node.targets:
+                        # print(target.attr)
+                   
+                        if isinstance(target, ast.Attribute) and target.attr == "params":
+                            params_dict = ast.literal_eval(node.value)
+                            instr_params[instr_name] = params_dict
+                           
+
+
+            
+            ##########################################
+            ##########################################
+            ##########################################
 
 
     return instr_names, instr_params, instr_init_arguments
+
    
 def load_font(font_path):
     dir_path = os.path.dirname(os.path.realpath(__file__))
@@ -316,7 +361,7 @@ class ControlPanel(QMainWindow):
         self.scan_parameters['y_pixels'] = 50
         self.scan_parameters['angle'] = 0
         self.scan_parameters['point_time_constant'] = 0.1
-        self.scan_parameters['retrace_point_time_constant'] = 0.05
+        self.scan_parameters['retrace_point_time_constant'] = self.scan_parameters['point_time_constant']
         self.scan_parameters['auto_close_after_finish'] = 10
         ######################################
 
@@ -475,8 +520,9 @@ class ControlPanel(QMainWindow):
 
 
     def synchronize_retrace_if_retrace_time_equal_to_trace(self):
-        if self.retrace_state.checkState() == Qt.Checked:
+        if self.retrace_state.checkState() == Qt.Unchecked:
             self.retrace_time_constant_field.setText(self.trace_time_constant_field.text())
+            self.retrace_time_constant_field.editingFinished.emit()
         else:
             print('Retrace time will not change.')
 
@@ -570,16 +616,12 @@ class ControlPanel(QMainWindow):
         try:
             with open(saved_setting_path, 'w') as json_file:
                 json.dump(self.overall_settings, json_file, indent=4)
-        except:
-            self.show_info_message('No setting file has been saved.')
+        except Exception as exception:
+            error_details = 'The scan configuration has not been saved. \n\nExecution details:\n\n' + f"{type(exception).__name__}: {str(exception)}\n{traceback.format_exc()}"
+            self.show_info_message(error_details)
 
 
     def load_settings(self):
-        for instr_index in range(self.instrument_layout.count()):
-            instrument = self.instrument_layout.itemAt(instr_index).widget()
-            instrument.deleteLater()
-        self.remove_instr_button.setEnabled(False)
-
         current_dir = os.path.dirname(os.path.abspath(__file__))
         imported_settings_path, _ = QFileDialog.getOpenFileName(self, "Select a LSM setting file", current_dir, "JSON Files (*.json)")
         try:
@@ -588,9 +630,19 @@ class ControlPanel(QMainWindow):
 
             saved_scan_parameters = saved_settings['scan_paramaters']
             saved_instruments_parameters = saved_settings['instruments_paramaters']
-        except:
-            self.show_info_message('No setting file has been loaded.')
+        except Exception as exception:
+            error_details = 'No setting file has been loaded. \n\nExecution details:\n\n' + f"{type(exception).__name__}: {str(exception)}\n{traceback.format_exc()}"
+            self.show_info_message(error_details)
+            # self.show_info_message('No setting file has been loaded.')
+            return
+        
+        for instr_index in range(self.instrument_layout.count()):
+            instrument = self.instrument_layout.itemAt(instr_index).widget()
+            instrument.deleteLater()
+        self.remove_instr_button.setEnabled(False)
 
+        
+        
 
         ###################################################
         ###################################################
@@ -685,7 +737,22 @@ class ControlPanel(QMainWindow):
         msg_box.setWindowTitle("Information")
         msg_box.setStandardButtons(QMessageBox.Ok)
         msg_box.exec()
+    def parse_scan_aprameters_input(self, input_str):
+        try:
+            # Attempt to evaluate as a number or list
+            parsed_value = ast.literal_eval(input_str)
 
+            # Ensure it's either a number, list of numbers, or list of strings
+            if isinstance(parsed_value, (int, float)):
+                return parsed_value
+            elif isinstance(parsed_value, list) and all(isinstance(i, (int, float, str)) for i in parsed_value):
+                return parsed_value
+        except (ValueError, SyntaxError):
+            # If evaluation fails, return as a string (case 1)
+            pass
+
+        return input_str  # Return as string if none of the other conditions apply
+    
     def start_scan(self):
         from source.params.position_params import Position_parameters
         from source.params.scan_params import Scan_parameters
@@ -693,32 +760,88 @@ class ControlPanel(QMainWindow):
         from source.plot_process import LSM_plot
         import source.inst_driver as inst_driver
 
-        display_parameters = Display_parameters(
-            scan_id=self.scan_parameters['scan_id'], 
-            window_width=self.scan_parameters['custom_window_width'],
-            font_size=self.scan_parameters['custom_font_size'])
+        try:
 
-        position_parameters = Position_parameters(
-                                                x_size=self.scan_parameters['x_center'],
-                                                y_size=self.scan_parameters['y_center'],
-                                                x_pixels=self.scan_parameters['x_pixels'],
-                                                y_pixels=self.scan_parameters['y_pixels'],
-                                                z_center=self.scan_parameters['z_center'],
-                                                angle=self.scan_parameters['angle'])
-    
-        scan_parameters = Scan_parameters(
-            point_time_constant=self.scan_parameters['point_time_constant'],retrace_point_time_constant=self.scan_parameters['retrace_point_time_constant'],
-            return_to_zero=False)
+            # window_width = self.scan_parameters['custom_window_width']
+            # font_size = self.scan_parameters['custom_font_size']
+            display_parameters = Display_parameters(
+                scan_id=self.scan_parameters['scan_id'], 
+                # window_width=font_size if font_size,
+                # font_size=int()
+                )
+
+            position_parameters = Position_parameters(
+                                                    x_size=float(self.scan_parameters['x_center']),
+                                                    y_size=float(self.scan_parameters['y_center']),
+                                                    x_pixels=int(self.scan_parameters['x_pixels']),
+                                                    y_pixels=int(self.scan_parameters['y_pixels']),
+                                                    z_center=float(self.scan_parameters['z_center']),
+                                                    angle=float(self.scan_parameters['angle']))
         
-        instruments = []
+            scan_parameters = Scan_parameters(
+                point_time_constant=float(self.scan_parameters['point_time_constant']),retrace_point_time_constant=float(self.scan_parameters['retrace_point_time_constant']),
+                return_to_zero=False)
+            
+            print('\n\n')
+            print(float(self.scan_parameters['point_time_constant']))
+            print(float(self.scan_parameters['retrace_point_time_constant']))
+            print('\n\n')
+            
+            instruments = []
 
-        scan = LSM_plot(position_parameters=position_parameters,
-             scan_parameters=scan_parameters,
-             display_parameters=display_parameters,
-             instruments=instruments,
-             auto_close_time_in_s=self.scan_parameters['auto_close_after_finish'],
-             simulate=True,
-             show_zero=True)
+            for instr_index in range(self.instrument_layout.count()):
+                instrument = self.instrument_layout.itemAt(instr_index).widget()
+                instr_prop = {}
+                init_args_values = {}
+                for key, value in instrument.init_args_values.items():
+                    init_args_values[key] = self.parse_scan_aprameters_input(value)
+                    # print(f'Parsing {value} as {type(init_args_values[key])}')
+                    # if isinstance(init_args_values[key], list):
+                    #     print(f'List: first element {init_args_values[key][0]} is type {type(init_args_values[key])}')
+                
+
+                for param in instrument.param_list:
+                    param_mode = instrument.param_modes[param]
+                    param_val = instrument.param_values[param]
+
+                    print('\n\n')
+                    print(param)
+                    print(param_mode)
+                    print(type(param_val))
+                    print(param_val)
+                    print('\n\n')
+
+                    if param_mode == 'Constant':
+                        instr_prop[param] = float(param_val)
+                    elif param_mode == 'Linear':
+                        instr_prop[param] = [float(param_val[0]), float(param_val[1])]
+                    elif param_mode == 'Trace/retrace':
+                        instr_prop[param] = [[float(param_val[0])], [float(param_val[1])]]
+                    elif param_mode == 'Custom':
+                        instr_prop[param] = param_val
+                    else:
+                        raise RuntimeError
+
+        
+                instrument = getattr(inst_driver, instrument.instr_type)(
+                    position_parameters=position_parameters,
+                    scan_parameters=scan_parameters,
+                    **init_args_values,
+                    **instr_prop
+                )
+                instruments.append(instrument)
+
+            scan = LSM_plot(position_parameters=position_parameters,
+                scan_parameters=scan_parameters,
+                display_parameters=display_parameters,
+                instruments=instruments,
+                auto_close_time_in_s=int(self.scan_parameters['auto_close_after_finish']),
+                simulate=True,
+                show_zero=True)
+        except Exception as exception:
+            error_details = 'Error(s) occured. The scan has not been started or successfully finished. Error details:\n\n' + f"{type(exception).__name__}: {str(exception)}\n{traceback.format_exc()}"
+            self.show_info_message(error_details)
+            print(error_details)
         
 
 if not QApplication.instance():

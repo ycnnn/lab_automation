@@ -239,7 +239,7 @@ class SimulatedInstrument(Instrument):
         
      
 
-        self.params = {'param1':20, 'param2':[0,1], 'param3':0}
+        self.params = {'param1':20, 'param2':1, 'param3':0}
         
     def initialize(self, **kwargs):
         super().initialize(**kwargs)
