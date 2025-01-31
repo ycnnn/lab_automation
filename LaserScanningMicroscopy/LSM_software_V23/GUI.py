@@ -884,7 +884,7 @@ else:
 font_family = load_font('font/SourceCodePro-Medium.ttf')
 if font_family:
     global_font = QFont(font_family)
-    global_font.setPixelSize(12)
+    # global_font.setPixelSize(12)
     app.setFont(global_font)
 
 control_panel = ControlPanel(app=app)
