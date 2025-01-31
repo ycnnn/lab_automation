@@ -33,8 +33,10 @@ def load_font(font_path):
     return font_families[0]
 
 class AppController:
-    def __init__(self):
+    def __init__(self, channel_num, save_destination):
         self.windows = []
+        self.channel_num = channel_num
+        self.save_destination = save_destination
 
     def add_window(self, window):
         self.windows.append(window)
@@ -60,8 +62,15 @@ class AppController:
             window.h_line.setPen(window.invisible_crosshair_pen)
             window.v_line.setPen(window.invisible_crosshair_pen)
 
+    def grab_screenshot(self):
+        for channel_id in range(self.channel_num):
+            pixmap = self.windows[channel_id].grab()
+            # self.windows[channel_id].pixmap.save(self.display_parameters.save_destination + self.windows[channel_id].title + '.png')
+            pixmap.save(self.save_destination + self.windows[channel_id].title + '.png')
 
     def close_all_windows(self):
+        
+        self.grab_screenshot()
         
         for window in self.windows:
             window.close()
@@ -95,7 +104,8 @@ class LSM_plot:
         screen_width = self.app.primaryScreen().size().width()
         screen_height = self.app.primaryScreen().size().height()
 
-        self.controller = AppController()
+        self.controller = AppController(channel_num=self.channel_num,
+                                        save_destination=self.display_parameters.save_destination)
         # default_font_size = self.app.font().pointSize()
         # Standard point size, a screen roughly have 60 lines
         default_font_size = screen_height / 70
@@ -144,10 +154,10 @@ class LSM_plot:
     
         self.app.exec()
 
-        for channel_id in range(self.channel_num):
-            pixmap = self.windows[channel_id].grab()
-            # self.windows[channel_id].pixmap.save(self.display_parameters.save_destination + self.windows[channel_id].title + '.png')
-            pixmap.save(self.display_parameters.save_destination + self.windows[channel_id].title + '.png')
+        # for channel_id in range(self.channel_num):
+        #     pixmap = self.windows[channel_id].grab()
+        #     # self.windows[channel_id].pixmap.save(self.display_parameters.save_destination + self.windows[channel_id].title + '.png')
+        #     pixmap.save(self.display_parameters.save_destination + self.windows[channel_id].title + '.png')
       
 
 

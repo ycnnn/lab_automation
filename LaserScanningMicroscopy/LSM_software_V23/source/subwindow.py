@@ -198,7 +198,7 @@ class SubWindow(QMainWindow):
             # print('\n\n\n')
             # print(str(datetime.now()) + ' Will close the window')
             # print('\n\n\n')
-            
+        
             self.controller.close_all_windows()
             super().closeEvent(event)
         # Allow the base class to handle the close event
