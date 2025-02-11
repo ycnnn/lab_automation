@@ -405,7 +405,7 @@ def generate_horizontal_cbar(cbar_ax, cmap='bwr', vmin=0, vmax=1,
     pad = -height_in_points/2
     cbar_ax.set_yticks([])
     cbar_ax.tick_params(axis='x', which='both', length=0) 
-    cbar_ax.tick_params(axis='x', labelbottom=True, labeltop=False, pad=pad)
+    cbar_ax.tick_params(axis='x', labelbottom=True, labeltop=False, pad=pad + delta_pad)
 
     for label in cbar_ax.get_xticklabels():
         label.set_path_effects([withStroke(linewidth=3, foreground=foreground)])
