@@ -391,6 +391,7 @@ def generate_horizontal_cbar(cbar_ax, cmap='bwr', vmin=0, vmax=1,
                              label_position=[0.08,0.5,0.92],
                              custom_labels = None,
                              foreground=(1,1,1,0.75),
+                             delta_pad=0,
                              ):
     cbar = cbar_ax.imshow(np.linspace([0,0],[1,1], num=500).T, aspect='auto', cmap=cmap)
     fig = plt.gcf()
