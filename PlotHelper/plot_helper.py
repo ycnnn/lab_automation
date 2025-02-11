@@ -389,7 +389,7 @@ def boxplot_2d_helper(x,y, ax, whis=1.5, linewidth=0.5,
 def generate_horizontal_cbar(cbar_ax, cmap='bwr', vmin=0, vmax=1, 
                              title='Colorbar',
                              label_position=[0.08,0.5,0.92],
-                             custom_labels = None,
+                             custom_labels = [],
                              foreground=(1,1,1,0.75),
                              delta_pad=0,
                              ):
@@ -412,8 +412,8 @@ def generate_horizontal_cbar(cbar_ax, cmap='bwr', vmin=0, vmax=1,
         label.set_verticalalignment('center')
     label_position = np.array(label_position) * 500
     cbar_ax.set_xticks(label_position)
-    if not custom_labels:
-        tick_labels = [vmin, title ,vmax]
+    if len(custom_labels)==0:
+        tick_labels = [vmin, title, vmax]
     else:
         tick_labels = custom_labels
     cbar_ax.set_xticklabels(tick_labels)
