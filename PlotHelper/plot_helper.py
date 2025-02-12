@@ -441,10 +441,14 @@ def set_tick_num(ax, x_tick_num=None, y_tick_num=None):
         ax.yaxis.set_major_locator(MaxNLocator(nbins=y_tick_num))
 
 def change_axis_color(ax=None, axis='x', orientation='left', color='blue'):
-    if axis != 'x' and axis !='y':
-        raise RuntimeError('Axis incorrect')
-    if orientation not in ['left', 'right', 'top', 'bottom']:
-        raise RuntimeError('Orientation incorrect')
+
+    if (axis, orientation) not in [
+        ('x','top'),
+        ('x','bottom'),
+        ('y','left'),
+        ('y','right'),
+    ]:
+        raise RuntimeError('Orientation or axis or teir combination incorrect')
     ax = ax if ax else plt.gca()
     ax.spines[orientation].set_color(color)  # Change the color of the left spine (y-axis)
     ax.tick_params(axis=axis, colors=color)
