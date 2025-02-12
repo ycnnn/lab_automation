@@ -451,6 +451,9 @@ def change_axis_color(ax=None, axis='x', orientation='left', color='blue'):
     ]:
         raise RuntimeError('Orientation or axis or teir combination incorrect')
     ax = ax if ax else plt.gca()
+    fig = plt.gcf()
+    for iterate_ax in fig.axes:
+        iterate_ax.spines[orientation].set_color([0,0,0,0])
     ax.spines[orientation].set_color(color)  # Change the color of the left spine (y-axis)
     ax.tick_params(axis=axis, colors=color)
     if axis == 'x':
