@@ -441,7 +441,8 @@ def set_tick_num(ax, x_tick_num=None, y_tick_num=None):
         ax.yaxis.set_major_locator(MaxNLocator(nbins=y_tick_num))
 
 def change_axis_color(ax=None, axis='x', orientation='left', color='blue'):
-
+    axis = axis.lower()
+    orientation = orientation.lower()
     if (axis, orientation) not in [
         ('x','top'),
         ('x','bottom'),
