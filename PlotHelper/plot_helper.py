@@ -14,6 +14,7 @@ from matplotlib.ticker import MaxNLocator
 
 svg = {'bbox_inches':'tight', 'transparent':True,'pad_inches':0.1}
 pdf = {'bbox_inches':'tight', 'transparent':True,'pad_inches':0.1}
+png = {'bbox_inches':'tight', 'transparent':True,'pad_inches':0.1, 'dpi':750}
 font_size = 10
 
 def generate_colormap(N=1024):
