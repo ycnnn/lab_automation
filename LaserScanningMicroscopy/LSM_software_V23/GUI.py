@@ -385,7 +385,7 @@ class ControlPanel(QMainWindow):
         ######################################
 
 
-        self.setWindowTitle("Setup a LSM Scan")
+        self.setWindowTitle("Setup a LSM Scan © Yue Zhang @ vdZ Lab")
         self.setStyleSheet("QMainWindow { background-color: black; }")
         screen = QApplication.primaryScreen()
         screen_height = screen.geometry().height()
@@ -609,7 +609,7 @@ class ControlPanel(QMainWindow):
         print(key + ' set to ' + val)
 
 
-    def save_settings(self):
+    def save_settings(self, forced_custom_save_path=None):
         self.overall_settings = {}
         
         self.instruments_save_list = []
@@ -627,8 +627,10 @@ class ControlPanel(QMainWindow):
         self.overall_settings['scan_paramaters'] = self.scan_parameters
         self.overall_settings['instruments_paramaters'] = self.instruments_save_list
 
-        
-        folder_path = QFileDialog.getExistingDirectory(self, "Select Directory to save",self.default_save_folder_path)
+        if forced_custom_save_path:
+            folder_path = forced_custom_save_path
+        else:
+            folder_path = QFileDialog.getExistingDirectory(self, "Select Directory to save",self.default_save_folder_path)
   
 
         saved_setting_path = folder_path + '/' + self.scan_parameters['scan_id'] + '.json'
@@ -863,6 +865,7 @@ class ControlPanel(QMainWindow):
                 )
                 instruments.append(instrument)
 
+            self.save_settings(forced_custom_save_path=customize_save_destination + '/results/' + self.scan_parameters['scan_id'] + '/')
             scan = LSM_plot(position_parameters=position_parameters,
                 scan_parameters=scan_parameters,
                 display_parameters=display_parameters,
@@ -875,11 +878,7 @@ class ControlPanel(QMainWindow):
             self.show_info_message(error_details)
             print(error_details)
 
-   
-# if len(sys.argv) > 1:
-#     pass
 
-# else:
 if not QApplication.instance():
     app = QApplication([])
 else:
