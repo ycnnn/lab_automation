@@ -2,6 +2,8 @@ import numpy as np
 import os
 import shutil
 from pathlib import Path
+from datetime import datetime
+
 
 class Display_parameters:
     def __init__(self,
@@ -34,19 +36,17 @@ class Display_parameters:
         # In short, the code NEVER overwrites nor DELETES your data!
 
         if not os.path.exists(self.save_destination):
-            # If the directory does not exist, create it
             os.makedirs(self.save_destination)
 
         else:
-            uniq = 1
-            backup_path = self.save_destination[:-1] + '_backup_' + str(uniq) + '/'
-            while os.path.exists(backup_path):
-                uniq += 1
-                backup_path = self.save_destination[:-1] + '_backup_' + str(uniq) + '/'
-            # shutil.copytree(self.save_destination, backup_path)
-            # shutil.rmtree(self.save_destination)
-            # os.makedirs(self.save_destination)
-            os.rename(self.save_destination, backup_path)
+            short_timestamp_str = datetime.now().strftime("_%yY_%mM_%dD_%HH_%MM_%SS")
+            long_timestamp_str  = datetime.now().strftime('_%yY_%mM_%dD_%HH_%MM_%S.%f')[:-3] + 'MS'
+            new_save_destination = self.save_destination[:-1] + short_timestamp_str + '/'
+            if os.path.exists(new_save_destination):
+                new_save_destination = self.save_destination[:-1] + long_timestamp_str + '/'
+            self.save_destination = new_save_destination
+            
+     
         
 
         os.makedirs(self.save_destination + 'data/')

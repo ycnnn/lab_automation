@@ -60,7 +60,17 @@ class LSM_scan(QThread):
         
         daq_exists = any(
             isinstance(instrument, DAQ_type) for instrument in self.instruments)
+        
+        # physical_daq_exists = any(
+        #     isinstance(instrument, inst_driver.DAQ) for instrument in self.instruments)
+        # sim_daq_exists = any(
+        #     isinstance(instrument, inst_driver.DAQ_simulated) for instrument in self.instruments)
 
+        # if not physical_daq_exists:
+        #     if not sim_daq_exists:
+        #         raise RuntimeError('DAQ not added to instrument list.')
+        #     else:
+        #         self.logger('No physical DAQ added, the system uses a simulated DAQ.')
         
         if not daq_exists:
             raise RuntimeError('DAQ not added to instrument list.')

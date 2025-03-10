@@ -1,0 +1,91 @@
+{
+    "scan_paramaters": {
+        "custom_font_size": null,
+        "custom_window_width": null,
+        "scan_id": "LSM_scan",
+        "x_center": "50",
+        "y_center": "50",
+        "z_center": "25",
+        "x_size": "35",
+        "y_size": "35",
+        "x_pixels": "100",
+        "y_pixels": "100",
+        "angle": "0",
+        "point_time_constant": "0.01",
+        "retrace_point_time_constant": "0.01",
+        "auto_close_after_finish": "10"
+    },
+    "instruments_paramaters": [
+        {
+            "type": "DAQ",
+            "init_args_values": {
+                "name": "DAQ",
+                "address": "Dev2",
+                "input_mapping": "['ai0']",
+                "no_average_input_channels": "[]",
+                "input_average": "10"
+            },
+            "param_list": [],
+            "param_modes": {},
+            "param_values": {}
+        },
+        {
+            "type": "LaserDiode",
+            "init_args_values": {
+                "name": "LaserDiode",
+                "address": "USB0::0x1313::0x804F::M00423181::INSTR"
+            },
+            "param_list": [
+                "current"
+            ],
+            "param_modes": {
+                "current": "Constant"
+            },
+            "param_values": {
+                "current": 0.045
+            }
+        },
+        {
+            "type": "SMU",
+            "init_args_values": {
+                "name": "SMU",
+                "address": "USB0::0x05E6::0x2450::04096331::INSTR",
+                "ramp_steps": 10
+            },
+            "param_list": [
+                "voltage"
+            ],
+            "param_modes": {
+                "voltage": "Linear"
+            },
+            "param_values": {
+                "voltage": [
+                    -1.0,
+                    1.0
+                ]
+            }
+        },
+        {
+            "type": "Lockin",
+            "init_args_values": {
+                "name": "Lockin",
+                "address": "USB0::0xB506::0x2000::002765::INSTR"
+            },
+            "param_list": [
+                "time_constant_level",
+                "volt_input_range",
+                "signal_sensitivity"
+            ],
+            "param_modes": {
+                "time_constant_level": "Constant",
+                "volt_input_range": "Constant",
+                "signal_sensitivity": "Constant"
+            },
+            "param_values": {
+                "time_constant_level": 8.0,
+                "volt_input_range": 3,
+                "signal_sensitivity": 12
+            }
+        }
+    ]
+}

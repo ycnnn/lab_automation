@@ -868,14 +868,18 @@ class ControlPanel(QMainWindow):
                 display_parameters=display_parameters,
                 instruments=instruments,
                 auto_close_time_in_s=int(self.scan_parameters['auto_close_after_finish']),
-                simulate=True,
+                simulate=False,
                 show_zero=True)
         except Exception as exception:
             error_details = 'Error(s) occured. The scan has not been started or successfully finished. Error details:\n\n' + f"{type(exception).__name__}: {str(exception)}\n{traceback.format_exc()}"
             self.show_info_message(error_details)
             print(error_details)
-        
 
+   
+# if len(sys.argv) > 1:
+#     pass
+
+# else:
 if not QApplication.instance():
     app = QApplication([])
 else:

@@ -152,7 +152,15 @@ class Instrument:
             param_sweep_list = param_val
         
         return param_sweep_list
-    
+    def initialize_visa_type_instrument(self):
+        rm = pyvisa.ResourceManager()
+        self.logger.info('\n\nInitializing...\n\n')
+        try:
+            self.instrument = rm.open_resource(self.address)
+        except Exception as e:
+        # if not self.instrument:
+            error_message = f'Instrument {self.name} has not been initialized successfuly. Check if it has been turned on, and the address {self.address} is correct.'
+            raise RuntimeError(error_message)
     # Methods that are instrument-specific
     ##############################################################################################
     ##############################################################################################
@@ -279,9 +287,7 @@ class SMU_deprecated(Instrument):
         
     def initialize(self, **kwargs):
         super().initialize(**kwargs)
-        rm = pyvisa.ResourceManager()
-        self.logger.info('\n\nInitializing...\n\n')
-        self.smu = rm.open_resource(self.address)
+        self.initialize_visa_type_instrument()
         self.smu.timeout = 500
         self.smu.write('reset()')
         self.smu.write("smu.source.autorange = smu.ON")
@@ -348,9 +354,7 @@ class SMU(Instrument):
         
     def initialize(self, **kwargs):
         super().initialize(**kwargs)
-        rm = pyvisa.ResourceManager()
-        self.logger.info('\n\nInitializing...\n\n')
-        self.instrument = rm.open_resource(self.address)
+        self.initialize_visa_type_instrument()
         self.instrument.timeout = 500
         self.instrument.write('reset()')
         self.instrument.write("smu.source.autorange = smu.ON")
@@ -429,8 +433,7 @@ class Lockin(Instrument):
     def initialize(self, **kwargs):
         super().initialize(**kwargs)
 
-        rm = pyvisa.ResourceManager()
-        self.instrument = rm.open_resource(self.address)
+        self.initialize_visa_type_instrument()
 
         # Reset
         self.instrument.write('*rst')
@@ -554,8 +557,7 @@ class Lockin_dual_freq(Instrument):
     def initialize(self, **kwargs):
         super().initialize(**kwargs)
 
-        rm = pyvisa.ResourceManager()
-        self.instrument = rm.open_resource(self.address)
+        self.initialize_visa_type_instrument()
 
         # Reset
         self.instrument.write('*rst')
@@ -684,8 +686,7 @@ class LaserDiode(Instrument):
         
     def initialize(self, **kwargs):
         super().initialize(**kwargs)
-        rm = pyvisa.ResourceManager()
-        self.instrument = rm.open_resource(self.address)
+        self.initialize_visa_type_instrument()
    
         if np.min(
             self.params_sweep_lists['current']
@@ -744,8 +745,7 @@ class Oscilloscope(Instrument):
         
     def initialize(self, **kwargs):
         super().initialize(**kwargs)
-        rm = pyvisa.ResourceManager()
-        self.instrument = rm.open_resource(self.address)
+        self.initialize_visa_type_instrument()
 
         self.logger.info('Currently, the oscilloscope does not support variable input parameters.')
    
