@@ -75,7 +75,8 @@ class AppController:
         
         for window in self.windows:
             window.close()
-        self.gui_start_scan_button.setEnabled(True) 
+        if not self.gui_start_scan_button:
+            self.gui_start_scan_button.setEnabled(True) 
 
 class LSM_plot:
 
