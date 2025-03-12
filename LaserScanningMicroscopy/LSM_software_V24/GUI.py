@@ -360,7 +360,7 @@ class Instrument_area(QLabel):
         
 
 class ControlPanel(QMainWindow):
-    def __init__(self, app, instrument_area_height_ratio=0.4):
+    def __init__(self, app, instrument_area_height_ratio=0.4, is_simulated=False):
         super().__init__()
         self.app = app
         ######################################
@@ -384,6 +384,7 @@ class ControlPanel(QMainWindow):
 
         self.default_save_folder_path = os.path.dirname(os.path.abspath(__file__))
         self.save_destination = self.default_save_folder_path
+        self.is_simulated = is_simulated
         ######################################
 
 
@@ -880,7 +881,7 @@ class ControlPanel(QMainWindow):
                 display_parameters=display_parameters,
                 instruments=instruments,
                 auto_close_time_in_s=int(self.scan_parameters['auto_close_after_finish']),
-                simulate=False,
+                simulate=self.is_simulated,
                 show_zero=True,
                 app=self.app,
                 gui_start_scan_button=self.start_scan_button)
@@ -903,6 +904,6 @@ if font_family:
     global_font = QFont(font_family)
     app.setFont(global_font)
 
-control_panel = ControlPanel(app=app)
+control_panel = ControlPanel(app=app, is_simulated=True)
 control_panel.show()
 app.exec()
