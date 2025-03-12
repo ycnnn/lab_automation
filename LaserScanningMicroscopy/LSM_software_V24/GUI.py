@@ -904,6 +904,6 @@ if font_family:
     global_font = QFont(font_family)
     app.setFont(global_font)
 
-control_panel = ControlPanel(app=app, is_simulated=True)
+control_panel = ControlPanel(app=app, is_simulated=False)
 control_panel.show()
 app.exec()
