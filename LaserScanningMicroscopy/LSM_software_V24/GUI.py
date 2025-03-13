@@ -111,7 +111,7 @@ class AppearanceDialog(QDialog):
     def __init__(self, system=None):
         super().__init__()
         self.system = system
-        self.setWindowTitle("Setting window appearances")
+        self.setWindowTitle("Advanced settings")
 
         layout = QGridLayout()
         customize_font_size = system.scan_parameters['custom_font_size']
@@ -135,16 +135,54 @@ class AppearanceDialog(QDialog):
         layout.addWidget(self.save_destination_label, 2, 0)  # Row 1, Column 0
         layout.addWidget(self.save_destination_button, 2, 1) 
         layout.addWidget(self.save_destination_input, 3, 0,1,2)  # Row 1, Column 1
-
+        
+        self.instr_height_label = QLabel("Instrument area height:")
+        self.instr_height_input = QLineEdit(f'{self.system.instrument_area_height_ratio}')
+        self.instr_height_input.editingFinished.connect(self.set_instr_area_height)
+        layout.addWidget(self.instr_height_label, 4, 0)  
+        layout.addWidget(self.instr_height_input, 4, 1)  
+        
+        
+        self.is_simulated_checkbox = QCheckBox('Run simulated scan')
+        self.is_simulated_checkbox.stateChanged.connect(self.on_simulated_status_changed)
+        layout.addWidget(self.is_simulated_checkbox, 5,0)
         # OK and Cancel buttons
         self.buttonBox = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
         self.buttonBox.accepted.connect(self.accept)
         self.buttonBox.rejected.connect(self.reject)
 
-        layout.addWidget(self.buttonBox, 4, 0, 1, 2)  # Span across two columns
+        layout.addWidget(self.buttonBox, 6, 0, 1, 2)  # Span across two columns
 
         self.setLayout(layout)
 
+    def set_instr_area_height(self):
+        self.system.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Minimum)
+        instr_height = float(self.instr_height_input.text())
+        self.system.instrument_area_height_ratio = instr_height
+        self.system.instrument_display_area.setFixedHeight(instr_height * self.system.screen_height)
+        self.system.main_layout.setSizeConstraint(QLayout.SetFixedSize)
+
+        
+        # self.system.instrument_display_area.updateGeometry()  
+        # self.system.central_widget.updateGeometry()  
+        # self.system.updateGeometry()  
+        # self.system.central_widget.resize(self.system.central_widget.minimumSizeHint())
+
+        # self.system.resize(self.system.minimumSizeHint())
+
+
+
+    
+    def on_simulated_status_changed(self, state):
+        if Qt.CheckState(state) == Qt.Unchecked:
+            self.system.is_simulated = False
+            print('Run real scan')
+        elif Qt.CheckState(state) == Qt.Checked:
+            print('Run simulated scan')
+            self.system.is_simulated = True
+        else:
+            raise RuntimeError('Simualted status fatal error.\n')
+        
     def set_save_destination(self):
         # try:
             folder_path = QFileDialog.getExistingDirectory(self, "Select Directory to save",self.system.save_destination)
@@ -360,7 +398,7 @@ class Instrument_area(QLabel):
         
 
 class ControlPanel(QMainWindow):
-    def __init__(self, app, instrument_area_height_ratio=0.4, is_simulated=False):
+    def __init__(self, app, instrument_area_height_ratio=0.4):
         super().__init__()
         self.app = app
         ######################################
@@ -384,9 +422,9 @@ class ControlPanel(QMainWindow):
 
         self.default_save_folder_path = os.path.dirname(os.path.abspath(__file__))
         self.save_destination = self.default_save_folder_path
-        self.is_simulated = is_simulated
+        self.is_simulated = False
         ######################################
-
+       
 
         self.setWindowTitle("Setup a LSM Scan © Yue Zhang, vdZ Lab")
         self.setStyleSheet("QMainWindow { background-color: black; }")
@@ -405,10 +443,10 @@ class ControlPanel(QMainWindow):
         # Main layout
         self.main_layout = QHBoxLayout()
         self.central_widget.setLayout(self.main_layout)
-
+        
         self.params_layout = QGridLayout()
-
-        self.params_layout.addWidget(QLabel('Step 1: Setting up scan parameters'), 0, 0, 1,3)
+    
+        self.params_layout.addWidget(QLabel('Step 1: Setting up scan parameters'), 0, 0, 1,2)
 
         self.params_layout.addWidget(QLabel('Scan ID'), 1, 0)
         self.scan_id_field = QLineEdit(self.scan_parameters['scan_id'])
@@ -419,9 +457,9 @@ class ControlPanel(QMainWindow):
             self.set_scan_parameters, 'scan_id'))
         
 
-        self.change_appearance_button = QPushButton('Change Appearance and save destination')
-        self.change_appearance_button.clicked.connect(self.open_appearance_dialog)
-        self.params_layout.addWidget(self.change_appearance_button, 0, 2,1,2)
+        self.advanced_button = QPushButton('Advanced')
+        self.advanced_button.clicked.connect(self.open_advanced_dialog)
+        self.params_layout.addWidget(self.advanced_button, 0, 3)
 
         self.save_settings_button = QPushButton('Save settings')
         self.load_settings_button = QPushButton('Load settings')
@@ -446,7 +484,7 @@ class ControlPanel(QMainWindow):
             self.set_scan_parameters, 'y_center'))
         self.z_center_field.editingFinished.connect(partial(
             self.set_scan_parameters, 'z_center'))
-
+     
         self.params_layout.addWidget(QLabel('XY Size (um)'), 3, 0)
         self.x_size_field = QLineEdit(str(self.scan_parameters['x_size'] ))
         self.y_size_field = QLineEdit(str(self.scan_parameters['y_size'] ))
@@ -746,7 +784,7 @@ class ControlPanel(QMainWindow):
                     raise RuntimeError
                    
        
-    def open_appearance_dialog(self):
+    def open_advanced_dialog(self):
         dialog = AppearanceDialog(system=self)
         if dialog.exec():  # If OK is pressed
             customize_font_size, customize_window_width, save_destination = dialog.get_values()   
@@ -904,6 +942,6 @@ if font_family:
     global_font = QFont(font_family)
     app.setFont(global_font)
 
-control_panel = ControlPanel(app=app, is_simulated=False)
+control_panel = ControlPanel(app=app)
 control_panel.show()
 app.exec()
