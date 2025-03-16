@@ -12,9 +12,9 @@ from matplotlib.lines import Line2D
 from matplotlib.patheffects import withStroke
 from matplotlib.ticker import MaxNLocator
 
-svg = {'bbox_inches':'tight', 'transparent':True,'pad_inches':0.1}
-pdf = {'bbox_inches':'tight', 'transparent':True,'pad_inches':0.1}
-png = {'bbox_inches':'tight', 'transparent':True,'pad_inches':0.1, 'dpi':750}
+svg = {'bbox_inches':'tight', 'pad_inches':0.1}
+pdf = {'bbox_inches':'tight', 'pad_inches':0.1}
+png = {'bbox_inches':'tight', 'pad_inches':0.1, 'dpi':750}
 font_size = 10
 
 def generate_colormap(N=1024):
