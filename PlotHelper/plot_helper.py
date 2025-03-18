@@ -462,3 +462,13 @@ def change_axis_color(ax=None, axis='x', orientation='left', color='blue'):
     elif axis == 'y':
         label = ax.get_ylabel()
     ax.set_ylabel(label, color=color)
+    
+def text_format(text,ax=None, color='black', facecolor=(1,1,1,0.5), edgecolor='none', rotation=None):
+    ax = ax if ax else plt.gca()
+    text.set_bbox(dict(facecolor=facecolor, 
+                  edgecolor=edgecolor))
+    text.set_color(color)
+    if rotation:
+        text.set_rotation(rotation)
+    
+    
