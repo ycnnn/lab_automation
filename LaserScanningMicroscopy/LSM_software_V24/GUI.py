@@ -161,6 +161,7 @@ class AppearanceDialog(QDialog):
         self.system.instrument_area_height_ratio = instr_height
         self.system.instrument_display_area.setFixedHeight(instr_height * self.system.screen_height)
         self.system.main_layout.setSizeConstraint(QLayout.SetFixedSize)
+        QTimer.singleShot(0, self.system.adjustSize)
 
         
         # self.system.instrument_display_area.updateGeometry()  
@@ -440,6 +441,7 @@ class ControlPanel(QMainWindow):
         
         self.central_widget = QWidget(self)
         self.setCentralWidget(self.central_widget)
+        self.setSizePolicy(self.central_widget.sizePolicy())
         # Main layout
         self.main_layout = QHBoxLayout()
         self.central_widget.setLayout(self.main_layout)
