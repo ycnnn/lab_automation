@@ -144,6 +144,8 @@ class AppearanceDialog(QDialog):
         
         
         self.is_simulated_checkbox = QCheckBox('Run simulated scan')
+        if self.system.is_simulated:
+            self.is_simulated_checkbox.setChecked(True)
         self.is_simulated_checkbox.stateChanged.connect(self.on_simulated_status_changed)
         layout.addWidget(self.is_simulated_checkbox, 5,0)
         # OK and Cancel buttons
