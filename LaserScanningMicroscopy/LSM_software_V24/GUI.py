@@ -16,6 +16,50 @@ import gc
 import platform
 
 
+class ValidatedLineEdit(QLineEdit):
+    def __init__(self, validator_func, name='',parent=None, value=''):
+        super().__init__(parent=parent)
+        self.name=name
+        self.setText(value)
+        self.validator_func = validator_func
+        self.previous_value = self.text()  # Store initial value
+        self.editingFinished.connect(self.validate_input)  # Connect validation
+
+    def validate_input(self):
+        status, validation_message = self.validator_func(self.text())
+        if not status:  # If input is invalid
+            attempted_value = self.text()
+            self.setText(self.previous_value)  # Restore previous value
+            self.show_error_message(attempted_value, validation_message)  # Show error popup
+        else:
+            self.previous_value = self.text()  # Update previous valid value
+
+    def show_error_message(self, attempted_value, validation_message):
+        msg_box = QMessageBox(self)
+        msg_box.setIcon(QMessageBox.Warning)
+        msg_box.setWindowTitle("Invalid Input")
+        msg_box.setText(f"Message: For the field {self.name}, '{attempted_value}' is not a valid input.\nRestoring previous value: '{self.previous_value}'" + '\n\nDetails: ' + validation_message)
+        msg_box.setStandardButtons(QMessageBox.Ok)
+        msg_box.exec()
+
+
+def is_number(text):
+    try:
+        float(text)
+        return True, ''
+    except:
+        return False, 'The input must be a number'
+
+def is_positive_number(text):
+    try:
+        val = float(text)
+        if val >= 0:
+            return True, ''
+        else:
+            return False, 'The input must be a positive number'
+    except:
+        return False, 'The input must be a positive number'
+   
 def enforce_font_size(widget, font_size):
     """ Recursively apply font size to all child widgets. """
     font = widget.font()
@@ -292,7 +336,9 @@ class Instrument_area(QLabel):
         param_dropdown.addItems(['Constant', 'Linear', 'Trace/retrace', 'Custom'])
         self.layout.addWidget(param_dropdown, self.total_rows,1)
         default_val = self.params[param]
-        param_constant_field = QLineEdit(str(default_val))
+        param_constant_field = ValidatedLineEdit(is_number, param, self, value=str(default_val))
+        
+        
         self.layout.addWidget(param_constant_field)
         param_dropdown.currentIndexChanged.connect(partial(self.switch_param_input, param_id=param_id))
         self.param_dropdowns.append(param_dropdown)
@@ -317,7 +363,7 @@ class Instrument_area(QLabel):
         
         if index == 0:
             self.param_modes[param] = 'Constant'
-            param_constant_field = QLineEdit(defult_val)
+            param_constant_field = ValidatedLineEdit(is_number, param, self, value=str(defult_val))
             self.layout.addWidget(param_constant_field, param_id + 1, 2)
             self.param_input_fields[param] = [param_constant_field]
             self.set_params_constant(param)
@@ -325,8 +371,8 @@ class Instrument_area(QLabel):
 
         elif index == 1:
             self.param_modes[param] = 'Linear'
-            param_start_field = QLineEdit(defult_val)
-            param_end_field = QLineEdit(defult_val)
+            param_start_field = ValidatedLineEdit(is_number, param + ' start', self, value=str(defult_val))
+            param_end_field = ValidatedLineEdit(is_number, param + ' end', self, value=str(defult_val))
             self.layout.addWidget(QLabel('Start'), param_id + 1, 2)
             self.layout.addWidget(param_start_field, param_id + 1, 3)
             self.layout.addWidget(QLabel('End'), param_id + 1, 4)
@@ -340,8 +386,8 @@ class Instrument_area(QLabel):
 
         elif index == 2:
             self.param_modes[param] = 'Trace/retrace'
-            param_trace_field = QLineEdit(defult_val)
-            param_retrace_field = QLineEdit(defult_val)
+            param_trace_field = ValidatedLineEdit(is_number, param + ' trace', self, value=str(defult_val))
+            param_retrace_field = ValidatedLineEdit(is_number, param + ' retrace', self, value=str(defult_val))
             self.layout.addWidget(QLabel('Trace'), param_id + 1, 2)
             self.layout.addWidget(param_trace_field, param_id + 1, 3)
             self.layout.addWidget(QLabel('Retrace'), param_id + 1, 4)
@@ -419,9 +465,9 @@ class ControlPanel(QMainWindow):
         self.scan_parameters['x_pixels'] = 50
         self.scan_parameters['y_pixels'] = 50
         self.scan_parameters['angle'] = 0
-        self.scan_parameters['point_time_constant'] = 0.1
+        self.scan_parameters['point_time_constant'] = 0.01
         self.scan_parameters['retrace_point_time_constant'] = self.scan_parameters['point_time_constant']
-        self.scan_parameters['auto_close_after_finish'] = 10
+        self.scan_parameters['auto_close_after_finish'] = 2
 
         self.default_save_folder_path = os.path.dirname(os.path.abspath(__file__))
         self.save_destination = self.default_save_folder_path
@@ -473,9 +519,11 @@ class ControlPanel(QMainWindow):
         self.load_settings_button.clicked.connect(self.load_settings)
 
         self.params_layout.addWidget(QLabel('XYZ Center (um)'), 2, 0)
-        self.x_center_field = QLineEdit(str(self.scan_parameters['x_center']))
-        self.y_center_field = QLineEdit(str(self.scan_parameters['y_center']))
-        self.z_center_field = QLineEdit(str(self.scan_parameters['z_center']))
+        self.x_center_field = ValidatedLineEdit(is_positive_number, 'x_center', self, value=str(self.scan_parameters['x_center']))
+        self.y_center_field = ValidatedLineEdit(is_positive_number, 'y_center', self, value=str(self.scan_parameters['y_center']))
+        self.z_center_field = ValidatedLineEdit(is_positive_number, 'z_center', self, value=str(self.scan_parameters['z_center']))
+        
+        
         self.params_layout.addWidget(self.x_center_field, 2, 1)
         self.params_layout.addWidget(self.y_center_field, 2, 2)
         self.params_layout.addWidget(self.z_center_field, 2, 3)
@@ -490,8 +538,9 @@ class ControlPanel(QMainWindow):
             self.set_scan_parameters, 'z_center'))
      
         self.params_layout.addWidget(QLabel('XY Size (um)'), 3, 0)
-        self.x_size_field = QLineEdit(str(self.scan_parameters['x_size'] ))
-        self.y_size_field = QLineEdit(str(self.scan_parameters['y_size'] ))
+        self.x_size_field = ValidatedLineEdit(is_positive_number, 'x_size', self, value=str(self.scan_parameters['x_size']))
+        self.y_size_field = ValidatedLineEdit(is_positive_number, 'y_size', self, value=str(self.scan_parameters['y_size']))
+        
         self.params_layout.addWidget(self.x_size_field, 3, 1)
         self.params_layout.addWidget(self.y_size_field, 3, 2)
         self.scan_parameters_input_fields['x_size'] = self.x_size_field
@@ -503,8 +552,9 @@ class ControlPanel(QMainWindow):
             self.set_scan_parameters, 'y_size'))
 
         self.params_layout.addWidget(QLabel('XY Pixels'), 4, 0)
-        self.x_pixel_field = QLineEdit(str(self.scan_parameters['x_pixels']))
-        self.y_pixel_field = QLineEdit(str(self.scan_parameters['y_pixels']))
+        self.x_pixel_field = ValidatedLineEdit(is_positive_number, 'x_pixels', self, value=str(self.scan_parameters['x_pixels']))
+        self.y_pixel_field = ValidatedLineEdit(is_positive_number, 'y_pixels', self, value=str(self.scan_parameters['y_pixels']))
+        
         self.params_layout.addWidget(self.x_pixel_field, 4, 1)
         self.params_layout.addWidget(self.y_pixel_field, 4, 2)
         self.scan_parameters_input_fields['x_pixels'] = self.x_pixel_field
@@ -515,7 +565,7 @@ class ControlPanel(QMainWindow):
             self.set_scan_parameters, 'y_pixels'))
 
         self.params_layout.addWidget(QLabel('Rotate angle (deg)'), 5, 0)
-        self.rotate_angle_field = QLineEdit(str(self.scan_parameters['angle']))
+        self.rotate_angle_field = ValidatedLineEdit(is_number, 'angle', self, value=str(self.scan_parameters['angle']))
         self.params_layout.addWidget(self.rotate_angle_field, 5, 1)
         self.scan_parameters_input_fields['angle'] = self.rotate_angle_field
         self.rotate_angle_field.editingFinished.connect(partial(
@@ -529,8 +579,8 @@ class ControlPanel(QMainWindow):
         self.params_layout.addWidget(self.retrace_label, 7, 2,1,2)
 
         self.params_layout.addWidget(QLabel('Time constants (s)'), 8, 0)
-        self.trace_time_constant_field = QLineEdit(str(self.scan_parameters['point_time_constant'] ))
-        self.retrace_time_constant_field = QLineEdit(str(self.scan_parameters['retrace_point_time_constant'] ))
+        self.trace_time_constant_field = ValidatedLineEdit(is_positive_number, 'point_time_constant', self, value=str(self.scan_parameters['point_time_constant']))
+        self.retrace_time_constant_field = ValidatedLineEdit(is_positive_number, 'retrace_point_time_constant', self, value=str(self.scan_parameters['retrace_point_time_constant']))
         self.scan_parameters_input_fields['point_time_constant'] = self.trace_time_constant_field
         self.scan_parameters_input_fields['retrace_point_time_constant'] = self.retrace_time_constant_field
 
@@ -546,7 +596,7 @@ class ControlPanel(QMainWindow):
         self.params_layout.addWidget(self.retrace_time_constant_field, 8, 2)
 
         self.params_layout.addWidget(QLabel('Auto close time after finish'), 9, 0, 1,2)
-        self.auto_close_time_constant_field = QLineEdit(str(self.scan_parameters['auto_close_after_finish']))
+        self.auto_close_time_constant_field = ValidatedLineEdit(is_positive_number, 'auto_close_after_finish', self, value=str(self.scan_parameters['auto_close_after_finish']))
         self.scan_parameters_input_fields['auto_close_after_finish'] = self.auto_close_time_constant_field
         self.auto_close_time_constant_field.editingFinished.connect(partial(self.set_scan_parameters, 'auto_close_after_finish'))
         self.params_layout.addWidget(self.auto_close_time_constant_field, 9, 2)
