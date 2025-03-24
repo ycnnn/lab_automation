@@ -95,11 +95,8 @@ def format(fig=None,
         
 def label_format(fig=None,
            label_size=font_size,
-           decimal_digits=0,
-           x_format='{x:<.1f}',
-           y_format='{x:<.1f}',
-           x_label_pad=5,
-           y_label_pad=0,
+           x_label_pad=2,
+           y_label_pad=2,
            show_ticks=True,
            show_labels=True,
            set_size_global=False):
