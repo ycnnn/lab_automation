@@ -1,7 +1,7 @@
 import sys
 import os, json
 import ast
-import time, traceback
+import time, traceback, datetime
 import inspect
 import importlib
 from PySide6.QtWidgets import QApplication, QMainWindow, QLabel, QVBoxLayout, QHBoxLayout, QGridLayout, QWidget, QLabel,QPushButton, QProgressBar, QSpacerItem, QSizePolicy,QToolTip, QSpacerItem, QLineEdit, QScrollArea, QComboBox, QCheckBox,QLayout, QFileDialog, QDialog,QDialogButtonBox, QMessageBox
@@ -561,8 +561,10 @@ class ControlPanel(QMainWindow):
         self.scan_parameters_input_fields['y_pixels'] = self.y_pixel_field
         self.x_pixel_field.editingFinished.connect(partial(
             self.set_scan_parameters, 'x_pixels'))
+        self.x_pixel_field.editingFinished.connect(self.update_scan_time)
         self.y_pixel_field.editingFinished.connect(partial(
             self.set_scan_parameters, 'y_pixels'))
+        self.y_pixel_field.editingFinished.connect(self.update_scan_time)
 
         self.params_layout.addWidget(QLabel('Rotate angle (deg)'), 5, 0)
         self.rotate_angle_field = ValidatedLineEdit(is_number, 'angle', self, value=str(self.scan_parameters['angle']))
@@ -587,8 +589,10 @@ class ControlPanel(QMainWindow):
         self.trace_time_constant_field.editingFinished.connect(partial(
             self.set_scan_parameters, 'point_time_constant'))
         self.trace_time_constant_field.editingFinished.connect(self.synchronize_retrace_if_retrace_time_equal_to_trace)
+        self.trace_time_constant_field.editingFinished.connect(self.update_scan_time)
         self.retrace_time_constant_field.editingFinished.connect(partial(
             self.set_scan_parameters, 'retrace_point_time_constant'))
+        self.retrace_time_constant_field.editingFinished.connect(self.update_scan_time)
             
         self.retrace_label.setVisible(False)
         self.retrace_time_constant_field.setVisible(False)
@@ -632,12 +636,34 @@ class ControlPanel(QMainWindow):
 
         self.main_layout.addLayout(self.params_layout)
 
-
-        self.params_layout.addWidget(QLabel('Step 3: Start the scan'), 13, 0, 1,3)
+        self.start_scan_label = QLabel('Step 3: Start the scan')
+        self.params_layout.addWidget(self.start_scan_label, 13, 0, 1,2)
         self.start_scan_button = QPushButton('Start scan')
         self.start_scan_button.clicked.connect(self.start_scan)
-        self.params_layout.addWidget(self.start_scan_button, 13, 3)
+        
+        self.scan_time_label = QLabel(self.calculate_scan_time())
+        self.params_layout.addWidget(self.scan_time_label, 13, 2, 1,2, alignment=Qt.AlignmentFlag.AlignRight)
+        self.params_layout.addWidget(self.start_scan_button, 14, 3)
 
+    def calculate_scan_time(self):
+        total_pixels = float(self.scan_parameters['x_pixels']) * float(self.scan_parameters['y_pixels']) 
+        total_single_point_time = (float(self.scan_parameters['point_time_constant']) + float(self.scan_parameters['retrace_point_time_constant']))
+        total_time = total_pixels * total_single_point_time
+        td = datetime.timedelta(seconds=int(total_time)) 
+        # Extract hours, minutes, and seconds
+        hours, remainder = divmod(td.seconds, 3600)
+        minutes, seconds = divmod(remainder, 60)
+
+        # Format the output
+        if hours == 0:
+            formatted_time = f"Total scan time is {minutes} M, {seconds} S"
+        else:
+            formatted_time = f"Total scan time is {hours} H, {minutes} M, {seconds} S"
+        return formatted_time
+    
+    def update_scan_time(self):
+        new_formatted_time = self.calculate_scan_time()
+        self.scan_time_label.setText(new_formatted_time)
 
     def synchronize_retrace_if_retrace_time_equal_to_trace(self):
         if self.retrace_state.checkState() == Qt.Unchecked:
