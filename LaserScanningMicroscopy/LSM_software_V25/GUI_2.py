@@ -60,9 +60,11 @@ def is_positive_number(text):
     except:
         return False, 'The input must be a positive number'
    
-def enforce_font_size(widget, font_size):
+def enforce_font_size(widget, font_size=None):
     """ Recursively apply font size to all child widgets. """
     font = widget.font()
+    if not font_size:
+        font_size = widget.font().pointSize()
     font.setPointSize(font_size)
     widget.setFont(font)
 
@@ -454,7 +456,7 @@ class ControlPanel(QMainWindow):
         # Define scan and position parameters to be used
         self.scan_parameters = {}
         self.scan_parameters_input_fields = {}
-        self.scan_parameters['custom_font_size'] = None
+        self.scan_parameters['custom_font_size'] = self.font().pointSize()
         self.scan_parameters['custom_window_width'] = None
         self.scan_parameters['scan_id'] = 'LSM_scan'
         self.scan_parameters['x_center'] = 50
@@ -644,6 +646,8 @@ class ControlPanel(QMainWindow):
         self.scan_time_label = QLabel(self.calculate_scan_time())
         self.params_layout.addWidget(self.scan_time_label, 13, 2, 1,2, alignment=Qt.AlignmentFlag.AlignRight)
         self.params_layout.addWidget(self.start_scan_button, 14, 3)
+        
+        enforce_font_size(self)
 
     def calculate_scan_time(self):
         total_pixels = float(self.scan_parameters['x_pixels']) * float(self.scan_parameters['y_pixels']) 
@@ -698,7 +702,7 @@ class ControlPanel(QMainWindow):
                                      scan_system=self)
         instr_area.mouseReleaseEvent = lambda event, instr=instr_area: self.select_instr(instr)
         self.instrument_layout.addWidget(instr_area)
-
+        enforce_font_size(self)
         return instr_area
         
 
@@ -708,6 +712,7 @@ class ControlPanel(QMainWindow):
             self.selected_instr.deleteLater()
             self.selected_instr = None
             self.remove_instr_button.setEnabled(False)
+            enforce_font_size(self)
 
     def select_instr(self, instr):
         if self.selected_instr == instr:
