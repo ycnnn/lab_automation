@@ -760,12 +760,21 @@ class ControlPanel(QMainWindow):
         self.overall_settings['instruments_paramaters'] = self.instruments_save_list
 
         if forced_custom_save_path:
-            folder_path = forced_custom_save_path
+            file_path = forced_custom_save_path
         else:
-            folder_path = QFileDialog.getExistingDirectory(self, "Select Directory to save",self.default_save_folder_path)
-  
+            # folder_path = QFileDialog.getExistingDirectory(self, "Select Directory to save",self.default_save_folder_path)
+            # file_path, _ = QFileDialog.getSaveFileName(self, "Save File", "", "JSON Files (*.json)")
+            options = QFileDialog.Options()
+            file_path, _ = QFileDialog.getSaveFileName(
+                            None,
+                            "Save JSON File",
+                            self.scan_parameters['scan_id'],
+                            "JSON Files (*.json);;All Files (*)",
+                            options=options
+                        )
 
-        saved_setting_path = folder_path + '/' + self.scan_parameters['scan_id'] + '.json'
+
+        saved_setting_path = file_path
         try:
             with open(saved_setting_path, 'w') as json_file:
                 json.dump(self.overall_settings, json_file, indent=4)
@@ -997,7 +1006,7 @@ class ControlPanel(QMainWindow):
                 )
                 instruments.append(instrument)
 
-            self.save_settings(forced_custom_save_path=customize_save_destination + '/results/' + self.scan_parameters['scan_id'] + '/')
+            self.save_settings(forced_custom_save_path=customize_save_destination + '/results/' + self.scan_parameters['scan_id'] + '/scan_settings.json')
             self.start_scan_button.setEnabled(False) 
             scan = LSM_plot(position_parameters=position_parameters,
                 scan_parameters=scan_parameters,
