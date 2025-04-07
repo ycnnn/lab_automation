@@ -944,7 +944,7 @@ class ControlPanel(QMainWindow):
                 font_size=customize_font_size,   
                 save_destination=customize_save_destination
                 )
-
+            
             position_parameters = Position_parameters(
                                                     x_size=float(self.scan_parameters['x_center']),
                                                     y_size=float(self.scan_parameters['y_center']),
@@ -1006,7 +1006,8 @@ class ControlPanel(QMainWindow):
                 )
                 instruments.append(instrument)
 
-            self.save_settings(forced_custom_save_path=customize_save_destination + '/results/' + self.scan_parameters['scan_id'] + '/scan_settings.json')
+            self.save_settings(forced_custom_save_path=display_parameters.save_destination + 'scan_settings.json')
+            # self.save_settings(forced_custom_save_path=customize_save_destination + '/results/' + self.scan_parameters['scan_id'] + '/scan_settings.json')
             self.start_scan_button.setEnabled(False) 
             scan = LSM_plot(position_parameters=position_parameters,
                 scan_parameters=scan_parameters,

@@ -702,7 +702,7 @@ class LaserDiode(Instrument):
 
     def quit(self, **kwargs):
         
-        # self.instrument.write('output:state 0')
+        self.instrument.write('output:state 0')
         self.instrument.write(f"source1:current:level:amplitude 0")
         super().quit(**kwargs)
 
