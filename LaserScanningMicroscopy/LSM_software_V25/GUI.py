@@ -946,8 +946,10 @@ class ControlPanel(QMainWindow):
                 )
             
             position_parameters = Position_parameters(
-                                                    x_size=float(self.scan_parameters['x_center']),
-                                                    y_size=float(self.scan_parameters['y_center']),
+                                                    x_center=float(self.scan_parameters['x_center']),
+                                                    y_center=float(self.scan_parameters['y_center']),
+                                                    x_size=float(self.scan_parameters['x_size']),
+                                                    y_size=float(self.scan_parameters['y_size']),
                                                     x_pixels=int(self.scan_parameters['x_pixels']),
                                                     y_pixels=int(self.scan_parameters['y_pixels']),
                                                     z_center=float(self.scan_parameters['z_center']),
