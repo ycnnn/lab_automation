@@ -1,0 +1,53 @@
+{
+    "scan_paramaters": {
+        "custom_font_size": 12,
+        "custom_window_width": null,
+        "scan_id": "LSM_scan",
+        "x_center": "50",
+        "y_center": "50",
+        "z_center": "25",
+        "x_size": "0",
+        "y_size": "0",
+        "x_pixels": "50",
+        "y_pixels": "50",
+        "angle": "0",
+        "point_time_constant": "0.00151",
+        "retrace_point_time_constant": "0.00122",
+        "auto_close_after_finish": "2"
+    },
+    "instruments_paramaters": [
+        {
+            "type": "DAQ_simulated",
+            "init_args_values": {
+                "name": "DAQ_simulated",
+                "address": "Dev2",
+                "input_mapping": "['ai0']"
+            },
+            "param_list": [],
+            "param_modes": {},
+            "param_values": {}
+        },
+        {
+            "type": "SimulatedInstrument",
+            "init_args_values": {
+                "name": "SimulatedInstrument",
+                "address": "0"
+            },
+            "param_list": [
+                "param1",
+                "param2",
+                "param3"
+            ],
+            "param_modes": {
+                "param1": "Constant",
+                "param2": "Constant",
+                "param3": "Constant"
+            },
+            "param_values": {
+                "param1": 20.01,
+                "param2": 2.123,
+                "param3": 3.456
+            }
+        }
+    ]
+}

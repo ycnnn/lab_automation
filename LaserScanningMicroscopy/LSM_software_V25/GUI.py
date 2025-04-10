@@ -783,9 +783,12 @@ class ControlPanel(QMainWindow):
             self.show_info_message(error_details)
 
 
-    def load_settings(self):
-        current_dir = os.path.dirname(os.path.abspath(__file__))
-        imported_settings_path, _ = QFileDialog.getOpenFileName(self, "Select a LSM setting file", current_dir, "JSON Files (*.json)")
+    def load_settings(self, supplied_imported_settings_path=None):
+        self.current_dir= os.path.dirname(os.path.abspath(__file__))
+        if not supplied_imported_settings_path:
+            imported_settings_path, _ = QFileDialog.getOpenFileName(self, "Select a LSM setting file", self.current_dir, "JSON Files (*.json)")
+        else:
+            imported_settings_path = self.current_dir+ '/' + supplied_imported_settings_path
         try:
             with open(imported_settings_path, 'r', encoding='utf-8') as file:
                 saved_settings = json.load(file)
@@ -793,8 +796,8 @@ class ControlPanel(QMainWindow):
             saved_scan_parameters = saved_settings['scan_paramaters']
             saved_instruments_parameters = saved_settings['instruments_paramaters']
         except Exception as exception:
-            error_details = 'No setting file has been loaded. \n\nExecution details:\n\n' + f"{type(exception).__name__}: {str(exception)}\n{traceback.format_exc()}"
-            self.show_info_message(error_details)
+            # error_details = 'No setting file has been loaded. \n\nExecution details:\n\n' + f"{type(exception).__name__}: {str(exception)}\n{traceback.format_exc()}"
+            # self.show_info_message(error_details)
             # self.show_info_message('No setting file has been loaded.')
             return
         
@@ -1009,6 +1012,9 @@ class ControlPanel(QMainWindow):
                 instruments.append(instrument)
 
             self.save_settings(forced_custom_save_path=display_parameters.save_destination + 'scan_settings.json')
+            self.current_dir= os.path.dirname(os.path.abspath(__file__))
+            self.save_settings(forced_custom_save_path= self.current_dir+'/running_files/last_scan_settings.json')
+            
             # self.save_settings(forced_custom_save_path=customize_save_destination + '/results/' + self.scan_parameters['scan_id'] + '/scan_settings.json')
             self.start_scan_button.setEnabled(False) 
             scan = LSM_plot(position_parameters=position_parameters,
@@ -1020,15 +1026,25 @@ class ControlPanel(QMainWindow):
                 show_zero=True,
                 app=self.app,
                 gui_start_scan_button=self.start_scan_button)
-            # self.start_scan_button.setEnabled(True) 
+        
         except Exception as exception:
             error_details = 'Error(s) occured. The scan has not been started or successfully finished. Error details:\n\n' + f"{type(exception).__name__}: {str(exception)}\n{traceback.format_exc()}"
             self.show_info_message(error_details)
             print(error_details)
             self.start_scan_button.setEnabled(True) 
+            
+    def closeEvent(self, event):
+        print("Manual close...")
+        if_reopen_settings_window_after_finish = self.current_dir+'/running_files/if_reopen_settings_window_after_finish.json'
+        with open(if_reopen_settings_window_after_finish, 'w') as json_file:
+            json.dump(False, json_file, indent=4)
 
-if platform.system() == "Darwin":
-    gc.disable()
+        self.closed_manually = True
+        event.accept()
+
+# May help imporve the code stability
+gc.disable()
+    
 if not QApplication.instance():
     app = QApplication([])
 else:
@@ -1040,5 +1056,7 @@ if font_family:
     app.setFont(global_font)
 
 control_panel = ControlPanel(app=app)
+
 control_panel.show()
+control_panel.load_settings(supplied_imported_settings_path='running_files/last_scan_settings.json')
 app.exec()

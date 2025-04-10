@@ -1,4 +1,5 @@
-import sys
+import sys,json
+from pathlib import Path
 import os, platform
 import time
 from PySide6.QtWidgets import QApplication, QMainWindow, QLabel, QVBoxLayout, QWidget, QLabel
@@ -77,6 +78,14 @@ class AppController:
             window.close()
         if self.gui_start_scan_button:
             self.gui_start_scan_button.setEnabled(True) 
+            app = QApplication.instance()  # Get the current QApplication instance
+            current_dir= os.path.dirname(os.path.abspath(__file__))
+            if_reopen_settings_window_after_finish = str(Path(current_dir).parent)+'/running_files/if_reopen_settings_window_after_finish.json'
+            with open(if_reopen_settings_window_after_finish, 'w') as json_file:
+                json.dump(True, json_file, indent=4)
+            if app:
+                # app.quit()
+                sys.exit(0)
 
 class LSM_plot:
 
