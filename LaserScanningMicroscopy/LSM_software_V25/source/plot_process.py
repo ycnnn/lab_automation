@@ -20,15 +20,17 @@ import source.inst_driver as inst_driver
 
 
 def load_font(font_path):
-    dir_path = os.path.dirname(os.path.realpath(__file__))
+    dir_path = str(Path(os.path.dirname(os.path.realpath(__file__))).parent)
+    
+    
 
     font_id = QFontDatabase.addApplicationFont(dir_path + '/' +  font_path)
     if font_id == -1:
-        print(f"Failed to load font from {font_path}")
+        print(f"Failed to load font from {dir_path + '/' +  font_path}")
         return None
     font_families = QFontDatabase.applicationFontFamilies(font_id)
     if not font_families:
-        print(f"No font families found for {font_path}")
+        print(f"No font families found for {dir_path + '/' +  font_path}")
         return None
 
     return font_families[0]
@@ -129,6 +131,7 @@ class LSM_plot:
         
        
         default_font_size = screen_height / 70
+        current_dir = os.path.dirname(os.path.abspath(__file__))
         font_family = load_font('font/SourceCodePro-Medium.ttf')
         if font_family:
             global_font = QFont(font_family)

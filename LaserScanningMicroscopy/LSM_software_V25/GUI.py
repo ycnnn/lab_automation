@@ -470,6 +470,8 @@ class ControlPanel(QMainWindow):
         self.scan_parameters['point_time_constant'] = 0.01
         self.scan_parameters['retrace_point_time_constant'] = self.scan_parameters['point_time_constant']
         self.scan_parameters['auto_close_after_finish'] = 2
+        
+        self.scanning_window_font_size = None
 
         self.default_save_folder_path = os.path.dirname(os.path.abspath(__file__))
         self.save_destination = self.default_save_folder_path
@@ -940,11 +942,18 @@ class ControlPanel(QMainWindow):
             customize_save_destination = self.save_destination + '/'
 
             print(f'\n\nSave destination: {customize_save_destination}\n\n\n')
-
+            
+            # with open(scanning_window_appearances_path, 'r') as json_file:
+            #     scanning_window_appearances = json.load(json_file) 
+            #     self.scanning_window_font_size = scanning_window_appearances['scanning_window_font_size']
+            # print('\n\n\n')
+            # print(f'scanning_window_font_size is {self.scanning_window_font_size}')
+            # print('\n\n\n')
+            
             display_parameters = Display_parameters(
                 scan_id=self.scan_parameters['scan_id'], 
                 window_width=customize_window_width,
-                font_size=customize_font_size,   
+                font_size=self.scanning_window_font_size,   
                 save_destination=customize_save_destination
                 )
             
@@ -1057,6 +1066,28 @@ if font_family:
 
 control_panel = ControlPanel(app=app)
 
-control_panel.show()
+
 control_panel.load_settings(supplied_imported_settings_path='running_files/last_scan_settings.json')
+
+current_dir = os.path.dirname(os.path.abspath(__file__))
+scanning_window_appearances_path = current_dir +'/running_files/scanning_window_appearances.json'
+# with open(scanning_window_appearances_path, 'r') as json_file:
+#     scanning_window_appearances = json.load(json_file) 
+#     control_panel.scanning_window_font_size = scanning_window_appearances['scanning_window_font_size']
+try:
+    with open(scanning_window_appearances_path, 'r') as json_file:
+            scanning_window_appearances = json.load(json_file) 
+            control_panel.scanning_window_font_size = scanning_window_appearances['scanning_window_font_size']
+except:
+    print(f'Failed to load predefined scanning window appearances from {scanning_window_appearances_path}')
+control_panel.show()
+# try:
+#     current_dir = os.path.dirname(os.path.abspath(__file__))
+#     scanning_window_appearances_path = current_dir +'/running_files/scanning_window_appearances.json'
+#     with open(scanning_window_appearances_path, 'r') as json_file:
+#         scanning_window_appearances = json.load(scanning_window_appearances_path) 
+#         control_panel.scanning_window_font_size = scanning_window_appearances['scanning_window_font_size']
+# except:
+#     print('No predefined data for the scanning window found. Default value is in effect.\n')
+control_panel.scanning_window_font_size
 app.exec()
