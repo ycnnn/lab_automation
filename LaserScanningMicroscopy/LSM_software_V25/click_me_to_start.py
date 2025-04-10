@@ -21,7 +21,7 @@ while running_time < max_running_times:
         if not reopen_state:
             break
     
-    process = subprocess.Popen(["python3", str(Path(__file__).parent) + "/GUI.py"])
+    process = subprocess.Popen(["python", str(Path(__file__).parent) + "/GUI.py"])
     process.wait()  # Wait for script to exit
     print("Script exited, restarting...")
     time.sleep(1)  # Optional delay before restart
