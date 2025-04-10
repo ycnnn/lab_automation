@@ -24,5 +24,5 @@ while running_time < max_running_times:
     process = subprocess.Popen(["python", str(Path(__file__).parent) + "/GUI.py"])
     process.wait()  # Wait for script to exit
     print("Script exited, restarting...")
-    time.sleep(1)  # Optional delay before restart
+    time.sleep(0.05)  # Optional delay before restart
     running_time += 1
