@@ -790,7 +790,7 @@ class ControlPanel(QMainWindow):
         if not supplied_imported_settings_path:
             imported_settings_path, _ = QFileDialog.getOpenFileName(self, "Select a LSM setting file", self.current_dir, "JSON Files (*.json)")
         else:
-            imported_settings_path = self.current_dir+ '/' + supplied_imported_settings_path
+            imported_settings_path = supplied_imported_settings_path
         try:
             with open(imported_settings_path, 'r', encoding='utf-8') as file:
                 saved_settings = json.load(file)
@@ -1051,43 +1051,43 @@ class ControlPanel(QMainWindow):
         self.closed_manually = True
         event.accept()
 
-# May help imporve the code stability
-gc.disable()
+
+def run_gui_program(supplied_imported_settings_path=None):
+
+    # May help imporve the code stability
+    gc.disable()
+        
+    if not QApplication.instance():
+        app = QApplication([])
+    else:
+        app = QApplication.instance()
+
+    font_family = load_font('font/SourceCodePro-Medium.ttf')
+    if font_family:
+        global_font = QFont(font_family)
+        app.setFont(global_font)
+
+    control_panel = ControlPanel(app=app)
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    if not supplied_imported_settings_path:
+        control_panel.load_settings(supplied_imported_settings_path= current_dir +'/running_files/last_scan_settings.json')
+    else:
+        control_panel.load_settings(supplied_imported_settings_path=supplied_imported_settings_path)
+        
     
-if not QApplication.instance():
-    app = QApplication([])
-else:
-    app = QApplication.instance()
-
-font_family = load_font('font/SourceCodePro-Medium.ttf')
-if font_family:
-    global_font = QFont(font_family)
-    app.setFont(global_font)
-
-control_panel = ControlPanel(app=app)
-
-
-control_panel.load_settings(supplied_imported_settings_path='running_files/last_scan_settings.json')
-
-current_dir = os.path.dirname(os.path.abspath(__file__))
-scanning_window_appearances_path = current_dir +'/running_files/scanning_window_appearances.json'
-# with open(scanning_window_appearances_path, 'r') as json_file:
-#     scanning_window_appearances = json.load(json_file) 
-#     control_panel.scanning_window_font_size = scanning_window_appearances['scanning_window_font_size']
-try:
-    with open(scanning_window_appearances_path, 'r') as json_file:
-            scanning_window_appearances = json.load(json_file) 
-            control_panel.scanning_window_font_size = scanning_window_appearances['scanning_window_font_size']
-except:
-    print(f'Failed to load predefined scanning window appearances from {scanning_window_appearances_path}')
-control_panel.show()
-# try:
-#     current_dir = os.path.dirname(os.path.abspath(__file__))
-#     scanning_window_appearances_path = current_dir +'/running_files/scanning_window_appearances.json'
-#     with open(scanning_window_appearances_path, 'r') as json_file:
-#         scanning_window_appearances = json.load(scanning_window_appearances_path) 
-#         control_panel.scanning_window_font_size = scanning_window_appearances['scanning_window_font_size']
-# except:
-#     print('No predefined data for the scanning window found. Default value is in effect.\n')
-control_panel.scanning_window_font_size
-app.exec()
+    scanning_window_appearances_path = current_dir +'/running_files/scanning_window_appearances.json'
+    try:
+        with open(scanning_window_appearances_path, 'r') as json_file:
+                scanning_window_appearances = json.load(json_file) 
+                control_panel.scanning_window_font_size = scanning_window_appearances['scanning_window_font_size']
+    except:
+        print(f'Failed to load predefined scanning window appearances from {scanning_window_appearances_path}')
+    control_panel.show()
+    control_panel.scanning_window_font_size
+    app.exec()
+    
+if __name__ == "__main__":
+    if len(sys.argv) == 1:
+        run_gui_program()
+    else:
+        run_gui_program(sys.argv[1])

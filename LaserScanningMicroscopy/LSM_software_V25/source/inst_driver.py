@@ -120,22 +120,44 @@ class Instrument:
             self.data_acquisition_finish(**kwargs)
 
     def sweep_parameter_generator(self, param, param_val):
-
+        
+        # info_message = f"""
+        #         \n\n
+        #         Try setting up {param} for {self.name}: try to set it as type {type(param_val)} as value {param_val}.
+                
+        #         """
+        # self.logger.info(info_message)
         if isinstance(param_val, numbers.Number):
             # Single input value, the parameter is fixed throughout the scan
             param_sweep_list = param_val * np.ones(shape=(2, self.scan_num))
-        elif isinstance(param_val, list) and len(param_val) == 2:
+        elif isinstance(param_val, list):
             # Double input value, 
-            # If input is of format [start, end], the parameter is sweeped from left_val to right_val
-            # If input is of format [[trace_val], [retrace_val]], the trace scan will use trace_val, and the retrace scan will use retrace_val
+            # If the input is of format [start, end], the parameter is sweeped from left_val to right_val
+            # If the input is of format [[trace_val], [retrace_val]], the trace scan will use trace_val, and the retrace scan will use retrace_val
+            # If the input is of format [val_1, val_2, ..., val_scan_num], then each line scan will use the specified value for both trace and retrace scan
+            # If the input is of format [[trace_val_1, trace_val_2, ..., trace_val_scan_num],[retrace_val_1, retrace_val_2, ..., retrace_val_scan_num]], then for each scan, trace and retrace will use the different specified value
             param_val_in_ndarray = np.array(param_val)
+            
+            self.logger.info(f'\n\nComplex case: setting up {param} for {self.name}: try to set it as type {type(param_val_in_ndarray)} as value {param_val_in_ndarray} of shape {param_val_in_ndarray.shape}.\n\n')
 
             if param_val_in_ndarray.shape == (2,):
                 param_sweep_list = np.linspace(
                 [param_val_in_ndarray[0],param_val_in_ndarray[0]],
                 [param_val_in_ndarray[1],param_val_in_ndarray[1]], 
                 num=self.scan_num).T
+                
             elif param_val_in_ndarray.shape == (2,1):
+                param_sweep_list = np.linspace(
+                [param_val_in_ndarray[0,0],param_val_in_ndarray[1,0]],
+                [param_val_in_ndarray[0,0],param_val_in_ndarray[1,0]], 
+                num=self.scan_num).T
+                
+            elif param_val_in_ndarray.shape == (self.scan_num,):
+                param_sweep_list = np.array(
+                    [param_val_in_ndarray, param_val_in_ndarray]
+                    )
+                
+            elif param_val_in_ndarray.shape == (2,self.scan_num):
                 param_sweep_list = np.linspace(
                 [param_val_in_ndarray[0,0],param_val_in_ndarray[1,0]],
                 [param_val_in_ndarray[0,0],param_val_in_ndarray[1,0]], 
@@ -146,7 +168,18 @@ class Instrument:
             # First array defines the sweep list of the trace scan;
             # Second array defines the sweep list of the reverse scan.
             if (not isinstance(param_val, np.ndarray)) or param_val.shape!= (2, self.scan_num):
-                error_message = '\n\nError when setting up ' + param + ' for ' +  self.name + ': the user either enetered the wrong parameter format, or indicated customized paramter sweep list, but does not supply a list of correct shape. Acceptable formats: a number, or a tuple of (start_val, end_val), or a numpy array of shape (2, scan_num).'
+                # error_message = '\n\nError when setting up ' + param + ' for ' +  self.name + ': the user either enetered the wrong parameter format, or indicated customized paramter sweep list, but does not supply a list of correct shape. Acceptable formats: a number, or a tuple of (start_val, end_val), or a numpy array of shape (2, scan_num).'
+                error_message = f"""
+                \n\n
+                Error when setting up {param} for {self.name}: try to set it as type {type(param_val)} as value {param_val}.
+                The user either enetered the wrong parameter format, or indicated customized paramter sweep list, but does not supply a list of correct shape. 
+                Acceptable formats: 
+                - a number; or 
+                - a tuple of (start_val, end_val); or 
+                - a numpy array [[trace_val],[retrace_val]]; or 
+                - a numpy array of shape ({self.scan_num},); or
+                - a numpy array of shape (2, {self.scan_num}); 
+                """
                 self.logger.info(error_message)
                 raise TypeError(error_message)
             param_sweep_list = param_val

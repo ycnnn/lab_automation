@@ -9,10 +9,10 @@
         "x_size": "0",
         "y_size": "0",
         "x_pixels": "50",
-        "y_pixels": "50",
+        "y_pixels": "54",
         "angle": "0",
-        "point_time_constant": "0.00151",
-        "retrace_point_time_constant": "0.00122",
+        "point_time_constant": "0.001",
+        "retrace_point_time_constant": "0.001",
         "auto_close_after_finish": "2"
     },
     "instruments_paramaters": [
@@ -39,12 +39,19 @@
                 "param3"
             ],
             "param_modes": {
-                "param1": "Constant",
+                "param1": "Custom",
                 "param2": "Constant",
                 "param3": "Constant"
             },
             "param_values": {
-                "param1": 20.01,
+                "param1": [
+                    [
+                        0
+                    ],
+                    [
+                        1
+                    ]
+                ],
                 "param2": 2.123,
                 "param3": 3.456
             }
