@@ -6,54 +6,45 @@
         "x_center": "50",
         "y_center": "50",
         "z_center": "25",
-        "x_size": "0",
-        "y_size": "0",
-        "x_pixels": "50",
-        "y_pixels": "54",
+        "x_size": "35",
+        "y_size": "35",
+        "x_pixels": "100",
+        "y_pixels": "100",
         "angle": "0",
-        "point_time_constant": "0.001",
-        "retrace_point_time_constant": "0.001",
-        "auto_close_after_finish": "2"
+        "point_time_constant": "0.01",
+        "retrace_point_time_constant": "0.01",
+        "auto_close_after_finish": "60"
     },
     "instruments_paramaters": [
         {
-            "type": "DAQ_simulated",
+            "type": "DAQ",
             "init_args_values": {
-                "name": "DAQ_simulated",
+                "name": "DAQ",
                 "address": "Dev2",
-                "input_mapping": "['ai0']"
+                "input_mapping": [
+                    "ai0"
+                ],
+                "no_average_input_channels": [],
+                "input_average": 1
             },
             "param_list": [],
             "param_modes": {},
             "param_values": {}
         },
         {
-            "type": "SimulatedInstrument",
+            "type": "LaserDiode",
             "init_args_values": {
-                "name": "SimulatedInstrument",
-                "address": "0"
+                "name": "LaserDiode",
+                "address": "USB0::0x1313::0x804F::M00332686::INSTR"
             },
             "param_list": [
-                "param1",
-                "param2",
-                "param3"
+                "current"
             ],
             "param_modes": {
-                "param1": "Custom",
-                "param2": "Constant",
-                "param3": "Constant"
+                "current": "Constant"
             },
             "param_values": {
-                "param1": [
-                    [
-                        0
-                    ],
-                    [
-                        1
-                    ]
-                ],
-                "param2": 2.123,
-                "param3": 3.456
+                "current": 0.0
             }
         }
     ]
