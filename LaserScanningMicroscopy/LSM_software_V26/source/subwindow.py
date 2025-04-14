@@ -193,6 +193,8 @@ class SubWindow(QMainWindow):
         # Terminate the scan safely
         # The user can either click the Terminate button, or click the X button to safety terminate
         self.set_terminate_flag()
+        
+        
         if self.thread.is_finished:
 
             # print('\n\n\n')
@@ -209,7 +211,9 @@ class SubWindow(QMainWindow):
     def set_terminate_flag(self):
         self.thread.is_terminated = True
         self.button.clicked.connect(self.controller.close_all_windows)
-        # self.close()
+        self.button.setEnabled(False)
+        self.button.setText('Terminating the scan ...')
+        
 
     def ui_format(self):
 
@@ -301,9 +305,10 @@ class SubWindow(QMainWindow):
     def update_plot(self, data_pack):
         
         self.count, new_data = data_pack
-        #self.progress_bar.setValue(self.count)
-        #self.progress_bar.setFormat(self.title + f" scanning line " + f"{self.count}/{self.scan_num},"  + f' {self.remaining_time} s remaining')
-        self.button.setText(f"Scanning line " + f"{self.count + 1}/{self.scan_num},"  + f' {self.remaining_time} s remaining')
+        if self.thread.is_finished:
+            self.button.setText('Terminating the scan ...')
+        else:
+            self.button.setText(f"Scanning line " + f"{self.count + 1}/{self.scan_num},"  + f' {self.remaining_time} s remaining')
         self.executed_porntion = (self.count+1)/self.scan_num
 
 
@@ -365,11 +370,12 @@ class SubWindow(QMainWindow):
     
         self.timer_for_count_down = QTimer()
         self.timer_for_count_down.timeout.connect(self.update_countdown_before_close)
+        self.button.setEnabled(True)
         self.timer_for_count_down.start(1000)
         self.auto_close_remaining_time = max(0, self.auto_close_time_in_s)
 
     def update_countdown_before_close(self):
-   
+        
         if self.auto_close_remaining_time >= 0:
             self.button.setText(f"Scan finished, auto close in {int(self.auto_close_remaining_time)} s.")
             self.auto_close_remaining_time -= 1
