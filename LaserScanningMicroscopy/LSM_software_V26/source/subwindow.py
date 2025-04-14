@@ -305,7 +305,7 @@ class SubWindow(QMainWindow):
     def update_plot(self, data_pack):
         
         self.count, new_data = data_pack
-        if self.thread.is_finished:
+        if self.thread.is_terminated:
             self.button.setText('Terminating the scan ...')
         else:
             self.button.setText(f"Scanning line " + f"{self.count + 1}/{self.scan_num},"  + f' {self.remaining_time} s remaining')
