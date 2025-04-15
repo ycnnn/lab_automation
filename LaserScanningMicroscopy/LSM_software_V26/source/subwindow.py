@@ -371,12 +371,14 @@ class SubWindow(QMainWindow):
         self.timer_for_count_down = QTimer()
         self.timer_for_count_down.timeout.connect(self.update_countdown_before_close)
         self.button.setEnabled(True)
+        self.button.clicked.connect(self.controller.close_all_windows)
         self.timer_for_count_down.start(1000)
         self.auto_close_remaining_time = max(0, self.auto_close_time_in_s)
 
     def update_countdown_before_close(self):
         
         if self.auto_close_remaining_time >= 0:
+            
             self.button.setText(f"Scan finished, auto close in {int(self.auto_close_remaining_time)} s.")
             self.auto_close_remaining_time -= 1
         else:
