@@ -335,7 +335,7 @@ class Instrument_area(QLabel):
         self.param_list.append(param)
         self.layout.addWidget(QLabel(param), self.total_rows,0)
         param_dropdown = QComboBox()
-        param_dropdown.addItems(['Constant', 'Linear', 'Trace/retrace', 'Custom'])
+        param_dropdown.addItems(['Constant', 'Linear', 'Trace/retrace', 'Custom','3-point linear'])
         self.layout.addWidget(param_dropdown, self.total_rows,1)
         default_val = self.params[param]
         param_constant_field = ValidatedLineEdit(is_number, param, self, value=str(default_val))
@@ -408,6 +408,16 @@ class Instrument_area(QLabel):
             self.param_input_fields[param] = [param_custom_field]
             self.set_params_custom(param)
             param_custom_field.editingFinished.connect(partial(self.set_params_custom, param))
+            
+        elif index == 4:
+            self.param_modes[param] = '3-point linear'
+            param_three_point_linear_field = QLineEdit('[0,0,0]')
+            self.layout.addWidget(param_three_point_linear_field, param_id + 1, 2,1,2)
+
+            self.param_input_fields[param] = [param_three_point_linear_field]
+            self.set_params_three_point_linear(param)
+            param_three_point_linear_field.editingFinished.connect(partial(self.set_params_three_point_linear, param))
+            # param_constant_field.editingFinished.connect(partial(self.set_params_constant, param))
         else:
             raise RuntimeError
 
@@ -442,6 +452,11 @@ class Instrument_area(QLabel):
         print(key + ' retrace_setting_pass ' + str(trace_val) + ' and ' + str(retrace_val))
 
     def set_params_custom(self, key):
+        val = self.param_input_fields[key][0].text()
+        self.param_values[key] = ast.literal_eval(val)
+        print(self.param_values[key])
+    
+    def set_params_three_point_linear(self, key):
         val = self.param_input_fields[key][0].text()
         self.param_values[key] = ast.literal_eval(val)
         print(self.param_values[key])
@@ -879,6 +894,10 @@ class ControlPanel(QMainWindow):
                     custom_field = instr.param_input_fields[param][0]
                     custom_field.setText(param_val)
                     custom_field.editingFinished.emit()
+                elif param_mode =='3-point linear':
+                    three_point_linear_field = instr.param_input_fields[param][0]
+                    three_point_linear_field.setText(param_val)
+                    three_point_linear_field.editingFinished.emit()
                 else:
                     raise RuntimeError
                    
@@ -1008,6 +1027,13 @@ class ControlPanel(QMainWindow):
                         instr_prop[param] = [[float(param_val[0])], [float(param_val[1])]]
                     elif param_mode == 'Custom':
                         instr_prop[param] = param_val
+                    elif param_mode == '3-point linear':
+                        start_val, middle_val, end_val = param_val
+                        first_list_len = int(int(self.scan_parameters['y_pixels'])/2)
+                        second_list_len = int(self.scan_parameters['y_pixels']) - int(int(self.scan_parameters['y_pixels'])/2)
+                        first_sweeping_list = np.linspace(start_val, middle_val, num=first_list_len)
+                        second_sweeping_list = np.linspace(middle_val, end_val, num=second_list_len)
+                        instr_prop[param] = list(np.concatenate([first_sweeping_list, second_sweeping_list]))
                     else:
                         raise RuntimeError
 
