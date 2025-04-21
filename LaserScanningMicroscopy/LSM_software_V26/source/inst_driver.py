@@ -10,7 +10,7 @@ import warnings
 
 import time
 import nidaqmx as ni
-from nidaqmx.constants import WAIT_INFINITELY
+from nidaqmx.constants import WAIT_INFINITELY, Signal
 from nidaqmx.constants import Edge, AcquisitionType, TaskMode, WAIT_INFINITELY
 from nidaqmx.stream_readers import AnalogMultiChannelReader
 from nidaqmx.stream_writers import AnalogMultiChannelWriter
@@ -442,7 +442,141 @@ class SMU(Instrument):
         
 
 
-class Lockin(Instrument):
+class Lockin_standard(Instrument):
+    def __init__(self, 
+                 address="USB0::0xB506::0x2000::002765::INSTR", 
+                 position_parameters=None, 
+                 name=None, 
+                 **kwargs):
+        super().__init__(address, channel_num=2, 
+                         name=name,
+                         reading_num=position_parameters.x_pixels, 
+                         scan_num=position_parameters.y_pixels, 
+                         channel_name_list = ['X', 'Y'],
+                         **kwargs)
+        
+       
+
+        self.params = {'time_constant_level':8, 
+                        'volt_input_range':3, 
+                        'signal_sensitivity':12,
+                        'internal_frequency':10170,
+                        'internal_sine_amplitude':0.50,
+                                  }
+        
+    def initialize(self, **kwargs):
+        super().initialize(**kwargs)
+
+        self.initialize_visa_type_instrument()
+
+        # Reset
+        self.instrument.write('*rst')
+        # self.logger.info(self.instrument.query('*idn?'))
+
+        # build buffer
+        self.instrument.write('capturelen 256')
+
+        # record XY signals
+        self.instrument.write('capturecfg xy')
+
+        # # Set the capture mode as external trigger
+        # self.instrument.write('rtrg posttl')
+
+        # Set the input source as VOLTAGE
+        self.instrument.write('ivmd volt')
+        # self.logger.info(self.instrument.query('ivmd?'))
+
+        # Set the input mode as A
+        self.instrument.write('isrc 0')
+        # self.logger.info(self.instrument.query('isrc?'))
+
+        # Set the input coupling. Always use AC coupling unless signal frequency <= 0.16 Hz (unlikely)
+        self.instrument.write('icpl 0')
+        # self.logger.info(self.instrument.query('icpl?'))
+
+        # Set the voltage input shield as float
+        self.instrument.write('ignd 0')
+        # self.logger.info(self.instrument.query('ignd?'))
+
+        # Set the voltage input range
+        # Levels and range: 0->1V, 1->300mV, 2->100mV 3->30mV, 4->10mV
+        self.instrument.write(f"irng {self.params_sweep_lists['volt_input_range'][0,0]}")
+        # self.logger.info(self.instrument.query('irng?'))
+
+        # Set the internal reference frequency
+        self.instrument.write(f"freq {self.params_sweep_lists['internal_frequency'][0,0]}")
+        # Set the initernal reference outout amplitude
+        self.instrument.write(f"slvl {self.params_sweep_lists['internal_sine_amplitude'][0,0]}")
+
+        
+        # Set the signal sensitivity
+        # Levels and range: 0->1V, 1->500mV, 2->200mV 3->100mV, 4->50mV, 5->20mV, 6->10mV, 7->5mV, 8->2mV, 
+        # 9->1mV, 10->500uV, 11->200uV, 12->100uV, 13->50uV, 14->20uV
+        self.instrument.write(f"scal {self.params_sweep_lists['signal_sensitivity'][0,0]}")
+        # self.logger.info(self.instrument.query('scal?'))
+
+        # Set the time constant
+        # Levels and range: 0->1us, 1->3us, 2->10us 3->30us, 4->100us, 5->300us, 6->1ms, 7->3ms, 8->10ms, 
+        # 9->30ms, 10->100ms, 11->300ms, 12->1s, 13->3s, 14->10s, 15->30s, 16->100s, 17->300s, 18->1000s, 19->3000s, 20->10000s
+        self.instrument.write(f"oflt {self.params_sweep_lists['time_constant_level'][0,0]}")
+        # self.logger.info(self.instrument.query('oflt?'))
+
+        # Set the reference mode as internal reference
+        self.instrument.write(f"rsrc 0")
+        # # Set the external reference trigger mode as positive TTL
+        # self.instrument.write(f"rtrg 1")
+        # # Set the external reference trigger input to 1 MOhm
+        # self.instrument.write(f"refz 1")
+
+
+    def quit(self, **kwargs):
+        # Turn off sine output
+        self.instrument.write(f"slvl 0")
+        # Disconnect 
+        super().quit(**kwargs)
+
+    def write_param_to_instrument(self, param, param_val):
+        super().write_param_to_instrument(param, param_val)
+
+        if self.params_state[param] == param_val:
+            self.logger.info('Writing ' + param + f' at level {param_val} skipped, because there is no change in the set value.' )
+            return None
+
+        if param == 'time_constant_level':
+            self.instrument.write(f"oflt {param_val}")
+        elif param == 'volt_input_range':
+            self.instrument.write(f"irng {param_val}")
+        elif param == 'signal_sensitivity':
+            self.instrument.write(f"scal {param_val}")
+        elif param == 'internal_frequency':
+            self.instrument.write(f"freq {param_val}")
+        elif param == 'internal_sine_amplitude':
+            self.instrument.write(f"slvl {param_val}")
+
+    
+
+        return None
+
+    def data_acquisition_start(self, **kwargs):
+        super().data_acquisition_start(**kwargs)
+
+        self.instrument.write('capturestart one, samp')
+
+
+  
+    
+    def data_acquisition_finish(self, **kwargs):
+        super().data_acquisition_finish(**kwargs)
+
+        self.instrument.write('capturestop')
+        buffer_len = int(self.instrument.query('captureprog?')[:-1])
+        input_data = np.array(
+            self.instrument.query_binary_values(f'captureget? 0, {buffer_len}')
+            ).reshape(-1,2)[:self.reading_num,:].T
+
+        self.data = input_data      
+  
+class Lockin_external(Instrument):
     def __init__(self, 
                  address="USB0::0xB506::0x2000::002765::INSTR", 
                  position_parameters=None, 
@@ -644,7 +778,7 @@ class Lockin_dual_freq(Instrument):
         self.instrument.write(f"oflt {self.params_sweep_lists['time_constant_level'][0,0]}")
         # self.logger.info(self.instrument.query('oflt?'))
 
-        # Set the reference mode as external reference
+        # Set the reference mode as dual reference
         self.instrument.write(f"rsrc 2")
         # Set the external reference trigger mode as positive TTL
         self.instrument.write(f"rtrg 1")
@@ -872,7 +1006,9 @@ class DAQ(Instrument):
                  name=None,
                  input_mapping=['ai0'],
                  no_average_input_channels=[],
+                 pulse_mapping=['PFI0','PFI1','PFI2','PFI3'],
                  input_average=1,
+                 pulse_delay=0.25,
                  scan_parameters=None,
                  **kwargs):
         super().__init__(address, channel_num=len(input_mapping), 
@@ -888,6 +1024,8 @@ class DAQ(Instrument):
         self.position_parameters = position_parameters
         self.input_average = int(input_average)
         self.no_average_input_channels = no_average_input_channels
+        self.pulse_delay = pulse_delay
+        self.pulse_mapping = pulse_mapping
         
         if self.input_average < 1:
             raise RuntimeError('Input average factor should be greater than 1.')
@@ -897,7 +1035,7 @@ class DAQ(Instrument):
         self.frequency = 1/(self.scan_parameters.point_time_constant * self.position_parameters.x_pixels)
         self.retrace_frequency = 1/(self.scan_parameters.retrace_point_time_constant * self.position_parameters.x_pixels)
         self.output_mapping=['ao0', 'ao1', 'ao2']
-        self.pulse_terminal='PFI0'
+        # self.pulse_terminal='PFI0'
 
 
     def write_data(self, ao_data, frequency):
@@ -929,9 +1067,12 @@ class DAQ(Instrument):
             ai_task.timing.cfg_samp_clk_timing(rate=sample_rate * self.input_average, 
                                                sample_mode=AcquisitionType.FINITE, samps_per_chan=num_samples * self.input_average)
             
-            pulse_channel = pulse_task.co_channels.add_co_pulse_chan_freq('Dev2/ctr0', freq=sample_rate, duty_cycle=0.25)
-            pulse_channel.co_pulse_term = '/' + DAQ_name + '/' + self.pulse_terminal
+            pulse_channel = pulse_task.co_channels.add_co_pulse_chan_freq('Dev2/ctr0', freq=sample_rate, duty_cycle=self.pulse_delay)
+            pulse_channel.co_pulse_term = '/' + DAQ_name + '/' + self.pulse_mapping[0]
             pulse_task.timing.cfg_implicit_timing(sample_mode=AcquisitionType.FINITE, samps_per_chan=num_samples)
+            for additional_pulse_channel in self.pulse_mapping[1:]:
+                pulse_task.export_signals.export_signal(signal_id=Signal.COUNTER_OUTPUT_EVENT, 
+                                                    output_terminal='/' + DAQ_name + '/' + additional_pulse_channel)
 
             ai_task.triggers.start_trigger.cfg_dig_edge_start_trig(trigger_source='/Dev2/ao/StartTrigger')
             pulse_task.triggers.start_trigger.cfg_dig_edge_start_trig(trigger_source='/Dev2/ao/StartTrigger')
