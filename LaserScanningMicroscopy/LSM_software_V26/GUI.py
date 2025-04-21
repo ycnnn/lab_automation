@@ -1044,7 +1044,7 @@ class ControlPanel(QMainWindow):
                                 error_message = f'Error for the parameter {param}: supplied {param_val} contains too many steps, max allowed {total_length} points.'
                                 self.show_info_message(error_message)
                                 raise RuntimeError
-                            segment_lengths = int(total_length/np_param_val.shape[0]) * np.ones(np_param_val.shape[0] - 1)
+                            segment_lengths = int(total_length/(np_param_val.shape[0]-1)) * np.ones(np_param_val.shape[0] - 1)
                             segment_lengths[-1] = total_length - np.sum(segment_lengths[:-1])
                             total_segments = []
                             for val_index in range(np_param_val.shape[0]-1):
