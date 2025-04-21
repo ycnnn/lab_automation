@@ -21,11 +21,16 @@
             "init_args_values": {
                 "name": "DAQ",
                 "address": "Dev2",
-                "input_mapping": [
-                    "ai0"
+                "input_mapping": "['ai0']",
+                "no_average_input_channels": "[]",
+                "pulse_mapping": [
+                    "PFI0",
+                    "PFI1",
+                    "PFI2",
+                    "PFI3"
                 ],
-                "no_average_input_channels": [],
-                "input_average": 1
+                "input_average": "1",
+                "pulse_delay": 0.05
             },
             "param_list": [],
             "param_modes": {},
