@@ -393,6 +393,7 @@ def generate_horizontal_cbar(cbar_ax, cmap='bwr', vmin=0, vmax=1,
                              custom_labels = [],
                              foreground=(1,1,1,0.75),
                              delta_pad=0,
+                             title_delta_pad=0
                              ):
 
     cbar = cbar_ax.imshow(np.linspace([0,0],[1,1], num=500).T, aspect='auto', cmap=cmap)
@@ -423,7 +424,12 @@ def generate_horizontal_cbar(cbar_ax, cmap='bwr', vmin=0, vmax=1,
         
     else:
         tick_labels = custom_labels
+    
     cbar_ax.set_xticklabels(tick_labels)
+    
+    if title_delta_pad !=0:
+        x_tick_labels = cbar_ax.get_xticklabels()
+        x_tick_labels[1].set_y(title_delta_pad)
 
 def add_scale_bar(ax,
                   x_start, x_end,
@@ -499,6 +505,7 @@ def generate_img_plot(
     cbar_custom_labels=[],
     cbar_foreground_color=(1, 1, 1, 0.75),
     cbar_delta_pad=-10,
+    cbar_title_delta_pad=0,
     auto_format=True):
     
     if fig_height and fig_width:
@@ -552,6 +559,7 @@ def generate_img_plot(
         custom_labels=cbar_custom_labels,
         foreground=cbar_foreground_color,
         delta_pad=cbar_delta_pad,
+        title_delta_pad=cbar_title_delta_pad
     )
 
     ax.set_xticks([])
