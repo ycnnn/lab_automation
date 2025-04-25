@@ -523,7 +523,7 @@ def generate_img_plot(
     
     if set_cbar_same_width_with_img:
         cbar_width = img_width
-        logging.info('Colar bar width has been set as the same as that of the image. The supplied cbar width will be ignored.')
+        logging.info('Color bar width has been set as the same as that of the image. The supplied cbar width will be ignored.')
     
     scale_factor = 1
     if fig_height:
