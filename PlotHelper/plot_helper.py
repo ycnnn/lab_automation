@@ -396,6 +396,7 @@ def generate_horizontal_cbar(cbar_ax, cmap='bwr', vmin=0, vmax=1,
                              ):
 
     cbar = cbar_ax.imshow(np.linspace([0,0],[1,1], num=500).T, aspect='auto', cmap=cmap)
+    cbar.set_clim(vmin=vmin, vmax=vmax)
     fig = plt.gcf()
         # Get the bounding box of the axes in pixels
     bbox = cbar_ax.get_window_extent()
