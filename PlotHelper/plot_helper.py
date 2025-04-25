@@ -491,9 +491,9 @@ def generate_img_plot(
     fig_height = None,
     fig_width = None,
     img_size_compression_factor = 100,
-    img_margin = 0.05,
-    cbar_height = 0.1,
-    cbar_width = 1.6,
+    img_margin = 0.05,# in inch
+    cbar_height = 0.1,# in inch
+    cbar_width = 0.5,# in inch
     set_cbar_same_width_with_img=False,
     vmin = None,
     vmax = None,
@@ -501,11 +501,11 @@ def generate_img_plot(
     cbar_vmin=0,
     cbar_vmax=1,
     cbar_title='Colorbar',
-    cbar_label_position=[0.08, 0.5, 0.92],
+    cbar_label_position=[0.08, 0.5, 0.92],# in percent
     cbar_custom_labels=[],
     cbar_foreground_color=(1, 1, 1, 0.75),
-    cbar_delta_pad=-10,
-    cbar_title_delta_pad=0,
+    cbar_delta_pad=-10,# in percent
+    cbar_title_delta_pad=0,# in percent
     auto_format=True):
     
     if fig_height and fig_width:
