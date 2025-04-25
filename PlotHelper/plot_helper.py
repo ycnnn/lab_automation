@@ -1,4 +1,7 @@
 import numpy as np
+import logging
+logging.basicConfig(level=logging.INFO)
+
 # import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib as mpl
@@ -478,7 +481,8 @@ def text_format(text,ax=None, color=None, facecolor=(1,1,1,0.5), edgecolor='none
 def generate_img_plot(
     data,
     fig=None,
-    fig_height = 1.7,
+    fig_height = None,
+    fig_width = None,
     img_size_compression_factor = 100,
     img_margin = 0.05,
     cbar_height = 0.1,
@@ -495,13 +499,25 @@ def generate_img_plot(
     cbar_delta_pad=-10,
     auto_format=True):
     
+    if fig_height and fig_width:
+        raise RuntimeError('Both figure height and figure width is supplied. Please only supply one.')
+    if not fig_height and not fig_width:
+        logging.info('None of the figure height and figure width is supplied. Will use orignal scale.')
+    
     fig = plt.gcf() if not fig else fig
     raw_img_height, raw_img_width = data.shape 
     img_height = raw_img_height / img_size_compression_factor
     img_width = raw_img_width / img_size_compression_factor
     total_height = img_height + cbar_height + 4 * img_margin
     total_width = img_width + 2 * img_margin
-    fig.set_size_inches((total_width, total_height))
+    
+    scale_factor = 1
+    if fig_height:
+        scale_factor = fig_height/total_height
+    if fig_width:
+        scale_factor = fig_width/total_width
+    fig.set_size_inches((total_width*scale_factor, total_height*scale_factor))
+    
 
     ax = fig.add_axes((
     img_margin/total_width, 
