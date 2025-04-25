@@ -391,6 +391,7 @@ def generate_horizontal_cbar(cbar_ax, cmap='bwr', vmin=0, vmax=1,
                              foreground=(1,1,1,0.75),
                              delta_pad=0,
                              ):
+
     cbar = cbar_ax.imshow(np.linspace([0,0],[1,1], num=500).T, aspect='auto', cmap=cmap)
     fig = plt.gcf()
         # Get the bounding box of the axes in pixels
@@ -404,14 +405,17 @@ def generate_horizontal_cbar(cbar_ax, cmap='bwr', vmin=0, vmax=1,
     cbar_ax.set_yticks([])
     cbar_ax.tick_params(axis='x', which='both', length=0) 
     cbar_ax.tick_params(axis='x', labelbottom=True, labeltop=False, pad=pad + delta_pad)
-
+    
     for label in cbar_ax.get_xticklabels():
         label.set_path_effects([withStroke(linewidth=3, foreground=foreground)])
         label.set_verticalalignment('center')
-    label_position = np.array(label_position) * 500
+    label_position = np.array(label_position).reshape(-1) * 500
     cbar_ax.set_xticks(label_position)
+    
     if len(custom_labels)==0:
         tick_labels = [vmin, title, vmax]
+        
+
     else:
         tick_labels = custom_labels
     cbar_ax.set_xticklabels(tick_labels)
@@ -469,4 +473,69 @@ def text_format(text,ax=None, color=None, facecolor=(1,1,1,0.5), edgecolor='none
     if rotation:
         text.set_rotation(rotation)
     
+
+def generate_img_plot(
+    data,
+    fig=None,
+    fig_height = 1.7,
+    img_size_compression_factor = 100,
+    img_margin = 0.05,
+    cbar_height = 0.1,
+    cbar_width = 1.6,
+    vmin = -65.0,
+    vmax = -64.0,
+    cmap='bwr',
+    cbar_vmin=0,
+    cbar_vmax=1,
+    cbar_title='Colorbar',
+    cbar_label_position=[0.08, 0.5, 0.92],
+    cbar_custom_labels=[],
+    cbar_foreground_color=(1, 1, 1, 0.75),
+    cbar_delta_pad=-10,
+    auto_format=True):
     
+    fig = plt.gcf() if not fig else fig
+    raw_img_height, raw_img_width = data.shape 
+    img_height = raw_img_height / img_size_compression_factor
+    img_width = raw_img_width / img_size_compression_factor
+    total_height = img_height + cbar_height + 4 * img_margin
+    total_width = img_width + 2 * img_margin
+    fig.set_size_inches((total_width, total_height))
+
+    ax = fig.add_axes((
+    img_margin/total_width, 
+    img_margin/total_height,
+    img_width/total_width, 
+    img_height/total_height
+    ))
+
+    cbar_ax = fig.add_axes((
+        (total_width - img_margin - cbar_width)/total_width,
+        (2 * img_margin + img_height)/total_height,
+        cbar_width/total_width,
+        cbar_height/total_height
+        ))
+
+    img = ax.imshow(data, vmin=vmin, vmax=vmax)
+    generate_horizontal_cbar(
+        cbar_ax=cbar_ax,
+        cmap=cmap,
+        vmin=cbar_vmin,
+        vmax=cbar_vmax,
+        title=cbar_title,
+        label_position=cbar_label_position,
+        custom_labels=cbar_custom_labels,
+        foreground=cbar_foreground_color,
+        delta_pad=cbar_delta_pad,
+    )
+
+    ax.set_xticks([])
+    ax.set_yticks([])
+    
+    if auto_format:
+        label_format()
+        format()
+    
+    
+    
+    return fig, ax, cbar_ax
