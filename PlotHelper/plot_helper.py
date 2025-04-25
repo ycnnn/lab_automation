@@ -488,6 +488,7 @@ def generate_img_plot(
     img_margin = 0.05,
     cbar_height = 0.1,
     cbar_width = 1.6,
+    set_cbar_same_width_with_img=False,
     vmin = None,
     vmax = None,
     cmap='bwr',
@@ -511,6 +512,10 @@ def generate_img_plot(
     img_width = raw_img_width / img_size_compression_factor
     total_height = img_height + cbar_height + 4 * img_margin
     total_width = img_width + 2 * img_margin
+    
+    if set_cbar_same_width_with_img:
+        cbar_width = img_width
+        logging.info('Colar bar width has been set as the same as that of the image. The supplied cbar width will be ignored.')
     
     scale_factor = 1
     if fig_height:
