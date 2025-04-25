@@ -487,6 +487,7 @@ def text_format(text,ax=None, color=None, facecolor=(1,1,1,0.5), edgecolor='none
 
 def generate_img_plot(
     data,
+    img_title=None,
     fig=None,
     fig_height = None,
     fig_width = None,
@@ -564,6 +565,9 @@ def generate_img_plot(
 
     ax.set_xticks([])
     ax.set_yticks([])
+    
+    if img_title:
+        ax.set_xlabel(img_title)
     
     if auto_format:
         label_format()
