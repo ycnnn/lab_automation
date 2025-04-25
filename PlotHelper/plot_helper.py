@@ -414,8 +414,9 @@ def generate_horizontal_cbar(cbar_ax, cmap='bwr', vmin=0, vmax=1,
     
     if len(custom_labels)==0:
         tick_labels = [vmin, title, vmax]
+    elif len(custom_labels)==2:
+        tick_labels = [custom_labels[0], title, custom_labels[1]]
         
-
     else:
         tick_labels = custom_labels
     cbar_ax.set_xticklabels(tick_labels)
@@ -482,8 +483,8 @@ def generate_img_plot(
     img_margin = 0.05,
     cbar_height = 0.1,
     cbar_width = 1.6,
-    vmin = -65.0,
-    vmax = -64.0,
+    vmin = None,
+    vmax = None,
     cmap='bwr',
     cbar_vmin=0,
     cbar_vmax=1,
@@ -517,6 +518,8 @@ def generate_img_plot(
         ))
 
     img = ax.imshow(data, vmin=vmin, vmax=vmax)
+
+    img.set_cmap(cmap)
     generate_horizontal_cbar(
         cbar_ax=cbar_ax,
         cmap=cmap,
