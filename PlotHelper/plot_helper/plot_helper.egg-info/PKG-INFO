@@ -1,0 +1,6 @@
+Metadata-Version: 2.1
+Name: plot-helper
+Version: 4.0
+Summary: Collection of helper functions for a beautiful scientific plots made from matplotlib
+Author: ycnnn
+License: MIT

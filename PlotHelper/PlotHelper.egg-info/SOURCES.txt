@@ -1,7 +1,0 @@
-README.md
-setup.py
-PlotHelper.egg-info/PKG-INFO
-PlotHelper.egg-info/SOURCES.txt
-PlotHelper.egg-info/dependency_links.txt
-PlotHelper.egg-info/entry_points.txt
-PlotHelper.egg-info/top_level.txt
