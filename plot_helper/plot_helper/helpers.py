@@ -393,7 +393,8 @@ def generate_horizontal_cbar(cbar_ax, cmap='bwr', vmin=0, vmax=1,
                              custom_labels = [],
                              foreground=(1,1,1,0.75),
                              delta_pad=0,
-                             title_delta_pad=0
+                             title_delta_pad=0,
+                             label_stroke_linewidth=3
                              ):
 
     cbar = cbar_ax.imshow(np.linspace([0,0],[1,1], num=500).T, aspect='auto', cmap=cmap)
@@ -412,7 +413,7 @@ def generate_horizontal_cbar(cbar_ax, cmap='bwr', vmin=0, vmax=1,
     cbar_ax.tick_params(axis='x', labelbottom=True, labeltop=False, pad=pad + delta_pad)
     
     for label in cbar_ax.get_xticklabels():
-        label.set_path_effects([withStroke(linewidth=3, foreground=foreground)])
+        label.set_path_effects([withStroke(linewidth=label_stroke_linewidth, foreground=foreground)])
         label.set_verticalalignment('center')
     label_position = np.array(label_position).reshape(-1) * 500
     cbar_ax.set_xticks(label_position)
