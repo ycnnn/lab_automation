@@ -1,7 +1,7 @@
 import numpy as np
 import logging
 logging.basicConfig(level=logging.INFO)
-
+import numbers
 # import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib as mpl
@@ -394,7 +394,8 @@ def generate_horizontal_cbar(cbar_ax, cmap='bwr', vmin=0, vmax=1,
                              foreground=(1,1,1,0.75),
                              delta_pad=0,
                              title_delta_pad=0,
-                             label_stroke_linewidth=3
+                             label_stroke_linewidth=3,
+                             rotation_angle_deg=0
                              ):
 
     cbar = cbar_ax.imshow(np.linspace([0,0],[1,1], num=500).T, aspect='auto', cmap=cmap)
@@ -402,6 +403,8 @@ def generate_horizontal_cbar(cbar_ax, cmap='bwr', vmin=0, vmax=1,
     fig = plt.gcf()
         # Get the bounding box of the axes in pixels
     bbox = cbar_ax.get_window_extent()
+    
+
 
     # Convert the size to points (1 inch = 72 points)
     width_in_points = bbox.width / fig.dpi * 72
@@ -412,9 +415,21 @@ def generate_horizontal_cbar(cbar_ax, cmap='bwr', vmin=0, vmax=1,
     cbar_ax.tick_params(axis='x', which='both', length=0) 
     cbar_ax.tick_params(axis='x', labelbottom=True, labeltop=False, pad=pad + delta_pad)
     
-    for label in cbar_ax.get_xticklabels():
-        label.set_path_effects([withStroke(linewidth=label_stroke_linewidth, foreground=foreground)])
-        label.set_verticalalignment('center')
+    #     if isinstance(rotation_angle_deg, numbers.Number):
+    #     rotation_angle_deg = 
+    # else:
+    #     individual_rot_anle = np.array(rotation_angle_deg)
+        
+    total_tick_num = len(cbar_ax.get_xticklabels())
+    if isinstance(rotation_angle_deg, numbers.Number):
+        individual_rot_anle = np.ones(total_tick_num) * rotation_angle_deg
+    else:
+        individual_rot_anle = np.array(rotation_angle_deg)
+        if len(individual_rot_anle) >= total_tick_num:
+            raise RuntimeError(f'Supplied rotation angle length {len(rotation_angle_deg)} is greater than to the tick number {total_tick_num}')
+    
+    
+        
     label_position = np.array(label_position).reshape(-1) * 500
     cbar_ax.set_xticks(label_position)
     
@@ -427,6 +442,11 @@ def generate_horizontal_cbar(cbar_ax, cmap='bwr', vmin=0, vmax=1,
         tick_labels = custom_labels
     
     cbar_ax.set_xticklabels(tick_labels)
+    
+    for label_index, label in enumerate(cbar_ax.get_xticklabels()):
+        label.set_path_effects([withStroke(linewidth=label_stroke_linewidth, foreground=foreground)])
+        label.set_verticalalignment('center')
+        label.set_rotation(individual_rot_anle[label_index])
     
     if title_delta_pad !=0:
         x_tick_labels = cbar_ax.get_xticklabels()
