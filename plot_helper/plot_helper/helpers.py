@@ -1,7 +1,9 @@
 import numpy as np
+import pandas as pd
 import logging
 logging.basicConfig(level=logging.INFO)
 import numbers
+from collections.abc import Iterable
 # import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib as mpl
@@ -14,6 +16,10 @@ from matplotlib.patches import Rectangle
 from matplotlib.lines import Line2D
 from matplotlib.patheffects import withStroke
 from matplotlib.ticker import MaxNLocator
+from matplotlib.axes import Axes
+import matplotlib.patches as mpatches
+
+
 
 svg = {'bbox_inches':'tight', 'pad_inches':0.1}
 pdf = {'bbox_inches':'tight', 'pad_inches':0.1}
@@ -140,60 +146,93 @@ def font_format(font_global="Arial"):
     mpl.rcParams['mathtext.bf'] = font_global  + ':bold'
 
     
-# def set_size(figsize, ax=None, unit_pt=True):
-#     ax = ax or plt.gca()
-#     cm = 1/2.54
-#     pt = 1/72
-#     """ w, h: width, height in inches """
-#     w, h = figsize
-#     l = ax.figure.subplotpars.left
-#     r = ax.figure.subplotpars.right
-#     t = ax.figure.subplotpars.top
-#     b = ax.figure.subplotpars.bottom
-#     figw = float(w)/(r-l)
-#     figh = float(h)/(t-b)
-#     if unit_pt:
-#         ax.figure.set_size_inches(figw*pt, figh*pt)
-#     else:
-#         ax.figure.set_size_inches(figw*cm, figh*cm)
-   
-def boxplot(data,
+def boxplot(df: pd.DataFrame,
+            category: str,
+            input_column:str,
             ax=None,
             whis=1.5,
             linewidth=0.5,
             whisker_color = 'black',
-            box_color = (1,0,0,0.5),
+            box_color = (1,0,0),
             med_color = 'black',
             cap_color = 'black',
             empty_face=False,
-            **kwargs):
+            box_alpha=0.5,
+            sca_alpha=1,
+            sca_jitter=0.05,
+            **kwargs
+            ):
     ax = ax or plt.gca()
-    # handles np.nan values
-    if np.sum(np.isnan(data)) > 0:
-        mask = ~np.isnan(data)
-        data = [d[m] for d, m in zip(data.T, mask.T)]
-    face_color = 'none' if empty_face else box_color
-    boxplot = ax.boxplot(data, whis=whis, 
-                         patch_artist=True,
-                         boxprops=dict(facecolor=face_color, edgecolor='black'), **kwargs)
+    face_color = 'none' if empty_face else box_color + (box_alpha,)
+    
+    groupby_object = df.groupby(category, sort=False)
 
-    for whis in boxplot['whiskers']:
+    
+    keys = [key for key, group in groupby_object]
+    groups = [group[input_column].values for _, group in groupby_object]
+    zipped_dict = dict(zip(keys, groups))
+    
+    box_object = ax.boxplot(groups, 
+                            labels=df[category].drop_duplicates(),
+                            whis=whis, 
+                            patch_artist=True,
+                            boxprops=dict(facecolor=face_color, edgecolor='black'), 
+                            showfliers=False,
+                            **kwargs)
+    
+    
+    for whis in box_object['whiskers']:
         whis.set_color(whisker_color)
         whis.set_linewidth(linewidth)
 
-    for box in boxplot['boxes']:
+    for box in box_object['boxes']:
         # box.set_color(box_color)        
         box.set_linewidth(linewidth)
         
-    for med in boxplot['medians']:
+    for med in box_object['medians']:
         med.set_color(med_color)
         med.set_linewidth(linewidth)
 
-    for cap in boxplot['caps']:
+    for cap in box_object['caps']:
         cap.set_color(cap_color)
         cap.set_linewidth(linewidth)
     
-    return boxplot
+    pos_dict = {ticklabel.get_text(): ticklabel.get_position()[0] for ticklabel in ax.get_xticklabels()}
+
+    for key, val in zipped_dict.items():
+        sca = ax.scatter(pos_dict[str(key)] * np.ones(len(val)) + np.random.normal(scale=sca_jitter, size=len(val)), val)
+        sca = scatter_format(sca, edgecolor=box_color + (sca_alpha,), markersize=15)
+        
+    
+    return box_object
+   
+def set_legend(
+    legend_lables: list,
+    colors: list,
+    ax: Axes
+):
+    if not isinstance(legend_lables, Iterable) and all(isinstance(x, str) for x in legend_lables):
+        raise RuntimeError
+    if not isinstance(colors, Iterable) and all(isinstance(x, tuple) for x in legend_lables):
+        raise RuntimeError
+    if len(legend_lables) != len(colors):
+        raise RuntimeError
+    patches = []
+    
+    for index in range(len(legend_lables)):
+        patches.append(
+            mpatches.Patch(
+                color=colors[index],
+                label=legend_lables[index],
+                linewidth=0
+            )
+        )
+    legend = ax.legend(handles=patches,
+                       facecolor=(1,1,1,0.5),
+                       edgecolor=(1,1,1,0)
+                       )
+    
+    return legend
 
 def scatter_format(scatter, 
                    edgecolor='red',
